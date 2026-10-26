@@ -6,8 +6,8 @@ android {
         applicationId 'com.markdave.tagotagoan'
         minSdk 24
         targetSdk 34
-        versionCode 1
-        versionName '1.0'
+        versionCode 3
+        versionName '3.0'
     }
     signingConfigs {
         tago {
@@ -22,5 +22,10 @@ android {
         release { minifyEnabled false; signingConfig signingConfigs.tago }
     }
     compileOptions { sourceCompatibility JavaVersion.VERSION_17; targetCompatibility JavaVersion.VERSION_17 }
+    packagingOptions { resources { excludes += ['META-INF/*.kotlin_module', 'META-INF/versions/**'] } }
 }
-dependencies { implementation 'androidx.webkit:webkit:1.11.0' }
+dependencies {
+    implementation 'androidx.webkit:webkit:1.11.0'
+    implementation 'org.java-websocket:Java-WebSocket:1.5.7'
+    implementation 'org.slf4j:slf4j-nop:2.0.13'
+}

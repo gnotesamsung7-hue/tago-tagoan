@@ -2,6 +2,8 @@ package com.markdave.tagotagoan;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
@@ -9,6 +11,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.view.WindowManager;
+import android.webkit.JavascriptInterface;
 import android.webkit.PermissionRequest;
 import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
@@ -26,6 +29,8 @@ public class MainActivity extends Activity {
     private WebView web;
     private PermissionRequest pendingPermission;
     private ValueCallback<Uri[]> fileCallback;
+    private RelayServer relay;
+    private LanBridge lan;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,6 +50,10 @@ public class MainActivity extends Activity {
         s.setDatabaseEnabled(true);
         s.setMediaPlaybackRequiresUserGesture(false);
         s.setAllowFileAccess(false);
+        s.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
+
+        lan = new LanBridge(this, web);
+        web.addJavascriptInterface(new Bridge(), "Android");
 
         web.setWebViewClient(new WebViewClient() {
             @Override
@@ -84,6 +93,65 @@ public class MainActivity extends Activity {
         });
 
         web.loadUrl("https://appassets.androidplatform.net/assets/index.html");
+    }
+
+    /** Called from the game's JavaScript as window.Android.* */
+    public class Bridge {
+        @JavascriptInterface
+        public String startHost(String name) {
+            try {
+                stopRelay();
+                relay = new RelayServer(47730);
+                relay.start();
+                lan.stopListen();
+                String n = name == null ? "Player" : name;
+                if (n.length() > 12) n = n.substring(0, 12);
+                lan.startBroadcast(n);
+                return "ok";
+            } catch (Exception e) {
+                return "error";
+            }
+        }
+
+        @JavascriptInterface
+        public void stopHost() {
+            lan.stopBroadcast();
+            stopRelay();
+        }
+
+        @JavascriptInterface
+        public String getIp() { return LanBridge.localIp(); }
+
+        @JavascriptInterface
+        public void startDiscovery() { lan.startListen(); }
+
+        @JavascriptInterface
+        public void stopDiscovery() { lan.stopListen(); }
+
+        @JavascriptInterface
+        public void copyText(final String text) {
+            runOnUiThread(() -> {
+                try {
+                    ClipboardManager cm = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
+                    if (cm != null) cm.setPrimaryClip(ClipData.newPlainText("Tago Tagoan prompt", text));
+                } catch (Exception ignored) { }
+            });
+        }
+    }
+
+    private void stopRelay() {
+        RelayServer r = relay;
+        relay = null;
+        if (r != null) {
+            try { r.stop(500); } catch (Exception ignored) { }
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (lan != null) { lan.stopBroadcast(); lan.stopListen(); }
+        stopRelay();
+        super.onDestroy();
     }
 
     private void hideSystemBars() {
