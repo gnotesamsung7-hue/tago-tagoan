@@ -66,11 +66,22 @@ public class MainActivity extends Activity {
             @Override
             public void onPermissionRequest(final PermissionRequest request) {
                 runOnUiThread(() -> {
-                    if (checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+                    java.util.List<String> need = new java.util.ArrayList<>();
+                    for (String r : request.getResources()) {
+                        if (PermissionRequest.RESOURCE_VIDEO_CAPTURE.equals(r)
+                                && checkSelfPermission(Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+                            need.add(Manifest.permission.CAMERA);
+                        }
+                        if (PermissionRequest.RESOURCE_AUDIO_CAPTURE.equals(r)
+                                && checkSelfPermission(Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+                            need.add(Manifest.permission.RECORD_AUDIO);
+                        }
+                    }
+                    if (need.isEmpty()) {
                         request.grant(request.getResources());
                     } else {
                         pendingPermission = request;
-                        requestPermissions(new String[]{Manifest.permission.CAMERA}, REQ_CAMERA);
+                        requestPermissions(need.toArray(new String[0]), REQ_CAMERA);
                     }
                 });
             }
@@ -81,9 +92,14 @@ public class MainActivity extends Activity {
                 fileCallback = callback;
                 Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
                 intent.addCategory(Intent.CATEGORY_OPENABLE);
-                intent.setType("image/*");
+                String type = "image/*";
+                String[] accept = params.getAcceptTypes();
+                if (accept != null && accept.length > 0 && accept[0] != null && !accept[0].trim().isEmpty()) {
+                    type = accept[0].trim();
+                }
+                intent.setType(type);
                 try {
-                    startActivityForResult(Intent.createChooser(intent, "Pick a face photo"), REQ_FILE);
+                    startActivityForResult(Intent.createChooser(intent, type.startsWith("audio") ? "Pick an audio file" : "Pick a face photo"), REQ_FILE);
                 } catch (Exception e) {
                     fileCallback = null;
                     return false;
@@ -174,7 +190,9 @@ public class MainActivity extends Activity {
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] results) {
         super.onRequestPermissionsResult(requestCode, permissions, results);
         if (requestCode == REQ_CAMERA && pendingPermission != null) {
-            if (results.length > 0 && results[0] == PackageManager.PERMISSION_GRANTED) {
+            boolean all = results.length > 0;
+            for (int r : results) if (r != PackageManager.PERMISSION_GRANTED) all = false;
+            if (all) {
                 pendingPermission.grant(pendingPermission.getResources());
             } else {
                 pendingPermission.deny();
