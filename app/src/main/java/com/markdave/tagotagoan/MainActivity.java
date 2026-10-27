@@ -58,7 +58,14 @@ public class MainActivity extends Activity {
         web.setWebViewClient(new WebViewClient() {
             @Override
             public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
-                return loader.shouldInterceptRequest(request.getUrl());
+                Uri u = request.getUrl();
+                // Serve the 3D engine from the app itself so 3D works offline (e.g. on a hotspot with no internet)
+                if (u != null && "cdnjs.cloudflare.com".equals(u.getHost()) && u.getPath() != null && u.getPath().endsWith("/three.min.js")) {
+                    try {
+                        return new WebResourceResponse("application/javascript", "utf-8", getAssets().open("lib/three.min.js"));
+                    } catch (Exception ignored) { }
+                }
+                return loader.shouldInterceptRequest(u);
             }
         });
 
