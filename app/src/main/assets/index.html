@@ -230,7 +230,7 @@ input[type=range]{border:0;background:none;padding:0;accent-color:var(--lamp)}
       </div>
       <div id="objective"></div>
       <div class="hudBtns">
-        <div class="row2"><button class="hb" id="mapBtn" aria-label="Toggle map">🗺</button><button class="hb" id="pauseBtn" aria-label="Pause">⏸</button></div>
+        <div class="row2"><button class="hb" id="vrBtn" aria-label="Enter VR" hidden>🥽</button><button class="hb" id="mapBtn" aria-label="Toggle map">🗺</button><button class="hb" id="pauseBtn" aria-label="Pause">⏸</button></div>
         <canvas id="mini" width="264" height="190"></canvas>
         <div id="gcu" hidden></div>
       </div>
@@ -261,6 +261,7 @@ input[type=range]{border:0;background:none;padding:0;accent-color:var(--lamp)}
       <div class="heroWrap" id="heroWrap"><img id="heroArt" alt="Tago Tagoan logo on a wooden sign, lit by a flashlight in a misty Filipino yard at night"><span class="presents">Matthew and Xian’s</span></div>
       <h1 class="title" id="titleText">Matthew and Xian’s Tago Tagoan</h1>
       <p class="tag">See through your own eyes. The monsters are “it.” Stay quiet… and hide!</p>
+      <p class="muted" id="vrMenuNote" hidden style="text-align:center;font-weight:700">🥽 Meta Quest detected — start any game, then tap 🥽 at the top right to enter VR.</p>
       <div class="faceRow" id="menuFaces"></div>
       <button class="btn primary" id="playSurvive">🫣 Tago! — Survive<small>Hide from the monsters until the timer runs out</small></button>
       <button class="btn" id="playSeek">🔎 Hanap! — Find the kids<small>5 kids are hiding. Search before the monsters get you</small></button>
@@ -371,6 +372,7 @@ input[type=range]{border:0;background:none;padding:0;accent-color:var(--lamp)}
       <p>🗺 Four stages: Bahay ni Lola, Paaralan, Palengke and Sementeryo — each with a <b>second floor</b>. Walk up the stairs to reach Lola’s Room and the azotea, the upper classrooms, the market bodega, the choir loft and more. Monsters follow you up and down, so stairs won’t save you!</p>
       <p>🧭 The mini-map shows the floor you’re on (1F or 2F). The ghost meter tells you when a ghost is upstairs or downstairs.</p>
       <p>👻 <b>Multo Hunt</b> is a bonus first-person level in the Lumang Mansyon. The <b>ghost meter</b> lights up and beeps faster as you get close, and its arrow points the way. Hold <b>Fire</b> to wrap a ghost in the plasma beam until it’s trapped in a net, then hit <b>Catch</b> to lock it in the Ghost Containment Unit. Don’t overheat the gun, and don’t let them charge you — 3 slimes and you’re out.</p>
+      <p>🥽 <b>Meta Quest VR:</b> open the game in the Quest Browser, start a game, then tap 🥽. Left stick walks where you look, right stick snap-turns (pull down to turn around), left trigger runs. Your right hand holds the flashlight. Ⓐ hides, Ⓑ holds your breath, the right trigger searches. In Multo Hunt the right hand becomes the plasma gun (trigger fires, Ⓐ catches) and your left hand holds the ghost meter.</p>
       <p>🎛 In the <b>Sound studio</b>, tap a beat, record your voice on top, save it, then choose it under <b>Game music</b>.</p>
       <p>📶 <b>Wi-Fi games</b> (Android app): hide together from the monsters, hunt the kids as a team, or play <b>Taya</b> — one player is the monster wearing their own face. The Taya counts to 10 first, then hunts. Taya sees 🔊 when a hider is loud and can search hiding spots. Caught hiders become ghosts 👻 and can keep watching.</p>
       <p class="muted">Phone: drag the left side to walk, swipe the right side to look. Keyboard: <kbd>W</kbd><kbd>S</kbd> walk, <kbd>A</kbd><kbd>D</kbd> step sideways, <kbd>←</kbd><kbd>→</kbd> or mouse to look, <kbd>Q</kbd> turn around, <kbd>Shift</kbd> run, <kbd>E</kbd> hide, <kbd>F</kbd> search, <kbd>Space</kbd> hold breath, <kbd>P</kbd> pause. In Multo Hunt: click or hold <kbd>Space</kbd> to fire, <kbd>E</kbd> to catch.</p>
@@ -490,7 +492,7 @@ const SFX={
   capture(){ tone(1300,.6,'sawtooth',.11,120); nz(.55,.2,3000,1,'bandpass',0,300); [523,784,1047].forEach((f,i)=>tone(f,.22,'triangle',.14,null,.5+i*.08)); },
   beep(f){ tone(f||660,.12,'square',.08) }
 };
-const vibrate=p=>{ try{ navigator.vibrate&&navigator.vibrate(p) }catch(e){} };
+const vibrate=p=>{ try{ navigator.vibrate&&navigator.vibrate(p) }catch(e){} try{ if(typeof R3!=='undefined'&&R3.inXR) vrBuzz(Array.isArray(p)?1:.6,Array.isArray(p)?300:p); }catch(e){} };
 
 /* ================= FACES ================= */
 let faceURLs=store.get('mxtt_faces',[null,null,null]); if(!Array.isArray(faceURLs)||faceURLs.length!==3) faceURLs=[null,null,null];
@@ -995,7 +997,7 @@ let lastMode='survive';
 function tayaName(){ if(!S) return 'Taya'; if(S.tayaId===myId()) return myName(); return (NET.players[S.tayaId]||{}).name||'Taya'; }
 
 let introTimer=null;
-function showIntro(src,title,sub){ if(!src||!S) return; const el=$('intro'), block=!S.net; $('introImg').src=src; $('introImg').alt=title; $('introTitle').textContent=title; $('introSub').textContent=sub;
+function showIntro(src,title,sub){ if(!src||!S||R3.inXR) return; const el=$('intro'), block=!S.net; $('introImg').src=src; $('introImg').alt=title; $('introTitle').textContent=title; $('introSub').textContent=sub;
   $('introTap').textContent=block?'Tap to start':''; el.hidden=false; if(block) S.paused=true; clearTimeout(introTimer);
   const done=()=>{ clearTimeout(introTimer); el.hidden=true; el.onclick=null; if(S&&block&&S.paused&&!S.over) S.paused=false; };
   el.onclick=done; introTimer=setTimeout(done,block?5000:2200); }
@@ -1049,7 +1051,7 @@ function tayaSearch(from,oi){ const obj=OBJS[oi]; if(!obj) return; const h=hider
   if(h) caughtHider(h,{taya:S.tayaId});
   if(from===myId()) toast(h?'👹 Gotcha!':'Walang tao dito… 🤷'); else netSend({t:'tres',to:from,hit:h?1:0}); }
 function miniScare(){ const opts=[['🐈','MEOW!','meow'],['🦎','TUKO!','beep'],['🐓','TIKTILAOK!','rooster'],['🦇','EEEK!','beep']]; const s=pick(opts);
-  $('msEmoji').textContent=s[0]; $('msSay').textContent=s[1]; const m=$('miniScare'); m.classList.add('on'); SFX[s[2]](1200); vibrate(80);
+  $('msEmoji').textContent=s[0]; $('msSay').textContent=s[1]; if(R3.inXR) toast(s[0]+' '+s[1]); const m=$('miniScare'); m.classList.add('on'); SFX[s[2]](1200); vibrate(80);
   setTimeout(()=>m.classList.remove('on'),800); }
 
 function goTo(c,x,y){ c.path=bfs(nearestPassable(tileOf(c)),nearestPassable(tileOf({x,y}))); }
@@ -1137,6 +1139,7 @@ function jumpscare(face,done){ const mode=settings.scare, el=$('jumpscare'), cv=
   x.lineWidth=8; x.strokeStyle=mode==='max'?'#ff0030':'#ffc857'; x.beginPath(); x.arc(200,190,152,0,Math.PI*2); x.stroke();
   if(mode==='fun'){ x.font=`60px ${EMOJI_FONT}`; x.textAlign='center'; x.fillText('👐',70,340); x.fillText('👐',330,340); }
   el.className='on '+mode; $('jsText').textContent=mode==='max'?'CAUGHT!':mode==='fun'?'BOO! 👻':'Caught!';
+  if(R3.inXR&&VR.scare){ VR.scareTex.needsUpdate=true; VR.scareDur=VR.scareT=mode==='max'?1.5:mode==='fun'?1.25:.95; }
   cv.style.animation='none'; void cv.offsetWidth; cv.style.animation='';
   if(mode==='max'){ SFX.scream(true); vibrate([300,80,400]); } else if(mode==='fun'){ SFX.boo(); vibrate(150); } else SFX.lose();
   setTimeout(()=>{ el.className=''; done(); }, mode==='max'?1500:mode==='fun'?1250:950); }
@@ -1302,7 +1305,7 @@ function buildProp(o){ let Wd=o.w*.92, Dp=o.h*.92; const rot=o.h>o.w; if(rot){ c
   const m=P.mesh(); if(rot) m.rotation.y=Math.PI/2; return m; }
 function init3D(){ if(!window.THREE||R3.ok) return R3.ok; try{
     const r=new THREE.WebGLRenderer({canvas:$('gl'),antialias:false,powerPreference:'high-performance'}); r.setClearColor(0x05040a,1); R3.renderer=r;
-    R3.scene=new THREE.Scene(); R3.camera=new THREE.PerspectiveCamera(70,1,.05,90); R3.scene.add(R3.camera);
+    R3.scene=new THREE.Scene(); R3.camera=new THREE.PerspectiveCamera(70,1,.05,90); R3.rig=new THREE.Group(); R3.scene.add(R3.rig); R3.rig.add(R3.camera);
     R3.hemi=new THREE.HemisphereLight(0x6677bb,0x1a1420,.4); R3.scene.add(R3.hemi);
     R3.flash=new THREE.SpotLight(0xffe2b0,2.2,13,.62,.5,1.15); R3.camera.add(R3.flash); R3.flash.position.set(.12,-.08,0); R3.flash.target.position.set(0,-.12,-1); R3.camera.add(R3.flash.target);
     R3.fog=new THREE.Fog(0x05040a,.8,10); R3.scene.fog=R3.fog;
@@ -1341,11 +1344,11 @@ const _v3=()=>new THREE.Vector3();
 function proj3(x,y,z){ const v=_v3().set(x,y,z), c=v.clone().applyMatrix4(R3.camera.matrixWorldInverse); if(c.z>-.05) return null; v.project(R3.camera); return {x:(v.x+1)/2*cv.width,y:(1-v.y)/2*cv.height,d:-c.z}; }
 function render3D(){ const t=performance.now()/1000, p=S.player, D=DIFF[S.diff], R=R3.renderer, gl=$('gl');
   if(R3.built!==R3.want) build3D(); gl.style.display='block';
-  const sc=isTouch?.55:.75; if(R3.w!==cssW||R3.h!==cssH){ R3.w=cssW; R3.h=cssH; R.setPixelRatio(1); R.setSize(Math.max(160,Math.round(cssW*sc*Math.min(dpr,1.6))),Math.max(120,Math.round(cssH*sc*Math.min(dpr,1.6))),false);
+  const sc=isTouch?.55:.75; if(!R3.inXR&&(R3.w!==cssW||R3.h!==cssH)){ R3.w=cssW; R3.h=cssH; R.setPixelRatio(1); R.setSize(Math.max(160,Math.round(cssW*sc*Math.min(dpr,1.6))),Math.max(120,Math.round(cssH*sc*Math.min(dpr,1.6))),false);
     R3.camera.aspect=cssW/cssH; R3.camera.fov=clamp(2*Math.atan(Math.tan(.78)/R3.camera.aspect)*180/Math.PI,55,84); R3.camera.updateProjectionMatrix(); }
   const ref=p.hidden?{x:p.hidden.cx,y:p.hidden.cy}:p, reg=regionOf(ref.x), lx=lxOf(ref.x)/T, lz=ref.y/T;
   const base=p.hidden?p.hidden.f*FH:zOf(p), eye=p.hidden?.32:EYE+Math.sin(p.bob)*.022, sh=S.shake*.012;
-  R3.camera.position.set(lx+(Math.random()-.5)*sh,base+eye+(Math.random()-.5)*sh,lz); R3.camera.lookAt(lx+Math.cos(p.a),base+eye-.03,lz+Math.sin(p.a)); R3.camera.updateMatrixWorld();
+  if(R3.inXR){ R3.rig.position.set(lx,base+(p.hidden?.32:EYE),lz); } else { R3.camera.position.set(lx+(Math.random()-.5)*sh,base+eye+(Math.random()-.5)*sh,lz); R3.camera.lookAt(lx+Math.cos(p.a),base+eye-.03,lz+Math.sin(p.a)); } R3.camera.updateMatrixWorld();
   const lightMul=S.mode==='hunt'?1.35:S.role==='taya'?1.2:S.out?1.5:1, far=(D.light/T)*1.55*lightMul*(p.hidden?.8:1);
   const room=roomAt(ref)||ROOMS[0], outdoors=!room.ceil, bg=outdoors?0x070a1c:0x05040a;
   R3.fog.color.setHex(bg); R3.fog.near=.6; R3.fog.far=far; R.setClearColor(bg,1);
@@ -1363,8 +1366,8 @@ function render3D(){ const t=performance.now()/1000, p=S.player, D=DIFF[S.diff],
   if(S.net) for(const q of Object.values(NET.players)){ if(q.me||!q.st||q.rx==null||q.st.out) continue; const pos={x:q.rx,y:q.ry}, qz=zOf(pos), qx=lxOf(q.rx)/T, qy=q.ry/T;
     if(q.role==='taya'){ if(S.mode==='taya'&&S.countdown>0) continue; const h=1.38; sprite3(si++,texOf(creatureSprite(playerFace(q),true)),qx,qz+h/2,qy,h*96/140,h,1,false); labels.push({x:qx,y:qz+h+.12,z:qy,t:q.name,col:'#ff3d6e',o:pos}); }
     else { if(q.st.h>=0) continue; const h=.95; sprite3(si++,texOf(kidSprite(q.color)),qx,qz+h/2,qy,h*64/112,h,1,false); labels.push({x:qx,y:qz+h+.1,z:qy,t:q.name,col:q.color,o:pos}); } }
-  for(let i=si;i<R3.spr.length;i++) R3.spr[i].visible=false; for(let i=ei;i<R3.eyes.length;i++) R3.eyes[i].visible=false;
-  R.render(R3.scene,R3.camera);
+  if(R3.inXR) si=vrTextSprites(si,marks,labels,t,ref); for(let i=si;i<R3.spr.length;i++) R3.spr[i].visible=false; for(let i=ei;i<R3.eyes.length;i++) R3.eyes[i].visible=false;
+  if(R3.inXR) vrPre(t); R.render(R3.scene,R3.camera); if(R3.inXR) return;
   ctx.setTransform(1,0,0,1,0,0); ctx.clearRect(0,0,cv.width,cv.height); ctx.textAlign='center'; ctx.textBaseline='bottom';
   const vis=o=>regionOf(o.x)===reg&&los(ref,o);
   for(const m of marks){ if(!vis(m.o)) continue; const s=proj3(m.x,m.y,m.z); if(!s) continue; ctx.font=`800 ${Math.round(clamp(80/s.d,16,60)*dpr)}px "Baloo 2",sans-serif`; ctx.lineWidth=4*dpr; ctx.strokeStyle='#000'; ctx.strokeText(m.t,s.x,s.y); ctx.fillStyle=m.col; ctx.fillText(m.t,s.x,s.y); }
@@ -1375,6 +1378,112 @@ function render3D(){ const t=performance.now()/1000, p=S.player, D=DIFF[S.diff],
   if(S.net&&S.role==='taya'&&S.countdown<=0) for(const q of Object.values(NET.players)){ if(q.me||!q.st||q.st.out||q.role!=='hider'||q.st.n<55) continue; const s=proj3(lxOf(q.st.x)/T,zOf(q.st)+.6,q.st.y/T); if(!s) continue;
     ctx.globalAlpha=.6+Math.sin(t*10)*.3; ctx.font=`${Math.round(clamp(90/s.d,18,60)*dpr)}px ${EMOJI_FONT}`; ctx.fillText('🔊',s.x,s.y); ctx.globalAlpha=1; }
   drawOverlays(t); }
+
+/* ================= META QUEST VR (WebXR) ================= */
+const VR={supported:false,hands:{},prev:{},hud:null,hudCv:null,hudT:0,mask:null,maskFor:null,maskCache:new Map(),tint:null,blind:null,scare:null,scareT:0,scareDur:1,beam:null,beamGlow:null,gun:null,torch:null,meter:null,meterCv:null,last:0,txt:new Map()};
+async function vrCheck(){ if(!R3.ok||!navigator.xr||!navigator.xr.isSessionSupported) return; try{ VR.supported=await navigator.xr.isSessionSupported('immersive-vr'); }catch(e){ VR.supported=false; }
+  $('vrBtn').hidden=!VR.supported; $('vrMenuNote').hidden=!VR.supported; }
+function vignetteCanvas(){ const c=mk(256,256), x=c.getContext('2d'), g=x.createRadialGradient(128,128,40,128,128,128); g.addColorStop(0,'rgba(255,255,255,0)'); g.addColorStop(1,'rgba(255,255,255,1)'); x.fillStyle=g; x.fillRect(0,0,256,256); return c; }
+function planeOn(parent,w,h,map,z,y,order){ const m=new THREE.Mesh(new THREE.PlaneGeometry(w,h),new THREE.MeshBasicMaterial({map:map||null,transparent:true,depthTest:false,depthWrite:false,fog:false})); m.position.set(0,y||0,z); m.renderOrder=order||999; m.frustumCulled=false; parent.add(m); return m; }
+function maskCanvas(o){ if(VR.maskCache.has(o)) return VR.maskCache.get(o); const c=mk(512,512), x=c.getContext('2d');
+  if(o.hs==='under'){ const g=x.createLinearGradient(0,0,0,256); g.addColorStop(0,'#000'); g.addColorStop(.85,'rgba(0,0,0,.97)'); g.addColorStop(1,'rgba(0,0,0,0)'); x.fillStyle=g; x.fillRect(0,0,512,256); x.fillStyle=o.c; x.globalAlpha=.6; for(let i=0;i<512;i+=21) x.fillRect(i,205,11,30); }
+  else if(o.hs==='inside'){ x.fillStyle='rgba(0,0,0,.96)'; x.beginPath(); x.rect(0,0,512,512); for(let i=0;i<5;i++) x.rect(60,150+i*46,392,22); x.fill('evenodd'); }
+  else { x.fillStyle=o.c; x.globalAlpha=.94; x.beginPath(); x.moveTo(0,0); x.lineTo(175,0); x.quadraticCurveTo(120,256,185,512); x.lineTo(0,512); x.fill(); x.beginPath(); x.moveTo(512,0); x.lineTo(337,0); x.quadraticCurveTo(392,256,327,512); x.lineTo(512,512); x.fill(); }
+  const t=new THREE.CanvasTexture(c); VR.maskCache.set(o,t); return t; }
+function texText(text,col){ const k=text+'|'+col; if(VR.txt.has(k)) return VR.txt.get(k); const c=mk(256,96), x=c.getContext('2d'); x.font=`800 56px "Baloo 2",${EMOJI_FONT}`; x.textAlign='center'; x.textBaseline='middle';
+  x.lineWidth=8; x.strokeStyle='rgba(0,0,0,.85)'; x.strokeText(text,128,50); x.fillStyle=col||'#fff'; x.fillText(text,128,50); const t=texOf(c); VR.txt.set(k,t); return t; }
+function vrSetup(){ if(VR.hud) return; const cam=R3.camera, R=R3.renderer;
+  VR.hudCv=mk(1024,512); VR.hudTex=new THREE.CanvasTexture(VR.hudCv); VR.hud=planeOn(cam,.66,.33,VR.hudTex,-.9,-.17,1003);
+  VR.blind=planeOn(cam,3,3,null,-.3,0,1000); VR.blind.material.color.set(0x000000); VR.blind.material.opacity=0;
+  VR.tint=planeOn(cam,3,3,texOf(vignetteCanvas()),-.31,0,1001); VR.tint.material.opacity=0;
+  VR.mask=planeOn(cam,1.6,1.6,null,-.33,0,1002); VR.mask.visible=false;
+  VR.scareTex=new THREE.CanvasTexture($('jsCanvas')); VR.scare=planeOn(cam,.62,.62,VR.scareTex,-.62,0,1004); VR.scare.visible=false;
+  for(let i=0;i<2;i++){ const ray=R.xr.getController(i), grip=R.xr.getControllerGrip(i); R3.rig.add(ray); R3.rig.add(grip); const h={ray,grip,hand:null};
+    ray.addEventListener('connected',e=>{ h.hand=e.data&&e.data.handedness; if(h.hand) VR.hands[h.hand]=h; vrHandModels(); vrAttachFlash(); });
+    ray.addEventListener('disconnected',()=>{ if(h.hand&&VR.hands[h.hand]===h) delete VR.hands[h.hand]; }); }
+  const bm=(col,op)=>{ const m=new THREE.Mesh(new THREE.CylinderGeometry(1,1,1,8,1,true),new THREE.MeshBasicMaterial({color:col,transparent:true,opacity:op,depthWrite:false,blending:THREE.AdditiveBlending,fog:false})); m.visible=false; m.frustumCulled=false; R3.scene.add(m); return m; };
+  VR.beam=bm(0xffffff,.95); VR.beamGlow=bm(0x5bf0a8,.45); }
+function vrHandModels(){ const rh=VR.hands.right, lh=VR.hands.left;
+  if(rh&&!rh.models){ rh.models=1; const t=new PB(); t.cyl(.022,.028,.17,0,0,0,'#263238',10); t.cyl(.032,.026,.03,0,.17,0,'#455a64',10); t.cyl(.028,.028,.004,0,.2,0,'#fff3c4',12);
+    VR.torch=t.mesh(); VR.torch.rotation.x=-Math.PI/2; VR.torch.position.set(0,-.01,.05); rh.grip.add(VR.torch);
+    const g=new PB(); g.box(.05,.07,.24,0,-.035,0,'#2b2f36'); g.box(.035,.09,.04,0,-.12,.06,'#1b1e23'); for(let i=0;i<3;i++) g.cyl(.016,.016,.04,0,.035,-.06+i*.05,'#5bf0a8',8);
+    g.geo(new THREE.CylinderGeometry(.018,.022,.08,10),0,0,-.15,'#90a4ae',Math.PI/2,0,0); g.sph(.02,0,0,-.19,'#e8fff6'); VR.gun=g.mesh(); rh.grip.add(VR.gun); }
+  if(lh&&!lh.models){ lh.models=1; VR.meterCv=mk(256,160); VR.meterTex=new THREE.CanvasTexture(VR.meterCv); const d=new PB(); d.box(.09,.03,.13,0,-.015,0,'#5f6670'); d.cyl(.004,.004,.08,.03,0,-.06,'#9e9e9e',6);
+    VR.meter=new THREE.Group(); VR.meter.add(d.mesh()); const scr=new THREE.Mesh(new THREE.PlaneGeometry(.08,.05),new THREE.MeshBasicMaterial({map:VR.meterTex,fog:false})); scr.rotation.x=-Math.PI/2; scr.position.set(0,.017,.01); VR.meter.add(scr); lh.grip.add(VR.meter); } }
+function vrAttachFlash(){ const rh=VR.hands.right; if(R3.inXR&&rh){ rh.grip.add(R3.flash); rh.grip.add(R3.flash.target); R3.flash.position.set(0,0,-.1); R3.flash.target.position.set(0,0,-1); } }
+function vrBuzz(s,ms){ if(!R3.inXR) return; const ses=R3.renderer.xr.getSession(); if(!ses) return; for(const src of ses.inputSources){ const h=src.gamepad&&src.gamepad.hapticActuators&&src.gamepad.hapticActuators[0]; if(h&&h.pulse){ try{ h.pulse(s,ms); }catch(e){} } } }
+const aimA=()=>R3.inXR&&S&&S.vrAim!=null?S.vrAim:S.player.a;
+function vrInput(dt){ const ses=R3.renderer.xr.getSession&&R3.renderer.xr.getSession(); if(!ses) return; let L=null,Rg=null;
+  for(const src of ses.inputSources){ if(!src.gamepad) continue; if(src.handedness==='left') L=src.gamepad; else if(src.handedness==='right') Rg=src.gamepad; }
+  const pv=VR.prev, btn=(g,i)=>!!(g&&g.buttons[i]&&g.buttons[i].pressed), ax=(g,i)=>g&&g.axes.length>i?g.axes[i]:0;
+  let mx=ax(L,2), my=ax(L,3); if(Math.hypot(mx,my)<.15){ mx=0; my=0; } joy.x=mx; joy.y=my; runHeld=btn(L,0)||btn(L,1)||btn(L,3);
+  const rx=ax(Rg,2), ry=ax(Rg,3);
+  if(Math.abs(rx)>.7&&!pv.snap){ R3.rig.rotation.y-=Math.sign(rx)*Math.PI/6; pv.snap=true; } else if(Math.abs(rx)<.3) pv.snap=false;
+  if(ry>.8&&!pv.back){ R3.rig.rotation.y+=Math.PI; pv.back=true; } else if(ry<.3) pv.back=false;
+  const A=btn(Rg,4), B=btn(Rg,5), RT=btn(Rg,0);
+  if(S.over){ if(A&&!pv.A&&!S.net) newGame(lastMode); }
+  else if(S.mode==='hunt'){ fireHeld=RT; if(A&&!pv.A) tryCatch(); }
+  else { if(A&&!pv.A) toggleHide(); breathHeld=B; if(RT&&!pv.RT) startSearch(); }
+  pv.A=A; pv.B=B; pv.RT=RT;
+  const v=new THREE.Vector3(); R3.camera.getWorldDirection(v); if(Math.hypot(v.x,v.z)>.1) S.player.a=Math.atan2(v.z,v.x);
+  const rh=VR.hands.right; if(rh){ rh.ray.getWorldDirection(v); if(Math.hypot(v.x,v.z)>.05) S.vrAim=Math.atan2(-v.z,-v.x); } else S.vrAim=null; }
+function vrPrompt(){ const p=S.player;
+  if(S.over) return 'Press Ⓐ to play again';
+  if(S.mode==='hunt'){ const tr=S.ghosts.find(g=>g.state==='trapped'&&!g.caught&&dist(g,p)<HUNT_RANGE); if(tr) return 'Ⓐ CATCH it!'; if(S.overheat>0) return '🔥 Cooling down…'; if(S.lock) return `⚡ Snaring… ${Math.round(S.lock.snare)}% — keep aiming`; return 'Hold the trigger to fire the plasma beam'; }
+  if(S.out) return '👻 You’re a ghost — watch your friends!';
+  if(p.hidden) return `Hiding in ${p.hidden.n} — hold Ⓑ to hold your breath, Ⓐ to get out`;
+  const nh=nearHide(); if(!nh) return ''; if(S.role==='taya') return `Trigger: search the ${nh.n}`; return S.mode==='seek'?`Ⓐ hide • Trigger: search the ${nh.n}`:`Ⓐ hide in the ${nh.n}`; }
+function vrHudDraw(){ const x=VR.hudCv.getContext('2d'); x.clearRect(0,0,1024,512);
+  x.fillStyle='rgba(8,6,16,.6)'; rr(x,8,8,1008,176,26); x.fill(); x.textBaseline='middle';
+  x.font=`800 44px "Baloo 2",${EMOJI_FONT}`; x.textAlign='left'; x.fillStyle='#fff'; x.fillText(S.over?'':($('hearts').textContent||''),30,56);
+  const obj=S.over?$('endTitle').textContent:(($('objective').innerText||$('objective').textContent||'').replace(/\s*\n+\s*/g,'  •  '));
+  x.textAlign='center'; x.font=`800 ${obj.length>34?34:42}px "Baloo 2",${EMOJI_FONT}`; x.fillText(obj.slice(0,64),600,56);
+  const bar=(lbl,v,col,y)=>{ x.textAlign='left'; x.font='800 30px "Baloo 2",sans-serif'; x.fillStyle='#fff'; x.fillText(lbl,30,y); x.fillStyle='rgba(0,0,0,.6)'; x.fillRect(170,y-13,300,26); x.fillStyle=col; x.fillRect(170,y-13,300*clamp(v/100,0,1),26); };
+  if(!S.over){ if(S.mode==='hunt') bar('Heat',S.heat,S.overheat>0?'#ff3d6e':S.heat>70?'#ffb347':'#5bf0a8',118);
+    else if(S.role!=='taya'&&!S.out){ bar('Noise',S.noise,S.noise>60?'#ff3d6e':S.noise>30?'#ffc857':'#58e0a0',118); if(S.player.hidden) bar('Breath',S.breath,S.gasp>0?'#ff3d6e':'#6ec6ff',156); }
+    x.textAlign='right'; x.font='800 32px "Baloo 2",sans-serif'; x.fillStyle='#ffc857'; x.fillText(regionOf((S.player.hidden?{x:S.player.hidden.cx}:S.player).x)?'2F':'1F',990,118); }
+  else { x.textAlign='center'; x.font='600 30px "Baloo 2",sans-serif'; x.fillStyle='#d7cdf5'; x.fillText($('endText').textContent.slice(0,70),512,128); }
+  const bn=$('roomBanner'); if(bn.classList.contains('show')){ x.textAlign='center'; x.font='64px Creepster, Impact, fantasy'; x.fillStyle='#ffc857'; x.fillText(bn.textContent,512,250); }
+  const ts=$('toast'); if(ts.classList.contains('show')){ x.fillStyle='rgba(8,6,16,.75)'; rr(x,90,300,844,64,18); x.fill(); x.textAlign='center'; x.font=`800 34px "Baloo 2",${EMOJI_FONT}`; x.fillStyle='#fff'; x.fillText(ts.textContent.slice(0,52),512,333); }
+  const pr=vrPrompt(); if(pr){ x.fillStyle='rgba(8,6,16,.78)'; rr(x,90,400,844,70,20); x.fill(); x.textAlign='center'; x.font=`800 34px "Baloo 2",${EMOJI_FONT}`; x.fillStyle='#ffc857'; x.fillText(pr.slice(0,56),512,436); }
+  VR.hudTex.needsUpdate=true;
+  if(VR.meterCv&&S.mode==='hunt'){ const m=VR.meterCv.getContext('2d'); m.fillStyle='#0a1a12'; m.fillRect(0,0,256,160); const R=10*T, lv=S.nearGhost&&S.nearest<R?Math.ceil((1-S.nearest/R)*8):0;
+    for(let i=0;i<8;i++){ m.fillStyle=i<lv?(i>=6?'#ff4d6d':i>=4?'#ffcf4a':'#5bf0a8'):'#173a2c'; m.fillRect(12+i*30,18,24,40); }
+    m.fillStyle='#9ff5cf'; m.font='800 40px "Baloo 2",sans-serif'; m.textAlign='center'; m.textBaseline='middle'; m.fillText($('gmArrow').textContent||'—',128,112); VR.meterTex.needsUpdate=true; } }
+function vrPre(t){ const p=S.player; VR.hudT-=VR.dt||.016; if(VR.hudT<=0){ VR.hudT=.12; vrHudDraw(); }
+  const chased=S.role==='hider'&&S.creatures.some(c=>c.state==='chase'&&c.tid===myId()), danger=S.out?0:chased?1:clamp(1-S.nearest/300,0,1)*.6;
+  if(S.slimeT>0){ VR.tint.material.color.setRGB(.35,1,.45); VR.tint.material.opacity=Math.min(1,S.slimeT/1.8)*.8; }
+  else { VR.tint.material.color.setRGB(1,0,.15); VR.tint.material.opacity=danger*.5*(.75+Math.sin(t*8)*.25); }
+  VR.blind.material.opacity=(S.role==='taya'&&S.countdown>0)?.96:0;
+  if(p.hidden){ const tx=maskCanvas(p.hidden); if(VR.mask.material.map!==tx){ VR.mask.material.map=tx; VR.mask.material.needsUpdate=true; } VR.mask.visible=true; } else VR.mask.visible=false;
+  if(VR.scareT>0){ const k=1-VR.scareT/VR.scareDur; VR.scare.visible=true; VR.scare.scale.setScalar(settings.scare==='off'?.6:.3+Math.min(1,k*3)*1.1); VR.scare.position.x=settings.scare==='max'?(Math.random()-.5)*.03:0; } else VR.scare.visible=false;
+  const hunt=S.mode==='hunt'; if(VR.gun) VR.gun.visible=hunt; if(VR.torch) VR.torch.visible=!hunt; if(VR.meter) VR.meter.visible=hunt;
+  const rh=VR.hands.right;
+  if(hunt&&S.firing&&rh&&VR.gun){ const tip=VR.gun.localToWorld(new THREE.Vector3(0,0,-.2)); let tgt;
+    if(S.lock){ const g=S.lock, G=GTYPES[g.type]; tgt=new THREE.Vector3(lxOf(g.x)/T,zOf(g)+.2+.75*G.size,g.y/T); }
+    else { const d=new THREE.Vector3(); rh.ray.getWorldDirection(d); tgt=tip.clone().addScaledVector(d,-6); }
+    const dir=tgt.clone().sub(tip), len=dir.length(); dir.normalize(); const mid=tip.clone().addScaledVector(dir,len/2), q=new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0,1,0),dir);
+    for(const [m,r] of [[VR.beam,.003+Math.random()*.003],[VR.beamGlow,.011+Math.random()*.007]]){ m.visible=true; m.position.copy(mid); m.quaternion.copy(q); m.scale.set(r,len,r); } }
+  else { VR.beam.visible=false; VR.beamGlow.visible=false; } }
+function vrTextSprites(si,marks,labels,t,ref){ const vis=o=>regionOf(o.x)===regionOf(ref.x)&&los(ref,o);
+  for(const m of marks){ if(!vis(m.o)) continue; sprite3(si++,texText(m.t,m.col),m.x,m.y,m.z,.42,.16,1,true); }
+  for(const l of labels){ if(!vis(l.o)) continue; sprite3(si++,texText(l.t,l.col),l.x,l.y,l.z,.6,.22,1,true); }
+  for(const q of S.particles){ if(!vis(q)) continue; const k=1-q.life/q.max; sprite3(si++,texText(q.text,q.color||'#fff'),lxOf(q.x)/T,zOf(q)+.75+k*.4,q.y/T,.5*q.size,.19*q.size,clamp(q.life/q.max*1.6,0,1),true); }
+  return si; }
+function xrFrame(){ const now=performance.now(), dt=Math.min(.05,(now-VR.last)/1000); VR.last=now; VR.dt=dt;
+  try{ if(userPaused) setPause(false);
+    if(S){ vrInput(dt); if(!S.over&&!S.paused){ update(dt); if(S&&!S.over) updateHUD(dt); } if(VR.scareT>0) VR.scareT-=dt; if(S) render3D(); }
+    else R3.renderer.render(R3.scene,R3.camera); }catch(e){ if(!xrFrame.w){ xrFrame.w=1; console.error(e); } } }
+async function startVR(){ if(!VR.supported||!S||R3.inXR) return; audioInit(); let ses;
+  try{ ses=await navigator.xr.requestSession('immersive-vr',{optionalFeatures:['local-floor']}); }catch(e){ toast('Couldn’t start VR here — open the game in the Quest Browser.'); return; }
+  const R=R3.renderer; R.xr.enabled=true; R.xr.setReferenceSpaceType('local'); try{ R.xr.setFramebufferScaleFactor(.8); }catch(e){}
+  vrSetup(); try{ await R.xr.setSession(ses); }catch(e){ toast('Couldn’t start VR.'); return; }
+  ctx.setTransform(1,0,0,1,0,0); ctx.clearRect(0,0,cv.width,cv.height); R3.inXR=true; R3.rig.scale.setScalar(.5); R3.rig.rotation.set(0,Math.atan2(-Math.cos(S.player.a),-Math.sin(S.player.a)),0); R3.camera.position.set(0,0,0); R3.camera.rotation.set(0,0,0);
+  $('intro').hidden=true; if(S.paused&&!S.over&&!$('jumpscare').className) S.paused=false; setPause(false); vrAttachFlash(); VR.last=performance.now();
+  R.setAnimationLoop(xrFrame); ses.addEventListener('end',endVR); toast('🥽 VR on — left stick walks, right stick turns'); }
+function endVR(){ const R=R3.renderer; R.setAnimationLoop(null); R3.inXR=false; R3.rig.scale.setScalar(1); R3.rig.position.set(0,0,0); R3.rig.rotation.set(0,0,0);
+  R3.camera.add(R3.flash); R3.camera.add(R3.flash.target); R3.flash.position.set(.12,-.08,0); R3.flash.target.position.set(0,-.12,-1); R3.w=0;
+  if(VR.beam){ VR.beam.visible=false; VR.beamGlow.visible=false; } joy.x=joy.y=0; runHeld=breathHeld=fireHeld=false; if(S) S.vrAim=null; if(S&&!S.over) setPause(true); }
 
 /* ================= RENDER (first-person raycaster) ================= */
 const cv=$('game'), ctx=cv.getContext('2d'), view=mk(320,240), vctx=view.getContext('2d');
@@ -1506,7 +1615,7 @@ function drawMini(){ const x=$('mini').getContext('2d'), p=S.player, ref=p.hidde
   x.fillStyle='rgba(255,220,140,.35)'; x.beginPath(); x.moveTo(cx,cy); x.arc(cx,cy,26,p.a-.6,p.a+.6); x.closePath(); x.fill();
   x.fillStyle='#fff'; x.beginPath(); x.arc(cx,cy,5,0,Math.PI*2); x.fill(); }
 let last=performance.now();
-function loop(now){ const dt=Math.min(.05,(now-last)/1000); last=now;
+function loop(now){ if(R3.inXR){ last=now; requestAnimationFrame(loop); return; } const dt=Math.min(.05,(now-last)/1000); last=now;
   try{ if(S&&!S.over&&!S.paused&&!(userPaused&&!S.net)){ update(dt); if(S&&!S.over) updateHUD(dt); } render(); }catch(e){ if(!loop.warned){ loop.warned=1; console.error(e); } }
   requestAnimationFrame(loop); }
 
@@ -1570,7 +1679,7 @@ function ghostFlee(g){ const p=S.player; let bestP=null,bd=-1; for(let i=0;i<8;i
 function releaseLock(){ const g=S.lock; S.lock=null; if(g&&g.state==='snared'&&!g.caught) ghostFlee(g); }
 function aimGhost(){ const p=S.player; let best=null,bs=1e9;
   for(const g of S.ghosts){ if(g.caught||g.state==='trapped') continue; const dx=g.x-p.x, dy=g.y-p.y, d=Math.hypot(dx,dy); if(d>HUNT_RANGE) continue;
-    const a=Math.abs(angDiff(Math.atan2(dy,dx),p.a)), tol=Math.atan2(T*.45*GTYPES[g.type].size,d)+.06; if(a>tol||!los(p,g)) continue; if(a<bs){ bs=a; best=g; } }
+    const a=Math.abs(angDiff(Math.atan2(dy,dx),aimA())), tol=Math.atan2(T*.45*GTYPES[g.type].size,d)+.06; if(a>tol||!los(p,g)) continue; if(a<bs){ bs=a; best=g; } }
   return best; }
 let beamNodes=null;
 function beamOn(){ if(!AC) return; beamOff(); try{ const g=AC.createGain(); g.gain.setValueAtTime(0,AC.currentTime); g.gain.linearRampToValueAtTime(.11,AC.currentTime+.08);
@@ -1581,7 +1690,7 @@ function beamOn(){ if(!AC) return; beamOff(); try{ const g=AC.createGain(); g.ga
 function beamOff(){ const b=beamNodes; beamNodes=null; if(!b||!AC) return; try{ const n=AC.currentTime; b.g.gain.cancelScheduledValues(n); b.g.gain.setValueAtTime(b.g.gain.value,n); b.g.gain.linearRampToValueAtTime(0,n+.1); b.o.forEach(o=>o.stop(n+.15)); }catch(e){} }
 function tryCatch(){ if(!S||S.mode!=='hunt'||S.over||userPaused) return; const p=S.player; let best=null,bd=1e9;
   for(const g of S.ghosts){ if(g.caught||g.state!=='trapped') continue; const d=dist(g,p); if(d>HUNT_RANGE||!los(p,g)) continue;
-    if(Math.abs(angDiff(Math.atan2(g.y-p.y,g.x-p.x),p.a))>.8) continue; if(d<bd){ bd=d; best=g; } }
+    if(Math.abs(angDiff(Math.atan2(g.y-p.y,g.x-p.x),aimA()))>.8) continue; if(d<bd){ bd=d; best=g; } }
   if(!best){ toast(S.ghosts.some(g=>g.state==='trapped')?'Look at the trapped ghost and get closer!':S.lock?'Keep the beam on it until it’s trapped!':'Snare a ghost with the beam first ⚡'); return; }
   best.caught=true; best.state='caught'; S.contained++; SFX.capture(); vibrate([60,40,60]);
   S.capFx={t:.8,max:.8,x:best.scr&&best.scr.vis?best.scr.x/RW:.5,y:best.scr&&best.scr.vis?best.scr.y/RH:.45,col:GTYPES[best.type].col};
@@ -1620,7 +1729,7 @@ function updateHunt(dt){ const p=S.player;
     if(S.heat>=100){ S.heat=100; S.overheat=2.6; S.firing=false; beamOff(); releaseLock(); toast('🔥 Plasma gun overheated! Cooling down…'); SFX.gasp(); } }
   else S.heat=Math.max(0,S.heat-(S.overheat>0?38:28)*dt);
   if(S.firing){
-    if(S.lock){ const g=S.lock, d=dist(g,p), a=Math.abs(angDiff(Math.atan2(g.y-p.y,g.x-p.x),p.a)); if(g.caught||g.state!=='snared'||d>HUNT_RANGE*1.2||a>.5||!los(p,g)) releaseLock(); }
+    if(S.lock){ const g=S.lock, d=dist(g,p), a=Math.abs(angDiff(Math.atan2(g.y-p.y,g.x-p.x),aimA())); if(g.caught||g.state!=='snared'||d>HUNT_RANGE*1.2||a>.5||!los(p,g)) releaseLock(); }
     if(!S.lock){ const g=aimGhost(); if(g){ S.lock=g; g.state='snared'; g.path=[]; SFX.wail(relPan(g)); } }
     if(S.lock){ const g=S.lock, G=GTYPES[g.type]; g.snare=Math.min(100,g.snare+(30/G.tough)*dt);
       if(g.snare>=100){ g.state='trapped'; g.trapT=4.5; S.lock=null; toast(`🕸️ ${G.label} trapped! CATCH it now!`); SFX.chime(); vibrate(60); } }
@@ -1957,7 +2066,7 @@ $('lanBack').onclick=()=>{ showScreen('menu'); };
 if(ARTA.logo){ $('heroArt').src=ARTA.logo; $('titleText').classList.add('sr'); } else $('heroWrap').hidden=true;
 document.querySelectorAll('img[data-art]').forEach(im=>{ const src=ARTA[im.dataset.art]; if(src) im.src=src; else im.remove(); });
 if(ARTA.meterIcon){ $('gmIcon').src=ARTA.meterIcon; $('gmIcon').hidden=false; }
-init3D(); resize(); loadStage(settings.stage); loadFaces(); showScreen('menu'); requestAnimationFrame(loop);
+init3D(); resize(); loadStage(settings.stage); loadFaces(); vrCheck(); $('vrBtn').onclick=startVR; showScreen('menu'); requestAnimationFrame(loop);
 </script>
 </body>
 </html>
