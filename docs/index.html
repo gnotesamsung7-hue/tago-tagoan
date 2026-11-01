@@ -103,7 +103,7 @@ h3{margin:14px 0 4px;font-size:19px}
 .meter span{width:52px}
 .bar{flex:1;height:13px;background:rgba(0,0,0,.55);border-radius:99px;overflow:hidden;border:1px solid rgba(255,255,255,.25)}
 .bar i{display:block;height:100%;width:0;border-radius:99px;background:var(--ok);transition:background .2s}
-#breathWrap[hidden],#noiseWrap[hidden]{display:none}
+#breathWrap[hidden],#noiseWrap[hidden],#staminaWrap[hidden],#fearWrap[hidden]{display:none}
 #toast{position:absolute;left:50%;top:96px;transform:translateX(-50%);background:rgba(10,6,20,.82);color:#fff;padding:8px 16px;border-radius:14px;font-weight:700;font-size:17px;opacity:0;transition:opacity .25s;white-space:nowrap;max-width:94vw;overflow:hidden;text-overflow:ellipsis}
 #toast.show{opacity:1}
 #roomBanner{position:absolute;left:0;right:0;top:28%;text-align:center;font-family:'Creepster',fantasy;font-size:clamp(28px,7vw,46px);color:var(--lamp);opacity:0;transition:opacity .5s;text-shadow:0 3px 0 #000}
@@ -209,6 +209,14 @@ input[type=range]{border:0;background:none;padding:0;accent-color:var(--lamp)}
 #seq button.on[data-t=hat]{background:radial-gradient(circle,#efffd0,#a6e35a 60%,#4f8a1f);border-color:#c8f28a;box-shadow:0 0 10px #a6e35a}
 #seq button.on[data-t=fx]{background:radial-gradient(circle,#f3e6ff,#b388f0 60%,#5d3a99);border-color:#d0b4ff;box-shadow:0 0 10px #b388f0}
 #recBtn{flex:0 0 132px!important;width:132px;height:132px;min-width:0!important;border-radius:50%;margin:6px auto;padding:0;background:radial-gradient(circle at 40% 35%,#ff6b6b,#b3121f 65%,#5e0710);color:#fff;font-size:20px;font-weight:800;border:6px solid #4a4f57;box-shadow:0 0 22px rgba(255,40,60,.45),inset 0 -6px 12px rgba(0,0,0,.35)}
+#missionList{display:grid;gap:10px;margin:10px 0}
+.mcard{display:flex;gap:12px;align-items:center;background:var(--surface2);border-radius:16px;padding:8px;cursor:pointer;border:2px solid transparent}
+.mcard:hover,.mcard:focus-visible{border-color:var(--lamp);outline:none}
+.mcard.locked{opacity:.5;cursor:default}
+.mcard.locked:hover{border-color:transparent}
+.mthumb{width:112px;height:63px;object-fit:cover;border-radius:10px;flex:none}
+.minfo{min-width:0}.minfo b{font-size:17px;display:block}.minfo .muted{font-size:14px}
+.mstars{font-size:14px;font-weight:800;color:var(--lamp);margin-top:2px}
 @media (prefers-reduced-motion:reduce){ #jumpscare canvas{animation:none!important} #jsFlash{animation:none!important} }
 </style>
 </head>
@@ -224,6 +232,8 @@ input[type=range]{border:0;background:none;padding:0;accent-color:var(--lamp)}
         <div class="meters">
           <div class="meter" id="noiseWrap"><span>Noise</span><div class="bar"><i id="noiseBar"></i></div></div>
           <div class="meter" id="breathWrap" hidden><span>Breath</span><div class="bar"><i id="breathBar" style="background:#6ec6ff"></i></div></div>
+          <div class="meter" id="staminaWrap" hidden><span>Stamina</span><div class="bar"><i id="staminaBar" style="background:#6ec6ff"></i></div></div>
+          <div class="meter" id="fearWrap" hidden><span>Fear</span><div class="bar"><i id="fearBar" style="background:#ff3d6e"></i></div></div>
           <div class="meter" id="heatWrap" hidden><span>Heat</span><div class="bar"><i id="heatBar"></i></div></div>
         </div>
         <div id="ghostMeter" hidden><div class="gmHead"><span><img class="gmIcon" id="gmIcon" alt="" hidden>GHOST METER</span><b id="gmArrow">—</b></div><div class="gmLeds" id="gmLeds"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
@@ -265,7 +275,9 @@ input[type=range]{border:0;background:none;padding:0;accent-color:var(--lamp)}
       <div class="faceRow" id="menuFaces"></div>
       <button class="btn primary" id="playSurvive">🫣 Tago! — Survive<small>Hide from the monsters until the timer runs out</small></button>
       <button class="btn" id="playSeek">🔎 Hanap! — Find the kids<small>5 kids are hiding. Search before the monsters get you</small></button>
-      <button class="btn" id="playHunt">👻 Multo Hunt — FPS bonus level<small>8 ghosts across 2 floors — track them, snare them with the plasma gun, lock them in the containment unit</small></button>
+      <button class="btn" id="playGiant">🗼 Ang Higante — spiral escape<small>A giant 10× your size chases you up a spiral tower. Run, knock things over, hide — but not for long</small></button>
+      <button class="btn" data-go="missions">📋 Multo Missions — ghost-clearing jobs<small>Take jobs from clients, clear haunted places, earn ₱ for better gear, and face Don Anino</small></button>
+      <button class="btn" id="playHunt">👻 Multo Hunt — free hunt<small>8 ghosts across 2 floors in the Lumang Mansyon — no mission, just catch them all</small></button>
       <button class="btn" data-go="lan">📶 Wi-Fi multiplayer<small>Play with family on the same Wi-Fi — together, or one of you is Taya</small></button>
       <button class="btn" data-go="faces">📸 Monster faces<small>Record your own faces for the monsters to wear</small></button>
       <button class="btn" data-go="studio">🎛 Sound studio<small>Make your own background music — beats, melodies and your own voice</small></button>
@@ -351,6 +363,30 @@ input[type=range]{border:0;background:none;padding:0;accent-color:var(--lamp)}
   </section>
   <input type="file" id="audioIn" accept="audio/*" hidden>
 
+  <section id="missions" class="screen" hidden>
+    <div class="card wide">
+      <h2>📋 Multo Missions</h2>
+      <p class="muted" style="margin:0 0 6px"><b>Bantay-Multo Agency</b> • Funds: <b id="msCash" style="color:var(--lamp)">₱0</b></p>
+      <p class="muted">Clients call when their place is haunted. Clear every ghost to finish a job — bonus goals earn stars and extra pay. Each job unlocks the next.</p>
+      <div id="missionList"></div>
+      <h3>🛠 Agency gear</h3>
+      <p class="muted" style="margin:0 0 6px">Upgrades work in every mission and in the free Multo Hunt.</p>
+      <div class="slots" id="gearList"></div>
+      <button class="btn c" data-go="menu">Back to menu</button>
+    </div>
+  </section>
+  <section id="brief" class="screen" hidden>
+    <div class="card">
+      <img id="briefArt" class="cardArt" alt="" hidden>
+      <h2 id="briefTitle"></h2>
+      <p class="muted" id="briefClient" style="font-weight:700;margin:0 0 6px"></p>
+      <p id="briefMsg" style="font-style:italic;line-height:1.4"></p>
+      <div id="briefObj"></div>
+      <button class="btn primary c" id="briefStart">🚐 Start mission</button>
+      <button class="btn c" data-go="missions">Back to missions</button>
+    </div>
+  </section>
+
   <section id="faces" class="screen" hidden>
     <div class="card">
       <h2>📸 Monster faces</h2>
@@ -373,6 +409,8 @@ input[type=range]{border:0;background:none;padding:0;accent-color:var(--lamp)}
       <p>🧭 The mini-map shows the floor you’re on (1F or 2F). The ghost meter tells you when a ghost is upstairs or downstairs.</p>
       <p>👻 <b>Multo Hunt</b> is a bonus first-person level in the Lumang Mansyon. The <b>ghost meter</b> lights up and beeps faster as you get close, and its arrow points the way. Hold <b>Fire</b> to wrap a ghost in the plasma beam until it’s trapped in a net, then hit <b>Catch</b> to lock it in the Ghost Containment Unit. Don’t overheat the gun, and don’t let them charge you — 3 slimes and you’re out.</p>
       <p>🥽 <b>Meta Quest VR:</b> open the game in the Quest Browser, start a game, then tap 🥽. Left stick walks where you look, right stick snap-turns (pull down to turn around), left trigger runs. Your right hand holds the flashlight. Ⓐ hides, Ⓑ holds your breath, the right trigger searches. In Multo Hunt the right hand becomes the plasma gun (trigger fires, Ⓐ catches) and your left hand holds the ghost meter.</p>
+      <p>📋 <b>Multo Missions</b>: take ghost-clearing jobs from clients — Lola Ising’s house, a haunted school, the palengke, the cemetery on Undas, and finally the mansion of Don Anino, a boss who splits apart when trapped. Earn ⭐ for bonus goals and ₱ to buy agency gear: Cooling Coils, Snare Booster, Spirit Vest and a Long-Range Meter.</p>
+      <p>🗼 <b>Ang Higante</b>: a giant ten times your size chases you up a spiral tower. Running drains stamina. Tap (or click / press F) crates, barrels, shelves, carts and scaffolding to knock them over behind you — he trips on them. Hide in closets, drums and jars to catch your breath, but your <b>fear meter</b> rises — faster when he’s close. When it fills, he smells you. Reach the moonlit door at the top to escape.</p>
       <p>🎛 In the <b>Sound studio</b>, tap a beat, record your voice on top, save it, then choose it under <b>Game music</b>.</p>
       <p>📶 <b>Wi-Fi games</b> (Android app): hide together from the monsters, hunt the kids as a team, or play <b>Taya</b> — one player is the monster wearing their own face. The Taya counts to 10 first, then hunts. Taya sees 🔊 when a hider is loud and can search hiding spots. Caught hiders become ghosts 👻 and can keep watching.</p>
       <p class="muted">Phone: drag the left side to walk, swipe the right side to look. Keyboard: <kbd>W</kbd><kbd>S</kbd> walk, <kbd>A</kbd><kbd>D</kbd> step sideways, <kbd>←</kbd><kbd>→</kbd> or mouse to look, <kbd>Q</kbd> turn around, <kbd>Shift</kbd> run, <kbd>E</kbd> hide, <kbd>F</kbd> search, <kbd>Space</kbd> hold breath, <kbd>P</kbd> pause. In Multo Hunt: click or hold <kbd>Space</kbd> to fire, <kbd>E</kbd> to catch.</p>
@@ -485,6 +523,10 @@ const SFX={
   lose(){ [392,330,262,196].forEach((f,i)=>tone(f,.42,'sawtooth',.09,null,i*.18)) },
   growl(pan){ tone(88,.6,'sawtooth',.09,58,0,pan); nz(.6,.07,220,1,'bandpass',0,null,pan) },
   ping(){ tone(1200,.08,'sine',.08); },
+  giantStep(v){ tone(42,.55,'sine',.7*v,26); nz(.45,.4*v,120,1,'lowpass'); },
+  roar(){ tone(68,1.4,'sawtooth',.16,38); nz(1.2,.28,320,1.2,'bandpass',0,120); tone(104,1.2,'square',.05,52); },
+  sniff(){ nz(.22,.12,1800,2,'bandpass',0,900); nz(.2,.1,1800,2,'bandpass',.3,900); },
+  crash(){ nz(.5,.4,600,.8,'lowpass',0,100); tone(90,.3,'square',.12,50); },
   meter(lv){ tone(700+lv*600,.05,'square',.03+lv*.03); },
   wail(pan){ tone(620,.9,'sine',.12,300,0,pan); tone(930,.9,'triangle',.04,450,0,pan); },
   whisper(pan){ nz(.7,.05,1300,6,'bandpass',0,600,pan); },
@@ -969,7 +1011,7 @@ function faceFromKey(k){ if(!k) return null; const parts=String(k).split(':'), p
   if(pid==='me'||(NET.id&&+pid===NET.id)) return okImg(myFaceList()[i]); const p=NET.players[pid]; return p?okImg((p.faces||[])[i]):null; }
 const creatureFace=c=>faceFromKey(c.fk);
 function playerFace(p){ return p.me?okImg(myFaceList()[0]):okImg((p.faces||[])[0]); }
-function newGame(mode,mp){ if(mode==='hunt') return newHunt(); audioInit(); loadStage(mp?mp.stage:settings.stage);
+function newGame(mode,mp){ if(mode==='hunt') return newHunt(); if(mode==='giant') return newGiant(); if(VR.supported) $('vrBtn').hidden=false; audioInit(); loadStage(mp?mp.stage:settings.stage);
   const diff=mp?(DIFF[mp.diff]?mp.diff:'normal'):settings.diff, D=DIFF[diff];
   const role=mp&&mode==='taya'&&mp.taya===NET.id?'taya':'hider';
   S={mode,net:!!mp,isAuth:!mp||NET.isHost,role,diff,t:0,timeLeft:mode==='survive'?120:mode==='seek'?180:150,hearts:mode==='taya'?2:3,out:false,
@@ -1157,7 +1199,7 @@ function applySnap(m){ if(typeof m.tl==='number') S.timeLeft=m.tl; if(typeof m.c
   S.lastChase=chaseMe; S.lastCheck=checkMe;
   if(Array.isArray(m.b)) m.b.forEach((a,i)=>{ const b=S.bots[i]; if(!b||!Array.isArray(a)) return; if(OBJS[a[0]]) b.obj=OBJS[a[0]]; if(a[1]&&!b.found) b.found=true; });
   S.found=S.bots.filter(b=>b.found).length; }
-function update(dt){ if(S.mode==='hunt') return updateHunt(dt); const p=S.player, D=DIFF[S.diff];
+function update(dt){ if(S.mode==='giant') return updateGiant(dt); if(S.mode==='hunt') return updateHunt(dt); const p=S.player, D=DIFF[S.diff];
   S.t+=dt; if(S.invuln>0) S.invuln-=dt; if(S.scareCool>0) S.scareCool-=dt; if(S.stun>0) S.stun-=dt;
   if(S.isAuth&&S.countdown>0){ S.countdown-=dt; if(S.countdown<=0){ S.countdown=0; } }
   if(S.mode==='taya'){ if(S.countdown<=0&&!S.cdDone){ S.cdDone=true; toast(S.role==='taya'?'👹 Ready or not, here I come!':`👹 ${tayaName()} is coming!`); SFX.sting(); } }
@@ -1359,7 +1401,7 @@ function render3D(){ const t=performance.now()/1000, p=S.player, D=DIFF[S.diff],
   for(const c of S.creatures){ const cz=zOf(c), cx=lxOf(c.x)/T, cy=c.y/T, ch=c.state==='chase', h=1.38, w=h*96/140, lift=Math.sin(t*5+c.wob)*.03;
     sprite3(si++,texOf(creatureSprite(creatureFace(c),ch)),cx,cz+h/2+lift,cy,w,h,1,false); if(regionOf(c.x)===reg){ const de=Math.hypot(cx-lx,cy-lz), eo=clamp((de-2.5)/3,0,1)*(ch?1:.7); if(eo>.02) eye3(ei++,cx,cz+h*.8+lift,cy,.3,eo); }
     if(c.mark) marks.push({x:cx,y:cz+h+.15,z:cy,t:c.mark,col:c.mark==='!'?'#ff3d6e':'#ffd166',o:c}); }
-  if(S.ghosts) for(const g of S.ghosts){ g.scr=null; if(g.caught) continue; const G=GTYPES[g.type], fk=ghostFrameKey(g), art=GHOST_IMG[g.type]&&GHOST_IMG[g.type][fk], aimg=ghostArtSprite(faceFromKey(g.fk),g.type,fk,g.flip);
+  if(S.ghosts) for(const g of S.ghosts){ g.scr=null; if(g.caught) continue; const G=GTYPES[g.type], fk=ghostFrameKey(g), art=GHOST_IMG[artType(g)]&&GHOST_IMG[artType(g)][fk], aimg=ghostArtSprite(faceFromKey(g.fk),artType(g),fk,g.flip);
     const img=aimg||ghostSprite(faceFromKey(g.fk),g.type,g.state==='snared'||g.state==='trapped'||g.state==='charge'), hh=aimg?1.35*G.size*art.rel:1.2*G.size, ww=aimg?hh*art.ar:hh*.78, gz=zOf(g)+.2+Math.sin(t*2+g.wob)*.07, gx=lxOf(g.x)/T, gy=g.y/T;
     sprite3(si++,texOf(img),gx,gz+hh/2,gy,ww,hh,ghostAlpha(g,t),true);
     if(regionOf(g.x)===reg&&los(ref,g)){ const pc=proj3(gx,gz+hh*.55,gy), pt=proj3(gx,gz+hh,gy), pb=proj3(gx,gz,gy); if(pc&&pt&&pb) g.scr={x:pc.x/cv.width*RW,y:pc.y/cv.height*RH,vis:true,hpx:Math.abs(pb.y-pt.y)/cv.height*RH}; } }
@@ -1378,6 +1420,151 @@ function render3D(){ const t=performance.now()/1000, p=S.player, D=DIFF[S.diff],
   if(S.net&&S.role==='taya'&&S.countdown<=0) for(const q of Object.values(NET.players)){ if(q.me||!q.st||q.st.out||q.role!=='hider'||q.st.n<55) continue; const s=proj3(lxOf(q.st.x)/T,zOf(q.st)+.6,q.st.y/T); if(!s) continue;
     ctx.globalAlpha=.6+Math.sin(t*10)*.3; ctx.font=`${Math.round(clamp(90/s.d,18,60)*dpr)}px ${EMOJI_FONT}`; ctx.fillText('🔊',s.x,s.y); ctx.globalAlpha=1; }
   drawOverlays(t); }
+
+/* ================= ANG HIGANTE — giant chase up a spiral tower ================= */
+const GT={TURNS:3,RISE:20,RIN:12,ROUT:20,RMID:16,W:8,EYE:1.6,GH:16,PAR:95}; GT.L=GT.RMID*2*Math.PI*GT.TURNS; GT.CPS=[GT.L*.25,GT.L*.5,GT.L*.75];
+const G3={scene:null,obst:[],hides:[],giant:null,flash:null,ray:null};
+const gY=s=>GT.RISE*(s/GT.RMID)/(2*Math.PI);
+function gPos(s,d,yOff){ const th=s/GT.RMID, r=GT.RMID+d; return new THREE.Vector3(Math.cos(th)*r,gY(s)+(yOff||0),Math.sin(th)*r); }
+const gTanA=s=>{ const th=s/GT.RMID; return Math.atan2(Math.cos(th),-Math.sin(th)); };
+function repTex(cv){ const t=new THREE.CanvasTexture(cv); t.wrapS=t.wrapT=THREE.RepeatWrapping; t.magFilter=THREE.NearestFilter; t.minFilter=THREE.NearestFilter; t.generateMipmaps=false; return t; }
+function gObstModel(type){ const P=new PB();
+  if(type==='Crates'){ P.box(1,1,1,0,0,-.55,'#a1783f'); P.box(1,1,1,0,0,.55,'#8d6436'); P.box(.95,.95,.95,0,1,0,'#b5894a'); }
+  else if(type==='Barrel'){ P.cyl(.5,.5,1.2,0,0,0,'#6d4c41',12); P.cyl(.52,.52,.08,0,.25,0,'#3e2723',12); P.cyl(.52,.52,.08,0,.9,0,'#3e2723',12); }
+  else if(type==='Bookshelf'){ P.box(.5,2.4,2,0,0,0,'#5d4037'); const cols=['#c0392b','#2980b9','#27ae60','#f1c40f','#8e44ad']; for(let r=0;r<4;r++) for(let i=0;i<9;i++) P.box(.2,.4,.16,-.18,.15+r*.55,-.8+i*.2,cols[(r*3+i)%5]); }
+  else if(type==='Kariton'){ P.box(1.2,.7,2,0,.5,0,'#8d6e4c'); P.wheel(.5,.12,0,.5,-1.05,'#3e2723'); P.wheel(.5,.12,0,.5,1.05,'#3e2723'); P.box(.1,.1,1.4,0,1.2,1.5,'#6d4c41'); for(let i=0;i<5;i++) P.sph(.25,(Math.random()-.5)*.6,1.35,(Math.random()-.5)*1.4,['#7cb342','#fdd835','#e53935','#fb8c00','#8e5aa8'][i]); }
+  else if(type==='Scaffolding'){ for(const z of [-.9,.9]) for(const x of [-.4,.4]) P.cyl(.06,.06,3,x,0,z,'#c8b06b',6); for(let y=.8;y<3;y+=1) P.box(.9,.08,1.9,0,y,0,'#a68b4f'); }
+  else { P.sph(.55,0,.55,-.4,'#b5651d'); P.sph(.55,0,.55,.6,'#a0522d'); P.sph(.45,0,1.45,.1,'#b5651d'); }
+  return P.mesh(); }
+function gHideModel(type){ const P=new PB();
+  if(type==='Aparador'){ P.box(.8,2.3,1.5,0,0,0,'#5d4037'); P.box(.02,2,.02,-.41,.15,0,'#2a1a10'); P.box(.04,.25,.04,-.42,1.1,-.12,'#d4af37'); P.box(.04,.25,.04,-.42,1.1,.12,'#d4af37'); }
+  else if(type==='Drum'){ P.cyl(.6,.58,1.3,0,0,0,'#3f7cac',14); P.cyl(.62,.62,.05,0,1.3,0,'#2e5d85',14); }
+  else { P.sph(.75,0,.8,0,'#b5651d',1.1); P.cyl(.35,.45,.4,0,1.55,0,'#8b4a17',12); }
+  return P.mesh(); }
+function gBuild(){ const sc=new THREE.Scene(); G3.scene=sc; sc.fog=new THREE.Fog(0x05040a,5,40); sc.background=new THREE.Color(0x05040a);
+  sc.add(new THREE.HemisphereLight(0x8090c0,0x201820,.34));
+  G3.flash=new THREE.SpotLight(0xffe2b0,2.8,42,.55,.5,1.05); sc.add(G3.flash); sc.add(G3.flash.target);
+  const N=Math.round(GT.TURNS*180), thMax=GT.L/GT.RMID, fl={p:[],n:[],u:[]}, wl={p:[],n:[],u:[]}, rl={p:[],n:[],u:[]};
+  const push=(B,a,b,c,d,n,ua)=>{ B.p.push(...a,...b,...c,...a,...c,...d); for(let i=0;i<6;i++) B.n.push(...n); B.u.push(...ua[0],...ua[1],...ua[2],...ua[0],...ua[2],...ua[3]); };
+  for(let i=0;i<N;i++){ const t0=thMax*i/N, t1=thMax*(i+1)/N, y0=GT.RISE*t0/(2*Math.PI), y1=GT.RISE*t1/(2*Math.PI), s0=t0*GT.RMID, s1=t1*GT.RMID;
+    const P=(r,t,y)=>[Math.cos(t)*r,y,Math.sin(t)*r];
+    push(fl,P(GT.RIN,t0,y0),P(GT.RIN,t1,y1),P(GT.ROUT,t1,y1),P(GT.ROUT,t0,y0),[0,1,0],[[0,s0/2],[0,s1/2],[4,s1/2],[4,s0/2]]);
+    push(wl,P(GT.ROUT,t0,y0-.4),P(GT.ROUT,t0,y0+GT.RISE),P(GT.ROUT,t1,y1+GT.RISE),P(GT.ROUT,t1,y1-.4),[-Math.cos((t0+t1)/2),0,-Math.sin((t0+t1)/2)],[[s0/4,0],[s0/4,GT.RISE/4],[s1/4,GT.RISE/4],[s1/4,0]]);
+    push(rl,P(GT.RIN,t0,y0),P(GT.RIN,t0,y0+1.05),P(GT.RIN,t1,y1+1.05),P(GT.RIN,t1,y1),[Math.cos(t0),0,Math.sin(t0)],[[s0/2,0],[s0/2,.5],[s1/2,.5],[s1/2,0]]); }
+  const mk3=(B,mat)=>{ const g=new THREE.BufferGeometry(); g.setAttribute('position',new THREE.Float32BufferAttribute(B.p,3)); g.setAttribute('normal',new THREE.Float32BufferAttribute(B.n,3)); g.setAttribute('uv',new THREE.Float32BufferAttribute(B.u,2)); const m=new THREE.Mesh(g,mat); sc.add(m); return m; };
+  mk3(fl,new THREE.MeshPhongMaterial({map:repTex(floorTexFor({name:'tower',tex:'tiles',floor:[96,90,84],ceil:'#111'})),side:THREE.DoubleSide,shininess:0}));
+  mk3(wl,new THREE.MeshPhongMaterial({map:repTex(TEX.stone),side:THREE.DoubleSide,shininess:0}));
+  mk3(rl,new THREE.MeshPhongMaterial({color:0x5d4037,side:THREE.DoubleSide,shininess:0}));
+  const ground=new THREE.Mesh(new THREE.CircleGeometry(GT.ROUT,40),new THREE.MeshPhongMaterial({map:repTex(TEX.stone),shininess:0})); ground.rotation.x=-Math.PI/2; ground.position.y=-.3; sc.add(ground);
+  const col=new THREE.Mesh(new THREE.CylinderGeometry(3,3.6,GT.RISE*GT.TURNS+24,20),new THREE.MeshPhongMaterial({map:repTex(TEX.stone),shininess:0})); col.position.y=(GT.RISE*GT.TURNS+24)/2-4; sc.add(col);
+  const glowT=texOf(glowCanvas('#ffb347'));
+  for(let s=8;s<GT.L;s+=14){ const p=gPos(s,GT.W/2-.25,2.6), sp=new THREE.Sprite(new THREE.SpriteMaterial({map:glowT,fog:false,transparent:true,depthWrite:false,blending:THREE.AdditiveBlending})); sp.position.copy(p); sp.scale.set(1.2,1.2,1); sc.add(sp);
+    const b=new THREE.Mesh(new THREE.BoxGeometry(.25,.4,.25),new THREE.MeshBasicMaterial({color:0xffcc66})); b.position.copy(p); sc.add(b); }
+  GT.CPS.forEach(s=>{ const p=gPos(s,-GT.W/2+.4,1.4), sp=new THREE.Sprite(new THREE.SpriteMaterial({map:texOf(glowCanvas('#ff5a3d')),fog:false,transparent:true,depthWrite:false,blending:THREE.AdditiveBlending})); sp.position.copy(p); sp.scale.set(2.2,2.2,1); sc.add(sp); });
+  const ex=gPos(GT.L,GT.W/2-.1,2.6), door=new THREE.Mesh(new THREE.PlaneGeometry(4,5.2),new THREE.MeshBasicMaterial({color:0xcfe3ff,fog:false})); door.position.copy(ex); door.lookAt(0,ex.y,0); sc.add(door);
+  const dg=new THREE.Sprite(new THREE.SpriteMaterial({map:texOf(glowCanvas('#cfe3ff')),fog:false,transparent:true,depthWrite:false,blending:THREE.AdditiveBlending})); dg.position.copy(ex); dg.scale.set(10,10,1); sc.add(dg);
+  const sp=[]; for(let i=0;i<500;i++){ const th=Math.random()*Math.PI*2, ph=.1+Math.random()*1.3; sp.push(Math.cos(th)*Math.cos(ph)*90,GT.RISE*GT.TURNS+Math.sin(ph)*60,Math.sin(th)*Math.cos(ph)*90); }
+  const sg=new THREE.BufferGeometry(); sg.setAttribute('position',new THREE.Float32BufferAttribute(sp,3)); sc.add(new THREE.Points(sg,new THREE.PointsMaterial({color:0xffffff,size:.35,fog:false})));
+  const types=['Crates','Barrel','Bookshelf','Kariton','Scaffolding','Banga Stack']; let k=0;
+  for(let s=48;s<GT.L-22;s+=19){ const pv=new THREE.Group(), m=gObstModel(types[k%types.length]); pv.add(m); sc.add(pv); G3.obst.push({s,n:types[k%types.length],pivot:pv,mesh:m}); m.userData.obst=G3.obst[G3.obst.length-1]; k++; }
+  const ht=['Aparador','Drum','Big Banga']; [72,122,168,214,258].forEach((s,i)=>{ const m=gHideModel(ht[i%3]), p=gPos(s,3.35); m.position.copy(p); m.rotation.y=-s/GT.RMID; sc.add(m);
+    G3.hides.push({s,d:3.35,n:ht[i%3],hs:'inside',c:ht[i%3]==='Drum'?'#3f7cac':'#5d4037',mesh:m}); });
+  G3.giant=new THREE.Sprite(new THREE.SpriteMaterial({transparent:true,alphaTest:.04})); sc.add(G3.giant);
+  G3.ray=new THREE.Raycaster(); }
+function gResetObstacles(){ for(const o of G3.obst){ o.state='up'; o.t=0; const th=o.s/GT.RMID, p=gPos(o.s,2.5); o.pivot.position.copy(p); o.pivot.rotation.set(0,-th,0); o.pivot.scale.setScalar(1); o.pivot.visible=true; } }
+function setGiantUI(on){ ['staminaWrap'].forEach(id=>$(id).hidden=!on); $('fearWrap').hidden=true;
+  if(on){ ['noiseWrap','breathWrap','bBreath','bFire','bCatch','heatWrap','ghostMeter','gcu','mini'].forEach(id=>$(id).hidden=true); $('bSearch').hidden=false; $('bSearch').innerHTML='<span class="em">🪵</span>Topple'; $('bHide').hidden=false; $('bRun').hidden=false; }
+  else { $('bSearch').innerHTML='<span class="em">🔎</span>Search'; if(R3.ok&&R3.camera.far!==90){ R3.camera.far=90; R3.camera.updateProjectionMatrix(); } } }
+function newGiant(){ if(!R3.ok){ toast('Ang Higante needs 3D graphics — try another device or browser.'); return; } audioInit(); if(!G3.scene) gBuild(); gResetObstacles();
+  S={mode:'giant',net:false,isAuth:true,role:'hider',diff:settings.diff,t:0,timeLeft:0,hearts:3,out:false,noise:0,breath:100,holding:false,gasp:0,invuln:2,stun:0,
+    player:{x:0,y:0,s:26,d:0,a:gTanA(26),r:15,hidden:null,step:0,bob:0,turn:0},creatures:[],bots:[],ghosts:null,particles:[],over:false,paused:false,shake:0,nearest:999,
+    gS:2,stumble:0,stamina:100,fear:0,exhausted:0,countdown:3.5,cp:0,toppled:0,hits:0,gStepT:0,roarT:2,hbT:0,sniffT:0,cdShown:4};
+  userPaused=false; showScreen(null); $('hud').hidden=false; $('touch').hidden=!isTouch; setHuntUI(false); setGiantUI(true); $('vrBtn').hidden=true;
+  lastMode='giant'; R3.camera.far=220; R3.camera.updateProjectionMatrix(); bgmForMode('giant'); banner('🗼 Ang Higante'); toast('He’s waking up… get ready to RUN!'); }
+const gNearTopple=()=>{ const p=S.player; let b=null,bd=1e9; for(const o of G3.obst){ if(o.state!=='up') continue; const d=Math.abs(o.s-p.s); if(d<6&&d<bd){ bd=d; b=o; } } return b; };
+const gNearHide=()=>{ const p=S.player; let b=null,bd=1e9; for(const h of G3.hides){ const d=Math.abs(h.s-p.s); if(d<2.6&&d<bd){ bd=d; b=h; } } return b; };
+function gTopple(o){ if(!S||S.mode!=='giant'||S.over||S.player.hidden) return; o=o||gNearTopple(); if(!o){ toast('Get next to a crate, barrel or shelf to topple it.'); return; }
+  if(Math.abs(o.s-S.player.s)>6){ toast('Too far — get closer to topple it.'); return; } if(o.state!=='up') return;
+  o.state='down'; o.t=0; S.toppled++; SFX.crash(); vibrate(40); toast(o.s<S.player.s?'🪵 Toppled! He’ll trip over it.':'🪵 Toppled — but it’s in front of you!'); }
+function gToggleHide(){ const p=S.player; if(S.over) return; if(p.hidden){ p.d=1.6; p.s=p.hidden.s; p.hidden=null; S.fear=Math.min(S.fear,60); SFX.rustle(); return; }
+  const h=gNearHide(); if(!h){ toast('No hiding spot here — keep running!'); return; } p.hidden=h; p.a=gTanA(h.s)+Math.PI*.5; SFX.rustle(); toast('🫣 Hidden… he’ll smell your fear soon!'); }
+function gTapAt(cx,cy){ if(!S||S.mode!=='giant'||!G3.ray) return false; const r=cv.getBoundingClientRect(), v=new THREE.Vector2(((cx-r.left)/r.width)*2-1,-((cy-r.top)/r.height)*2+1);
+  G3.ray.setFromCamera(v,R3.camera); const hits=G3.ray.intersectObjects(G3.obst.map(o=>o.mesh),false); if(hits.length){ gTopple(hits[0].object.userData.obst); return true; } return false; }
+function giantCatch(){ if(S.paused||S.over) return; const p=S.player; S.hearts--; S.hits++; S.paused=true; p.hidden=null; S.fear=0;
+  const art=GHOST_IMG.anino&&GHOST_IMG.anino.drift&&okImg(GHOST_IMG.anino.drift.img)?GHOST_IMG.anino.drift.img:null; SFX.roar();
+  jumpscare(art,()=>{ if(!S||S.over) return; if(S.hearts<=0) return endGiant(false); const back=Math.max(S.cp,26); p.s=back; p.d=0; p.a=gTanA(back); S.gS=back-26; S.stamina=100; S.invuln=2.5; S.countdown=2; S.cdShown=3; S.paused=false;
+    toast(`💔 ${S.hearts} ${S.hearts===1?'heart':'hearts'} left — back to the last lantern!`); }); }
+function endGiant(win){ if(S.over) return; S.over=true; bgmStop(); $('hud').hidden=true; $('touch').hidden=true; try{ document.exitPointerLock&&document.exitPointerLock(); }catch(e){}
+  const used=Math.round(S.t); let emoji,title,text;
+  if(win){ const stars=1+(S.hits===0?1:0)+(used<=GT.PAR?1:0); emoji='⭐'.repeat(stars)+'☆'.repeat(3-stars); title='You escaped the giant!';
+    text=`You reached the top in ${fmt(used)} • ${S.toppled} ${S.toppled===1?'thing':'things'} toppled • ${S.hits===0?'never caught':`caught ${S.hits}×`}${used<=GT.PAR?'':` • ⭐ Beat ${fmt(GT.PAR)} for another star`}`;
+    if(best.giantBest==null||used<best.giantBest){ best.giantBest=used; text+=' • New best time!'; } }
+  else { emoji='👹'; title='The giant got you!'; text=`You climbed ${Math.round(S.player.s/GT.L*100)}% of the tower. Knock things over behind you — he trips on them — and hide only while he’s far away.`; }
+  store.set('mxtt_best',best); (win?SFX.win:SFX.lose)(); setEndArt(null);
+  $('endEmoji').textContent=emoji; $('endTitle').textContent=title; $('endText').textContent=text; $('againBtn').textContent='Run again'; $('menuBtn').textContent='Menu'; showScreen('end'); }
+function updateGiant(dt){ const p=S.player, D=DIFF[S.diff]; S.t+=dt; if(S.invuln>0) S.invuln-=dt;
+  let turn=lookDX; lookDX=0; if(keys.has('ArrowLeft')) turn-=2.6*dt; if(keys.has('ArrowRight')) turn+=2.6*dt; if(p.turn>0){ const sp=Math.min(p.turn,9*dt); p.turn-=sp; turn+=sp; } p.a+=turn;
+  if(S.countdown>0){ S.countdown-=dt; const c=Math.ceil(S.countdown); if(c<S.cdShown&&c>0){ S.cdShown=c; banner(String(c)); SFX.beep(440); } if(S.countdown<=0){ banner('👹 RUN!'); SFX.roar(); SFX.sting(); } }
+  let fw=-joy.y, st=joy.x; if(keys.has('KeyW')||keys.has('ArrowUp')) fw+=1; if(keys.has('KeyS')||keys.has('ArrowDown')) fw-=1; if(keys.has('KeyA')) st-=1; if(keys.has('KeyD')) st+=1;
+  const m=Math.hypot(fw,st); if(m>1){ fw/=m; st/=m; } const moving=m>.15&&!p.hidden;
+  const running=moving&&(keys.has('ShiftLeft')||keys.has('ShiftRight')||runHeld)&&S.stamina>0&&S.exhausted<=0;
+  if(running){ S.stamina-=24*dt; if(S.stamina<=0){ S.stamina=0; S.exhausted=1.4; toast('😮‍💨 Out of breath! Walk or hide to recover.'); SFX.gasp(); } }
+  else S.stamina=Math.min(100,S.stamina+(p.hidden?35:moving?9:18)*dt); if(S.exhausted>0) S.exhausted-=dt;
+  if(moving){ const sp=(running?6.4:3.3)*dt, ca=Math.cos(p.a), sa=Math.sin(p.a), vx=ca*fw-sa*st, vz=sa*fw+ca*st, th=p.s/GT.RMID;
+    const ds=(vx*-Math.sin(th)+vz*Math.cos(th))*sp*(GT.RMID/(GT.RMID+p.d)), dd=(vx*Math.cos(th)+vz*Math.sin(th))*sp;
+    let ns=clamp(p.s+ds,1,GT.L), nd=clamp(p.d+dd,-GT.W/2+.7,GT.W/2-.7);
+    for(const o of G3.obst){ if(o.state==='up'&&Math.abs(ns-o.s)<1&&nd>1.5) nd=Math.min(nd,1.5); }
+    p.a+=(ns-p.s)/GT.RMID; p.s=ns; p.d=nd; p.step+=Math.abs(sp); p.bob+=dt*(running?14:9); if(p.step>(running?2.2:2.6)){ p.step=0; SFX.step(running); } }
+  for(const cp of GT.CPS) if(p.s>=cp&&S.cp<cp){ S.cp=cp; toast('🏮 Checkpoint lantern!'); SFX.chime(); }
+  const gap=p.s-S.gS;
+  if(S.countdown<=0){
+    if(S.stumble>0) S.stumble-=dt;
+    else { let v=4.7*D.mul; if(gap>30) v*=1.7; else if(gap>18) v*=1.25; if(p.hidden) v*=.35; S.gS+=v*dt; if(p.hidden) S.gS=Math.min(S.gS,p.s-4); }
+    for(const o of G3.obst){ if(o.state==='down'&&S.gS>=o.s-2.5){ o.state='smashed'; o.t=0; S.stumble=2.6; S.shake=5; SFX.crash(); SFX.growl(); vibrate(90); toast('💥 The giant tripped!'); }
+      else if(o.state==='up'&&S.gS>=o.s-1.2){ o.state='kicked'; o.t=0; SFX.crash(); } }
+    S.gStepT-=dt; if(S.gStepT<=0&&S.stumble<=0){ S.gStepT=.95; const vol=clamp(1-gap/45,.06,1); SFX.giantStep(vol); S.shake=Math.max(S.shake,3.2*vol); }
+    S.roarT-=dt; if(gap<12&&S.roarT<=0&&!p.hidden){ S.roarT=rnd(3,5); SFX.roar(); } }
+  for(const o of G3.obst) o.t+=dt;
+  if(p.hidden){ S.fear+=(6+34*clamp(1-gap/26,0,1))*dt; S.sniffT-=dt; if(S.sniffT<=0&&gap<22){ S.sniffT=rnd(.8,1.6); SFX.sniff(); } if(S.fear>=100){ toast('👃 He smelled your fear!'); return giantCatch(); } }
+  else S.fear=Math.max(0,S.fear-20*dt);
+  if(!p.hidden&&S.countdown<=0&&S.invuln<=0&&gap<4.5) return giantCatch();
+  if(p.s>=GT.L-1.5) return endGiant(true);
+  S.nearest=Math.max(0,gap)*14; S.hbT-=dt; if(gap<25&&S.hbT<=0){ SFX.thump(); S.hbT=.3+gap/25*.8; }
+  if(S.shake>0) S.shake=Math.max(0,S.shake-dt*5);
+  for(const q of S.particles) q.life-=dt; S.particles=S.particles.filter(q=>q.life>0); }
+function giantHUD(){ const p=S.player, gap=Math.max(0,p.s-S.gS);
+  $('hearts').textContent='❤️'.repeat(Math.max(0,S.hearts))+'🖤'.repeat(Math.max(0,3-S.hearts));
+  $('objective').innerHTML=`🗼 Height ${Math.round(p.s/GT.L*100)}% • 👹 ${Math.round(gap)} m behind`;
+  const sb=$('staminaBar'); sb.style.width=S.stamina+'%'; sb.style.background=S.exhausted>0?'#ff3d6e':S.stamina<30?'#ffb347':'#6ec6ff';
+  $('fearWrap').hidden=!p.hidden; $('fearBar').style.width=S.fear+'%';
+  const pr=$('prompt'), o=p.hidden?null:gNearTopple(), h=p.hidden?null:gNearHide();
+  if(S.countdown>0) pr.textContent='He’s waking up… get ready!';
+  else if(p.hidden) pr.textContent=isTouch?`Hiding in the ${p.hidden.n} — get out before your fear fills up!`:`Hiding in the ${p.hidden.n} — E to get out before your fear fills up!`;
+  else if(o) pr.textContent=isTouch?`🪵 Tap the ${o.n} (or Topple) to knock it over`:`F or click the ${o.n} — knock it over`;
+  else if(h) pr.textContent=isTouch?`🫣 Hide in the ${h.n}`:`E — hide in the ${h.n}`;
+  else pr.textContent='';
+  pr.classList.toggle('show',!!pr.textContent);
+  if(isTouch){ $('bSearch').classList.toggle('dim',!o); const bh=$('bHide'); bh.innerHTML=p.hidden?'<span class="em">🚪</span>Get out':'<span class="em">🫣</span>Hide'; bh.classList.toggle('dim',!p.hidden&&!h); $('bRun').classList.toggle('on',runHeld); } }
+function renderGiant(){ const t=performance.now()/1000, p=S.player, R=R3.renderer; $('gl').style.display='block';
+  const sc=isTouch?.55:.75; if(R3.w!==cssW||R3.h!==cssH){ R3.w=cssW; R3.h=cssH; R.setPixelRatio(1); R.setSize(Math.max(160,Math.round(cssW*sc*Math.min(dpr,1.6))),Math.max(120,Math.round(cssH*sc*Math.min(dpr,1.6))),false);
+    R3.camera.aspect=cssW/cssH; R3.camera.fov=clamp(2*Math.atan(Math.tan(.78)/R3.camera.aspect)*180/Math.PI,55,84); R3.camera.updateProjectionMatrix(); }
+  const hid=p.hidden, pos=hid?gPos(hid.s,hid.d-.55,1.05):gPos(p.s,p.d,GT.EYE+Math.sin(p.bob)*.05), sh=S.shake*.025;
+  pos.x+=(Math.random()-.5)*sh; pos.y+=(Math.random()-.5)*sh; R3.camera.position.copy(pos); R3.camera.lookAt(pos.x+Math.cos(p.a),pos.y-.04,pos.z+Math.sin(p.a)); R3.camera.updateMatrixWorld();
+  G3.flash.position.copy(pos); const dir=new THREE.Vector3(); R3.camera.getWorldDirection(dir); G3.flash.target.position.copy(pos).addScaledVector(dir,6);
+  for(const h of G3.hides) h.mesh.visible=h!==hid;
+  for(const o of G3.obst){ const th=o.s/GT.RMID, k=Math.min(1,o.t/.45);
+    if(o.state==='down'){ o.pivot.rotation.set(0,-th,k*Math.PI/2); }
+    else if(o.state==='smashed'||o.state==='kicked'){ const f=Math.min(1,o.t/.7); if(f>=1){ o.pivot.visible=false; continue; } const b=gPos(o.s,2.5+f*3,f*4); o.pivot.position.copy(b); o.pivot.rotation.set(f*3,-th,Math.PI/2+f*2); o.pivot.scale.setScalar(1-f*.6); } }
+  const gap=p.s-S.gS, fk=S.stumble>0?'drift':gap<12?'flee':'drift', art=GHOST_IMG.anino&&GHOST_IMG.anino[fk];
+  const gp=gPos(S.gS,0,0), gth=S.gS/GT.RMID, lat=(-Math.sin(gth))*(-Math.sin(p.a))+Math.cos(gth)*Math.cos(p.a), flip=lat<0;
+  const img=art&&okImg(art.img)?ghostArtSprite(null,'anino',fk,flip):creatureSprite(null,true), ar=art&&okImg(art.img)?art.ar:96/140, H=GT.GH*(art?art.rel:1);
+  const gm=G3.giant.material; const tx=texOf(img); if(gm.map!==tx){ gm.map=tx; gm.needsUpdate=true; } gm.rotation=S.stumble>0?Math.sin(t*9)*.25:0;
+  G3.giant.position.set(gp.x,gp.y+H/2-.3+(S.stumble>0?-1.2:Math.abs(Math.sin(t*3.3))*.4),gp.z); G3.giant.scale.set(H*ar,H,1);
+  R.render(G3.scene,R3.camera);
+  ctx.setTransform(1,0,0,1,0,0); ctx.clearRect(0,0,cv.width,cv.height);
+  if(!hid){ const o=gNearTopple(); if(o&&o.state==='up'){ const v=gPos(o.s,2.5,2.4).project(R3.camera); if(v.z<1){ const x=(v.x+1)/2*cv.width, y=(1-v.y)/2*cv.height; ctx.font=`${Math.round(34*dpr)}px ${EMOJI_FONT}`; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.globalAlpha=.6+Math.sin(t*8)*.35; ctx.fillText('👆',x,y); ctx.globalAlpha=1; } } }
+  drawOverlays(t);
+  if(S.countdown>0){ ctx.fillStyle=`rgba(0,0,0,${Math.min(.6,S.countdown*.2)})`; ctx.fillRect(0,0,cv.width,cv.height); } }
 
 /* ================= META QUEST VR (WebXR) ================= */
 const VR={supported:false,hands:{},prev:{},hud:null,hudCv:null,hudT:0,mask:null,maskFor:null,maskCache:new Map(),tint:null,blind:null,scare:null,scareT:0,scareDur:1,beam:null,beamGlow:null,gun:null,torch:null,meter:null,meterCv:null,last:0,txt:new Map()};
@@ -1421,7 +1608,7 @@ function vrInput(dt){ const ses=R3.renderer.xr.getSession&&R3.renderer.xr.getSes
   if(Math.abs(rx)>.7&&!pv.snap){ R3.rig.rotation.y-=Math.sign(rx)*Math.PI/6; pv.snap=true; } else if(Math.abs(rx)<.3) pv.snap=false;
   if(ry>.8&&!pv.back){ R3.rig.rotation.y+=Math.PI; pv.back=true; } else if(ry<.3) pv.back=false;
   const A=btn(Rg,4), B=btn(Rg,5), RT=btn(Rg,0);
-  if(S.over){ if(A&&!pv.A&&!S.net) newGame(lastMode); }
+  if(S.over){ if(A&&!pv.A&&!S.net){ if(S.mission){ const m=S.mission, nx=S.win&&MISSIONS[m.idx+1]; newHunt(nx||m); } else newGame(lastMode); } }
   else if(S.mode==='hunt'){ fireHeld=RT; if(A&&!pv.A) tryCatch(); }
   else { if(A&&!pv.A) toggleHide(); breathHeld=B; if(RT&&!pv.RT) startSearch(); }
   pv.A=A; pv.B=B; pv.RT=RT;
@@ -1447,7 +1634,7 @@ function vrHudDraw(){ const x=VR.hudCv.getContext('2d'); x.clearRect(0,0,1024,51
   const ts=$('toast'); if(ts.classList.contains('show')){ x.fillStyle='rgba(8,6,16,.75)'; rr(x,90,300,844,64,18); x.fill(); x.textAlign='center'; x.font=`800 34px "Baloo 2",${EMOJI_FONT}`; x.fillStyle='#fff'; x.fillText(ts.textContent.slice(0,52),512,333); }
   const pr=vrPrompt(); if(pr){ x.fillStyle='rgba(8,6,16,.78)'; rr(x,90,400,844,70,20); x.fill(); x.textAlign='center'; x.font=`800 34px "Baloo 2",${EMOJI_FONT}`; x.fillStyle='#ffc857'; x.fillText(pr.slice(0,56),512,436); }
   VR.hudTex.needsUpdate=true;
-  if(VR.meterCv&&S.mode==='hunt'){ const m=VR.meterCv.getContext('2d'); m.fillStyle='#0a1a12'; m.fillRect(0,0,256,160); const R=10*T, lv=S.nearGhost&&S.nearest<R?Math.ceil((1-S.nearest/R)*8):0;
+  if(VR.meterCv&&S.mode==='hunt'){ const m=VR.meterCv.getContext('2d'); m.fillStyle='#0a1a12'; m.fillRect(0,0,256,160); const R=meterR(), lv=S.nearGhost&&S.nearest<R?Math.ceil((1-S.nearest/R)*8):0;
     for(let i=0;i<8;i++){ m.fillStyle=i<lv?(i>=6?'#ff4d6d':i>=4?'#ffcf4a':'#5bf0a8'):'#173a2c'; m.fillRect(12+i*30,18,24,40); }
     m.fillStyle='#9ff5cf'; m.font='800 40px "Baloo 2",sans-serif'; m.textAlign='center'; m.textBaseline='middle'; m.fillText($('gmArrow').textContent||'—',128,112); VR.meterTex.needsUpdate=true; } }
 function vrPre(t){ const p=S.player; VR.hudT-=VR.dt||.016; if(VR.hudT<=0){ VR.hudT=.12; vrHudDraw(); }
@@ -1474,7 +1661,7 @@ function xrFrame(){ const now=performance.now(), dt=Math.min(.05,(now-VR.last)/1
   try{ if(userPaused) setPause(false);
     if(S){ vrInput(dt); if(!S.over&&!S.paused){ update(dt); if(S&&!S.over) updateHUD(dt); } if(VR.scareT>0) VR.scareT-=dt; if(S) render3D(); }
     else R3.renderer.render(R3.scene,R3.camera); }catch(e){ if(!xrFrame.w){ xrFrame.w=1; console.error(e); } } }
-async function startVR(){ if(!VR.supported||!S||R3.inXR) return; audioInit(); let ses;
+async function startVR(){ if(!VR.supported||!S||R3.inXR) return; if(S.mode==='giant'){ toast('Ang Higante isn’t in VR yet — play it on phone or PC.'); return; } audioInit(); let ses;
   try{ ses=await navigator.xr.requestSession('immersive-vr',{optionalFeatures:['local-floor']}); }catch(e){ toast('Couldn’t start VR here — open the game in the Quest Browser.'); return; }
   const R=R3.renderer; R.xr.enabled=true; R.xr.setReferenceSpaceType('local'); try{ R.xr.setFramebufferScaleFactor(.8); }catch(e){}
   vrSetup(); try{ await R.xr.setSession(ses); }catch(e){ toast('Couldn’t start VR.'); return; }
@@ -1524,7 +1711,7 @@ function renderRay(){ const t=performance.now()/1000; ctx.setTransform(1,0,0,1,0
   const tayaHidden=S.mode==='taya'&&S.countdown>0;
   for(const c of S.creatures){ const d=depth(c.x,c.y); if(d.tY>.15) sprites.push({d,img:creatureSprite(creatureFace(c),c.state==='chase'),w:.78,h:1.14,lift:Math.sin(t*5+c.wob)*.03,c}); }
   if(S.ghosts) for(const g of S.ghosts){ g.scr=null; if(g.caught) continue; const d=depth(g.x,g.y); if(d.tY>.15){ const G=GTYPES[g.type];
-    const fk=ghostFrameKey(g), art=GHOST_IMG[g.type]&&GHOST_IMG[g.type][fk], aimg=ghostArtSprite(faceFromKey(g.fk),g.type,fk,g.flip);
+    const fk=ghostFrameKey(g), art=GHOST_IMG[artType(g)]&&GHOST_IMG[artType(g)][fk], aimg=ghostArtSprite(faceFromKey(g.fk),artType(g),fk,g.flip);
     if(aimg){ const hh=1.2*G.size*art.rel; sprites.push({d,img:aimg,w:hh*art.ar,h:hh,lift:.16+Math.sin(t*2+g.wob)*.07,ghost:g}); }
     else sprites.push({d,img:ghostSprite(faceFromKey(g.fk),g.type,g.state==='snared'||g.state==='trapped'||g.state==='charge'),w:.8*G.size,h:1.02*G.size,lift:.22+Math.sin(t*2+g.wob)*.07,ghost:g}); } }
   if(S.net) for(const q of Object.values(NET.players)){ if(q.me||!q.st||q.rx==null||q.st.out) continue;
@@ -1554,7 +1741,7 @@ function renderRay(){ const t=performance.now()/1000; ctx.setTransform(1,0,0,1,0
   v.globalAlpha=1;
   ctx.imageSmoothingEnabled=false; ctx.drawImage(view,0,0,cv.width,cv.height);
   drawOverlays(t); }
-function render(){ if(S&&R3.ok){ render3D(); return; } $('gl').style.display='none'; renderRay(); }
+function render(){ if(S&&S.mode==='giant'){ if(R3.ok) renderGiant(); return; } if(S&&R3.ok){ render3D(); return; } $('gl').style.display='none'; renderRay(); }
 function drawOverlays(t){ const p=S.player, Wd=cv.width, Hd=cv.height, mn=Math.min(Wd,Hd);
   const fl=ctx.createRadialGradient(Wd/2,Hd*.52,mn*.22,Wd/2,Hd*.52,Math.max(Wd,Hd)*.72); fl.addColorStop(0,'rgba(255,220,150,.05)'); fl.addColorStop(.45,'rgba(0,0,0,0)'); fl.addColorStop(1,'rgba(0,0,0,.6)');
   ctx.fillStyle=fl; ctx.fillRect(0,0,Wd,Hd);
@@ -1582,7 +1769,7 @@ function drawHideOverlay(o,Wd,Hd,t){ const c=ctx; c.save();
   c.restore(); }
 
 let hudT=0;
-function updateHUD(dt){ hudT-=dt; if(hudT>0) return; hudT=.08; const p=S.player; if(S.mode==='hunt') return huntHUD();
+function updateHUD(dt){ hudT-=dt; if(hudT>0) return; hudT=.08; const p=S.player; if(S.mode==='giant') return giantHUD(); if(S.mode==='hunt') return huntHUD();
   $('hearts').textContent=S.role==='taya'?'👹':S.out?'👻':'❤️'.repeat(Math.max(0,S.hearts))+'🖤'.repeat(Math.max(0,(S.mode==='taya'?2:3)-S.hearts));
   let obj;
   if(S.mode==='taya'){ const hs=S.isAuth?hiders():null; let alive=0,total=0;
@@ -1623,13 +1810,13 @@ function loop(now){ if(R3.inXR){ last=now; requestAnimationFrame(loop); return; 
 const typing=()=>{ const a=document.activeElement; return a&&(a.tagName==='INPUT'||a.tagName==='TEXTAREA'); };
 window.addEventListener('keydown',e=>{ if(typing()) return; if(!$('intro').hidden){ $('intro').click(); return; } if(['Space','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.code)&&S&&!S.over) e.preventDefault();
   keys.add(e.code); if(e.repeat||!S||S.over) return;
-  if(S.mode==='hunt'){ if(e.code==='KeyE') tryCatch(); } else { if(e.code==='KeyE') toggleHide(); if(e.code==='KeyF') startSearch(); } if(e.code==='KeyQ'&&!userPaused) S.player.turn=Math.PI;
+  if(S.mode==='giant'){ if(e.code==='KeyE') gToggleHide(); if(e.code==='KeyF') gTopple(); } else if(S.mode==='hunt'){ if(e.code==='KeyE') tryCatch(); } else { if(e.code==='KeyE') toggleHide(); if(e.code==='KeyF') startSearch(); } if(e.code==='KeyQ'&&!userPaused) S.player.turn=Math.PI;
   if(e.code==='KeyP'||e.code==='Escape') setPause(!userPaused); });
 window.addEventListener('keyup',e=>keys.delete(e.code));
 window.addEventListener('blur',()=>{ keys.clear(); runHeld=breathHeld=fireHeld=mouseFire=false; joy.x=joy.y=0; });
 document.addEventListener('visibilitychange',()=>{ if(document.hidden&&S&&!S.over) setPause(true); });
 let dragging=false,lastMX=0;
-cv.addEventListener('pointerdown',e=>{ if(!S||S.over||isTouch) return; audioInit(); dragging=true; lastMX=e.clientX; if(S.mode==='hunt'&&e.button===0) mouseFire=true;
+cv.addEventListener('pointerdown',e=>{ if(!S||S.over||isTouch) return; audioInit(); if(S.mode==='giant'&&e.button===0){ if(document.pointerLockElement===cv){ const r=cv.getBoundingClientRect(); gTapAt(r.left+r.width/2,r.top+r.height/2); } else gTapAt(e.clientX,e.clientY); } dragging=true; lastMX=e.clientX; if(S.mode==='hunt'&&e.button===0) mouseFire=true;
   try{ const r=cv.requestPointerLock&&cv.requestPointerLock(); if(r&&r.catch) r.catch(()=>{}); }catch(err){} });
 window.addEventListener('pointermove',e=>{ if(isTouch||!S) return; if(document.pointerLockElement===cv) lookDX+=e.movementX*.0028; else if(dragging){ lookDX+=(e.clientX-lastMX)*.006; lastMX=e.clientX; } });
 window.addEventListener('pointerup',()=>{ dragging=false; mouseFire=false; });
@@ -1641,36 +1828,39 @@ jz.addEventListener('pointermove',e=>{ if(e.pointerId!==joyId) return; const r=j
 const joyEnd=e=>{ if(e.pointerId!==joyId) return; joyId=null; joy.x=joy.y=0; jb.style.display='none'; };
 jz.addEventListener('pointerup',joyEnd); jz.addEventListener('pointercancel',joyEnd);
 const lz=$('lookZone'); let lookId=null, lookLast=0;
-lz.addEventListener('pointerdown',e=>{ e.preventDefault(); audioInit(); lookId=e.pointerId; lz.setPointerCapture(e.pointerId); lookLast=e.clientX; $('lookHint').style.display='none'; });
+lz.addEventListener('pointerdown',e=>{ e.preventDefault(); audioInit(); lookId=e.pointerId; lz.setPointerCapture(e.pointerId); lookLast=e.clientX; lz.tap={x:e.clientX,y:e.clientY,t:performance.now()}; $('lookHint').style.display='none'; });
 lz.addEventListener('pointermove',e=>{ if(e.pointerId!==lookId) return; lookDX+=(e.clientX-lookLast)*.0075; lookLast=e.clientX; });
-const lookEnd=e=>{ if(e.pointerId===lookId) lookId=null; }; lz.addEventListener('pointerup',lookEnd); lz.addEventListener('pointercancel',lookEnd);
+const lookEnd=e=>{ if(e.pointerId===lookId){ lookId=null; const tp=lz.tap; if(tp&&e.type==='pointerup'&&performance.now()-tp.t<300&&Math.hypot(e.clientX-tp.x,e.clientY-tp.y)<14&&S&&S.mode==='giant') gTapAt(e.clientX,e.clientY); } }; lz.addEventListener('pointerup',lookEnd); lz.addEventListener('pointercancel',lookEnd);
 function holdBtn(el,set){ el.addEventListener('pointerdown',e=>{ e.preventDefault(); audioInit(); el.setPointerCapture(e.pointerId); set(true); });
   const off=()=>set(false); el.addEventListener('pointerup',off); el.addEventListener('pointercancel',off); }
 holdBtn($('bRun'),v=>runHeld=v); holdBtn($('bBreath'),v=>breathHeld=v); holdBtn($('bFire'),v=>fireHeld=v);
 $('bCatch').addEventListener('pointerdown',e=>{ e.preventDefault(); tryCatch(); });
-$('bHide').addEventListener('pointerdown',e=>{ e.preventDefault(); toggleHide(); });
-$('bSearch').addEventListener('pointerdown',e=>{ e.preventDefault(); startSearch(); });
+$('bHide').addEventListener('pointerdown',e=>{ e.preventDefault(); if(S&&S.mode==='giant') gToggleHide(); else toggleHide(); });
+$('bSearch').addEventListener('pointerdown',e=>{ e.preventDefault(); if(S&&S.mode==='giant') gTopple(); else startSearch(); });
 $('bTurn').addEventListener('pointerdown',e=>{ e.preventDefault(); if(S&&!S.over) S.player.turn=Math.PI; });
 document.addEventListener('contextmenu',e=>{ if(S&&!S.over) e.preventDefault(); });
 
 /* ================= MULTO HUNT (FPS bonus level) ================= */
-const GTYPES={multo:{label:'Multo',col:'#9ff5cf',sp:70,tough:1,size:1},lady:{label:'White Lady',col:'#e3ecff',sp:96,tough:1.3,size:1.15},anino:{label:'Anino',col:'#c3a6ff',sp:55,tough:2,size:1.35}};
+const GTYPES={multo:{label:'Multo',col:'#9ff5cf',sp:70,tough:1,size:1},lady:{label:'White Lady',col:'#e3ecff',sp:96,tough:1.3,size:1.15},anino:{label:'Anino',col:'#c3a6ff',sp:55,tough:2,size:1.35},boss:{label:'Don Anino',col:'#ff8fd8',sp:62,tough:3.2,size:2.0,art:'anino'}};
+const artType=g=>GTYPES[g.type].art||g.type;
 const HUNT_RANGE=6.5*T;
 const angDiff=(a,b)=>((a-b)%(Math.PI*2)+Math.PI*3)%(Math.PI*2)-Math.PI;
-function setHuntUI(on){ if(on&&!$('gcu').dataset.built){ $('gcu').dataset.built='1'; $('gcu').innerHTML=(ARTA.gcuIcon?`<img class="gcuImg" src="${ARTA.gcuIcon}" alt="">`:'🧪 ')+'<span id="gcuTxt"></span><br><span id="gcuDots"></span>'; } ['heatWrap','ghostMeter','gcu','bFire','bCatch'].forEach(id=>$(id).hidden=!on);
+function setHuntUI(on){ if(typeof setGiantUI==='function'&&S&&S.mode!=='giant') setGiantUI(false); if(VR.supported&&S&&S.mode!=='giant') $('vrBtn').hidden=false; if(on&&!$('gcu').dataset.built){ $('gcu').dataset.built='1'; $('gcu').innerHTML=(ARTA.gcuIcon?`<img class="gcuImg" src="${ARTA.gcuIcon}" alt="">`:'🧪 ')+'<span id="gcuTxt"></span><br><span id="gcuDots"></span>'; } ['heatWrap','ghostMeter','gcu','bFire','bCatch'].forEach(id=>$(id).hidden=!on);
   if(on){ ['noiseWrap','breathWrap','bHide','bSearch','bBreath'].forEach(id=>$(id).hidden=true); $('bRun').hidden=false; } else $('bHide').hidden=false;
   $('crosshair').classList.toggle('hunt',on); }
-function newHunt(){ audioInit(); loadStage(HUNT_STAGE); const pool=facePool(false);
-  S={mode:'hunt',net:false,isAuth:true,role:'hunter',diff:settings.diff,t:0,timeLeft:300,hearts:3,energy:3,out:false,noise:0,breath:100,holding:false,gasp:0,invuln:2,stun:0,
+function newHunt(ms){ ms=ms&&ms.ghosts?ms:null; audioInit(); loadStage(ms?ms.stage:HUNT_STAGE); const pool=facePool(false);
+  S={mode:'hunt',net:false,isAuth:true,role:'hunter',diff:settings.diff,t:0,timeLeft:ms?ms.time:300,hearts:3,energy:3+MS.gear.vest,maxEnergy:3+MS.gear.vest,mission:ms,slimeHits:0,overheats:0,out:false,noise:0,breath:100,holding:false,gasp:0,invuln:2,stun:0,
     player:{x:START.x,y:START.y,a:ST.startA,r:15,hidden:null,hidePos:null,searching:null,step:0,bob:0,turn:0},
     creatures:[],bots:[],ghosts:[],found:0,particles:[],over:false,paused:false,hbT:0,shake:0,room:null,nearest:999,nearGhost:null,
     heat:0,overheat:0,lock:null,contained:0,meterT:0,slimeT:0,firing:false,recoil:0,countdown:0,scareCool:0,capFx:null};
   const order=['multo','multo','lady','multo','lady','anino','multo','lady'];
-  SPAWNS.forEach((sp,i)=>{ S.ghosts.push({x:sp.x,y:sp.y,type:order[i%order.length],fk:pool.length?pool[i%pool.length]:'',state:'wander',path:[],snare:0,t:rnd(0,9),wob:rnd(0,6),atkT:rnd(8,14),trapT:0,fleeT:0,chT:0,caught:false,whT:rnd(3,8),scr:null}); });
+  if(ms){ const list=ghostList(ms), pts=missionSpawns(list.length); const far=pts.slice().sort((a,b)=>physDist(b,START)-physDist(a,START));
+    list.forEach((ty,i)=>{ const sp=ty==='boss'?far[0]:pts[i%pts.length]; S.ghosts.push(mkGhost(ty,sp.x+rnd(-8,8),sp.y+rnd(-8,8),pool,i)); }); }
+  else SPAWNS.forEach((sp,i)=>{ S.ghosts.push(mkGhost(order[i%order.length],sp.x,sp.y,pool,i)); });
   userPaused=false; showScreen(null); $('hud').hidden=false; $('touch').hidden=!isTouch; $('mini').hidden=!settings.mini;
-  lastMode='hunt'; spriteCache.clear(); setHuntUI(true);
-  toast('👻 8 ghosts on 2 floors — follow the ghost meter!'); banner(`${ST.emoji} ${ST.name}`); bgmForMode('hunt');
-  showIntro(ARTA.gun||(ARTA.stages||[])[4],'🏚️ Lumang Mansyon','Follow the ghost meter. Hold Fire to snare a ghost, then Catch it!'); }
+  lastMode='hunt'; spriteCache.clear(); setHuntUI(true); banner(`${ST.emoji} ${ST.name}`); bgmForMode('hunt');
+  if(ms){ toast(`📋 ${ms.title} — ${S.ghosts.length} ghosts on 2 floors`); showIntro((ARTA.stages||[])[ms.stage],`📋 ${ms.title}`,`${ms.emoji} ${ms.client}: ${ms.short}. Contain all ${S.ghosts.length} ghosts!`); }
+  else { toast('👻 8 ghosts on 2 floors — follow the ghost meter!'); showIntro(ARTA.gun||(ARTA.stages||[])[4],'🏚️ Lumang Mansyon','Follow the ghost meter. Hold Fire to snare a ghost, then Catch it!'); } }
 function ghostAlpha(g,t){ if(g.state==='snared'||g.state==='trapped') return .97; if(g.state==='charge') return .9; return .55+Math.sin(t*1.7+g.wob)*.13; }
 function ghostTry(g,dx,dy){ if(!isWallPx(g.x+dx,g.y)) g.x+=dx; if(!isWallPx(g.x,g.y+dy)) g.y+=dy; }
 function ghostFollow(g,sp,dt){ return follow(g,sp,dt); }
@@ -1692,6 +1882,9 @@ function tryCatch(){ if(!S||S.mode!=='hunt'||S.over||userPaused) return; const p
   for(const g of S.ghosts){ if(g.caught||g.state!=='trapped') continue; const d=dist(g,p); if(d>HUNT_RANGE||!los(p,g)) continue;
     if(Math.abs(angDiff(Math.atan2(g.y-p.y,g.x-p.x),aimA()))>.8) continue; if(d<bd){ bd=d; best=g; } }
   if(!best){ toast(S.ghosts.some(g=>g.state==='trapped')?'Look at the trapped ghost and get closer!':S.lock?'Keep the beam on it until it’s trapped!':'Snare a ghost with the beam first ⚡'); return; }
+  if(best.boss&&best.phase<1){ best.phase++; best.snare=0; S.lock=null; ghostFlee(best); SFX.wail(relPan(best)); vibrate([120,60,120]); S.shake=4;
+    for(let k=0;k<2;k++){ const g2=mkGhost('multo',best.x+rnd(-30,30),best.y+rnd(-30,30),facePool(false),S.ghosts.length+k); ghostFlee(g2); S.ghosts.push(g2); }
+    toast('😱 Don Anino splits apart! Trap him once more!'); return; }
   best.caught=true; best.state='caught'; S.contained++; SFX.capture(); vibrate([60,40,60]);
   S.capFx={t:.8,max:.8,x:best.scr&&best.scr.vis?best.scr.x/RW:.5,y:best.scr&&best.scr.vis?best.scr.y/RH:.45,col:GTYPES[best.type].col};
   toast(`🧪 ${GTYPES[best.type].label} contained! (${S.contained}/${S.ghosts.length})`);
@@ -1708,7 +1901,7 @@ function updGhost(g,dt){ const p=S.player, G=GTYPES[g.type]; g.t+=dt;
       g.atkT-=dt; if(g.atkT<=0){ g.atkT=rnd(7,13); const d=dist(g,p); if(d<6*T&&los(g,p)&&S.invuln<=0){ g.state='charge'; g.chT=2.6; SFX.wail(relPan(g)); } } }
   }
   g.whT-=dt; if(g.whT<=0){ g.whT=rnd(4,8); if(dist(g,p)<6*T) SFX.whisper(relPan(g)); }
-  if(g.state!=='trapped'&&S.invuln<=0&&dist(g,p)<34){ S.energy--; S.invuln=2.2; S.slimeT=1.8; S.shake=3; SFX.slime(); vibrate(140);
+  if(g.state!=='trapped'&&S.invuln<=0&&dist(g,p)<34){ S.energy--; S.slimeHits=(S.slimeHits||0)+1; S.invuln=2.2; S.slimeT=1.8; S.shake=3; SFX.slime(); vibrate(140);
     if(S.lock===g) S.lock=null; ghostFlee(g);
     if(S.energy<=0){ endHunt(false,'slimed'); return; } toast(`🟢 Slimed! ${S.energy} energy left`); }
 }
@@ -1725,13 +1918,13 @@ function updateHunt(dt){ const p=S.player;
   const wantFire=(fireHeld||keys.has('Space')||mouseFire)&&S.overheat<=0;
   if(wantFire&&!S.firing){ S.firing=true; beamOn(); } else if(!wantFire&&S.firing){ S.firing=false; beamOff(); releaseLock(); }
   if(S.overheat>0) S.overheat-=dt;
-  if(S.firing){ S.heat+=20*dt; S.recoil=Math.min(1,S.recoil+dt*4);
-    if(S.heat>=100){ S.heat=100; S.overheat=2.6; S.firing=false; beamOff(); releaseLock(); toast('🔥 Plasma gun overheated! Cooling down…'); SFX.gasp(); } }
+  if(S.firing){ S.heat+=20*dt*(1-.15*MS.gear.cool); S.recoil=Math.min(1,S.recoil+dt*4);
+    if(S.heat>=100){ S.heat=100; S.overheat=2.6; S.overheats=(S.overheats||0)+1; S.firing=false; beamOff(); releaseLock(); toast('🔥 Plasma gun overheated! Cooling down…'); SFX.gasp(); } }
   else S.heat=Math.max(0,S.heat-(S.overheat>0?38:28)*dt);
   if(S.firing){
     if(S.lock){ const g=S.lock, d=dist(g,p), a=Math.abs(angDiff(Math.atan2(g.y-p.y,g.x-p.x),aimA())); if(g.caught||g.state!=='snared'||d>HUNT_RANGE*1.2||a>.5||!los(p,g)) releaseLock(); }
     if(!S.lock){ const g=aimGhost(); if(g){ S.lock=g; g.state='snared'; g.path=[]; SFX.wail(relPan(g)); } }
-    if(S.lock){ const g=S.lock, G=GTYPES[g.type]; g.snare=Math.min(100,g.snare+(30/G.tough)*dt);
+    if(S.lock){ const g=S.lock, G=GTYPES[g.type]; g.snare=Math.min(100,g.snare+(30/G.tough)*(1+.2*MS.gear.snare)*dt);
       if(g.snare>=100){ g.state='trapped'; g.trapT=4.5; S.lock=null; toast(`🕸️ ${G.label} trapped! CATCH it now!`); SFX.chime(); vibrate(60); } }
     if(beamNodes&&AC){ try{ beamNodes.o[0].frequency.setTargetAtTime(S.lock?165:110,AC.currentTime,.08); }catch(e){} }
   }
@@ -1741,23 +1934,24 @@ function updateHunt(dt){ const p=S.player;
     const lat=(g.x-ox)*rx+(g.y-oy)*ry; if(Math.abs(g.x-ox)<T){ if(lat>.35) g.flip=false; else if(lat<-.35) g.flip=true; }
     const d=physDist(g,p); if(d<near){ near=d; nearG=g; } }
   S.nearest=near; S.nearGhost=nearG;
-  if(nearG){ const R=10*T; if(near<R){ S.meterT-=dt; if(S.meterT<=0){ const lv=1-near/R; SFX.meter(lv); S.meterT=.12+(1-lv)*1.1; } } }
+  if(nearG){ const R=meterR(); if(near<R){ S.meterT-=dt; if(S.meterT<=0){ const lv=1-near/R; SFX.meter(lv); S.meterT=.12+(1-lv)*1.1; } } }
   if(S.shake>0) S.shake=Math.max(0,S.shake-dt*6);
   const r=roomAt(p); if(r&&r!==S.room){ S.room=r; banner(r.name); }
   for(const q of S.particles) q.life-=dt; S.particles=S.particles.filter(q=>q.life>0);
 }
 function endHunt(win,why){ if(S.over) return; S.over=true; if(S.firing||beamNodes){ S.firing=false; beamOff(); } bgmStop();
   $('hud').hidden=true; $('touch').hidden=true; setHuntUI(false); try{ document.exitPointerLock&&document.exitPointerLock(); }catch(e){}
+  if(S.mission) return endMission(win,why);
   const used=Math.round(300-S.timeLeft); let emoji,title,text;
   if(win){ emoji='🧪'; title='Mansion cleared!'; text=`All ${S.ghosts.length} ghosts are locked in the containment unit — in ${fmt(used)}.`; if(best.huntBest==null||used<best.huntBest){ best.huntBest=used; text+=' New best time!'; } }
   else { emoji=why==='slimed'?'🟢':'⏰'; title=why==='slimed'?'Slimed out!':'Time’s up!'; text=`You contained ${S.contained} of ${S.ghosts.length} ghosts. ${why==='slimed'?'Back off when one turns bright — it’s about to charge.':'Follow the ghost meter’s arrow to find them faster.'}`; }
   store.set('mxtt_best',best); (win?SFX.win:SFX.lose)(); setEndArt(win?ARTA.gcu:null);
   $('endEmoji').textContent=emoji; $('endTitle').textContent=title; $('endText').textContent=text; $('againBtn').textContent='Hunt again'; $('menuBtn').textContent='Menu'; showScreen('end'); }
 function huntHUD(){ const p=S.player;
-  $('hearts').textContent='💚'.repeat(Math.max(0,S.energy))+'🖤'.repeat(Math.max(0,3-S.energy));
-  $('objective').innerHTML=`👻 Ghosts ${S.contained}/${S.ghosts.length} • ⏱ ${fmt(S.timeLeft)}`;
+  $('hearts').textContent='💚'.repeat(Math.max(0,S.energy))+'🖤'.repeat(Math.max(0,(S.maxEnergy||3)-S.energy));
+  $('objective').innerHTML=S.mission?`📋 ${escapeHtml(S.mission.short)} • 👻 ${S.contained}/${S.ghosts.length} • ⏱ ${fmt(S.timeLeft)}`:`👻 Ghosts ${S.contained}/${S.ghosts.length} • ⏱ ${fmt(S.timeLeft)}`;
   const hb=$('heatBar'); hb.style.width=S.heat+'%'; hb.style.background=S.overheat>0?'#ff3d6e':S.heat>70?'#ffb347':'#5bf0a8';
-  const R=10*T, lv=S.nearGhost&&S.nearest<R?Math.ceil((1-S.nearest/R)*8):0;
+  const R=meterR(), lv=S.nearGhost&&S.nearest<R?Math.ceil((1-S.nearest/R)*8):0;
   [...$('gmLeds').children].forEach((el,i)=>{ el.className=i<lv?(i>=6?'max':i>=4?'hot':'on'):''; });
   let arrow='— quiet'; if(S.nearGhost&&S.nearest<R){ const g=S.nearGhost, rg=regionOf(g.x), rp=regionOf(p.x);
     if(rg!==rp) arrow=rg>rp?'⏫ upstairs':'⏬ downstairs'; else { const a=angDiff(Math.atan2(g.y-p.y,g.x-p.x),p.a); arrow=Math.abs(a)<.35?'▲ ahead':Math.abs(a)>2.5?'▼ behind':a>0?'▶ right':'◀ left'; } }
@@ -1804,7 +1998,7 @@ function drawHuntFX(Wd,Hd,t){ const c=ctx, kx=Wd/RW, ky=Hd/RH, mn=Math.min(Wd,Hd
   else if(S.slimeT>0){ const a=Math.min(1,S.slimeT/1.8)*.75; c.save(); c.fillStyle=`rgba(90,220,110,${a*.3})`; c.fillRect(0,0,Wd,Hd); c.fillStyle=`rgba(120,235,120,${a})`;
     for(const [x,y,r] of SLIME){ c.beginPath(); c.arc(x*Wd,y*Hd,r*mn,0,Math.PI*2); c.fill(); c.fillRect(x*Wd-r*mn*.25,y*Hd,r*mn*.5,r*mn*(1.4+Math.sin(x*9)*.4)*(1.8-S.slimeT*.5)); } c.restore(); }
 }
-function ghostFrameKey(g){ if(g.state==='snared'||g.state==='trapped') return 'trap'; if(g.state==='flee') return 'flee'; if(g.state==='charge') return g.type==='anino'?'flee':'charge'; return 'drift'; }
+function ghostFrameKey(g){ if(g.state==='snared'||g.state==='trapped') return 'trap'; if(g.state==='flee') return 'flee'; if(g.state==='charge') return artType(g)==='anino'?'flee':'charge'; return 'drift'; }
 function ghostArtSprite(face,type,fk,flip){ const F=GHOST_IMG[type]&&GHOST_IMG[type][fk]; if(!F||!okImg(F.img)) return null;
   let m=spriteCache.get(face||'none'); if(!m){ m={}; spriteCache.set(face||'none',m); } const key='A'+type+fk+(flip?1:0); if(m[key]) return m[key];
   const im=F.img, cv=mk(im.naturalWidth,im.naturalHeight), x=cv.getContext('2d');
@@ -1893,7 +2087,7 @@ function bgmStop(){ BGM.on=false; BGM.token++; clearInterval(BGM.timer); BGM.tim
   if(BGM.pad){ BGM.pad.os.forEach(o=>{ try{ o.stop(); }catch(e){} }); BGM.pad=null; } if(BGM.rec){ try{ BGM.rec.stop(); }catch(e){} BGM.rec=null; }
   if(g&&AC){ try{ g.gain.setTargetAtTime(0,AC.currentTime,.05); setTimeout(()=>{ try{ g.disconnect(); }catch(e){} },500); }catch(e){} } }
 function gameSong(mode){ const sel=settings.bgm; if(sel==='off') return null; if(sel!=='builtin'&&bgmSlots[+sel]) return bgmSlots[+sel];
-  return PRESETS[mode==='hunt'?'hunt':mode==='taya'?'habulan':'kilabot']; }
+  return PRESETS[mode==='hunt'?'hunt':(mode==='taya'||mode==='giant')?'habulan':'kilabot']; }
 function bgmForMode(mode){ const sg=gameSong(mode); if(sg) bgmStart(sg,.26); else bgmStop(); }
 
 let seqBtns=[], stPlaying=false, lastCol=-1;
@@ -1971,6 +2165,70 @@ $('audioIn').onchange=e=>{ const file=e.target.files&&e.target.files[0]; if(!fil
     decodeRec(u).then(()=>{ studioSong.rec=u; renderRecInfo(); restartPreview(); setStatus(`Imported “${file.name.slice(0,30)}”. It loops on top of the beat.`); }).catch(()=>setStatus('Couldn’t read that audio file. Try an MP3, M4A or WAV.')); };
   fr.readAsDataURL(file); };
 
+/* ================= MULTO MISSIONS (ghost-clearing jobs) ================= */
+const MISSIONS=[
+ {id:'lola',stage:0,title:'Lola Ising’s Midnight Visitors',short:'Clear Lola’s house',client:'Lola Ising',emoji:'👵',
+  msg:'Apo, may naglalaro sa bahay tuwing hatinggabi. Doors open by themselves and the rocking chair won’t stop. Please clear them before the grandkids wake up.',
+  thanks:'Salamat, apo! I can finally sleep.',ghosts:{multo:5},time:240,par:150,bonus:['noSlime'],pay:200},
+ {id:'school',stage:1,title:'Night Class',short:'Clear the school',client:'Principal Reyes',emoji:'🧑‍🏫',
+  msg:'The janitor says chairs move by themselves in the Grade 3 room, and someone in white keeps walking the upper hallway. Classes start at 7 — clear the building tonight.',
+  thanks:'Excellent work. Class dismissed — for the ghosts.',ghosts:{multo:4,lady:2},time:270,par:200,bonus:['noOverheat'],pay:300},
+ {id:'market',stage:2,title:'Palengke After Hours',short:'Clear the market',client:'Aling Nena, fish vendor',emoji:'🐟',
+  msg:'My ice chests keep opening at night, and something giggles in the bodega upstairs. The shadows near the karnehan are the worst. Please — opening is at 4 AM!',
+  thanks:'Libre ka ng bangus anytime!',ghosts:{multo:4,lady:1,anino:2},time:300,par:230,bonus:['noSlime'],pay:400},
+ {id:'cemetery',stage:3,title:'Undas Overtime',short:'Clear the cemetery',client:'Mang Berto, caretaker',emoji:'🕯️',
+  msg:'Too many restless spirits this Undas. White Ladies by the balete, and something big in the choir loft. Families arrive at dawn with flowers — help them rest.',
+  thanks:'Tahimik na ulit ang sementeryo. Maraming salamat.',ghosts:{lady:3,multo:3,anino:1},time:300,par:240,bonus:['noOverheat'],pay:550},
+ {id:'mansion',stage:4,title:'The Master of Lumang Mansyon',short:'Contain Don Anino',client:'Heritage Society',emoji:'🏚️',
+  msg:'Don Anino, a huge shadow spirit, rules the old mansion with his servants. He splits apart when trapped — trap him twice to contain him for good.',
+  thanks:'The mansion is safe for visitors again. You’re legends!',ghosts:{multo:3,lady:2,boss:1},time:360,par:300,bonus:['noSlime'],pay:900}];
+MISSIONS.forEach((m,i)=>m.idx=i);
+const GEAR={cool:{label:'Cooling Coils',icon:'❄️',desc:'Plasma gun heats up 15% slower per level',max:3},
+  snare:{label:'Snare Booster',icon:'⚡',desc:'Snare ghosts 20% faster per level',max:3},
+  vest:{label:'Spirit Vest',icon:'🦺',desc:'+1 energy against slime per level',max:2},
+  meter:{label:'Long-Range Meter',icon:'📡',desc:'Ghost meter senses 3 tiles farther per level',max:2}};
+const GEAR_COST=[300,700,1500];
+let MS=store.get('mxtt_missions',{}); MS=Object.assign({cleared:{},cash:0},MS); MS.gear=Object.assign({cool:0,snare:0,vest:0,meter:0},MS.gear||{});
+const saveMS=()=>store.set('mxtt_missions',MS);
+const meterR=()=>(10+3*MS.gear.meter)*T;
+const missionUnlocked=i=>i===0||!!MS.cleared[MISSIONS[i-1].id];
+const ghostList=m=>{ const out=[]; for(const k in m.ghosts) for(let i=0;i<m.ghosts[k];i++) out.push(k); return out; };
+const ghostSummary=m=>Object.entries(m.ghosts).map(([k,n])=>`${n}× ${GTYPES[k].label}`).join(', ');
+const bonusText=b=>b==='noSlime'?'Don’t get slimed':b==='noOverheat'?'Never overheat the gun':b;
+function renderMissions(){ $('msCash').textContent='₱'+MS.cash.toLocaleString('en-PH'); const box=$('missionList'); box.textContent='';
+  MISSIONS.forEach((m,i)=>{ const open=missionUnlocked(i), rec=MS.cleared[m.id], d=document.createElement('div'); d.className='mcard'+(open?'':' locked');
+    const im=document.createElement('img'); im.className='mthumb'; im.alt=''; const src=(ARTA.stages||[])[m.stage]; if(src) im.src=src; else im.hidden=true;
+    const info=document.createElement('div'); info.className='minfo'; const h=document.createElement('b'); h.textContent=`${i+1}. ${m.title}`;
+    const sub=document.createElement('div'); sub.className='muted'; sub.textContent=open?`${m.emoji} ${m.client} • ${ghostSummary(m)}`:'🔒 Clear the previous mission to unlock';
+    const st=document.createElement('div'); st.className='mstars'; st.textContent=rec?('⭐'.repeat(rec.stars)+'☆'.repeat(3-rec.stars)+`  best ${fmt(rec.best)}`):open?`💰 ₱${m.pay}+`:'';
+    info.append(h,sub,st); d.append(im,info); if(open){ d.tabIndex=0; d.setAttribute('role','button'); d.onclick=()=>openBrief(i); d.onkeydown=e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); openBrief(i); } }; } box.appendChild(d); });
+  const g=$('gearList'); g.textContent='';
+  for(const k in GEAR){ const G=GEAR[k], lv=MS.gear[k], d=document.createElement('div'); d.className='slot'; const info=document.createElement('div'); info.className='info';
+    const b=document.createElement('b'); b.textContent=`${G.icon} ${G.label}  ${'●'.repeat(lv)}${'○'.repeat(G.max-lv)}`; const s=document.createElement('div'); s.className='muted'; s.style.fontSize='14px'; s.textContent=G.desc;
+    const acts=document.createElement('div'); acts.className='acts'; const bt=document.createElement('button'); bt.className='mini on';
+    if(lv>=G.max){ bt.textContent='Maxed'; bt.disabled=true; } else { const c=GEAR_COST[lv]; bt.textContent=`Buy ₱${c}`; bt.disabled=MS.cash<c; bt.onclick=()=>{ if(MS.cash<c) return; MS.cash-=c; MS.gear[k]++; saveMS(); SFX.chime(); renderMissions(); }; }
+    acts.appendChild(bt); info.append(b,s,acts); d.appendChild(info); g.appendChild(d); } }
+let briefIdx=0;
+function openBrief(i){ briefIdx=i; const m=MISSIONS[i], src=(ARTA.stages||[])[m.stage], im=$('briefArt'); if(src){ im.src=src; im.alt=`${STAGES[m.stage].name} at night`; im.hidden=false; } else im.hidden=true;
+  $('briefTitle').textContent=`📋 ${m.title}`; $('briefClient').textContent=`${m.emoji} Client: ${m.client} • ${STAGES[m.stage].emoji} ${STAGES[m.stage].name}`; $('briefMsg').textContent=`“${m.msg}”`;
+  const o=$('briefObj'); o.textContent=''; const rows=[`🎯 Contain all ghosts: ${ghostSummary(m)}`,`⏱ Time limit: ${fmt(m.time)}`,...m.bonus.map(b=>`⭐ Bonus: ${bonusText(b)}`),`⭐ Bonus: finish within ${fmt(m.par)}`,`💰 Pay: ₱${m.pay} + ₱100 per star`];
+  rows.forEach(t=>{ const p=document.createElement('p'); p.style.margin='4px 0'; p.textContent=t; o.appendChild(p); }); showScreen('brief'); }
+function mkGhost(type,x,y,pool,i){ return {x,y,type,fk:pool.length?pool[i%pool.length]:'',state:'wander',path:[],snare:0,t:rnd(0,9),wob:rnd(0,6),atkT:type==='boss'?rnd(5,9):rnd(8,14),trapT:0,fleeT:0,chT:0,caught:false,whT:rnd(3,8),scr:null,boss:type==='boss',phase:0}; }
+function missionSpawns(n){ const pts=SPAWNS.slice().sort(()=>Math.random()-.5); let tries=0; while(pts.length<n&&tries++<400){ const f=randomWallFloor(); if(physDist(f,START)>7*T) pts.push(f); } return pts.slice(0,n); }
+function endMission(win,why){ const m=S.mission, used=Math.round(m.time-S.timeLeft); let emoji,title,text; S.win=win;
+  if(win){ let stars=1; const bon=[];
+    for(const b of m.bonus){ const ok=b==='noSlime'?S.slimeHits===0:S.overheats===0; bon.push((ok?'✔ ':'✘ ')+bonusText(b)); if(ok) stars++; }
+    const fast=used<=m.par; bon.push((fast?'✔ ':'✘ ')+`Done within ${fmt(m.par)}`); if(fast) stars++; stars=Math.min(3,stars);
+    const prev=MS.cleared[m.id], first=!prev, pay=Math.round((m.pay+stars*100)*(first?1:.4)); MS.cash+=pay;
+    MS.cleared[m.id]={stars:Math.max(stars,prev?prev.stars:0),best:prev&&prev.best!=null?Math.min(prev.best,used):used}; saveMS();
+    emoji='⭐'.repeat(stars)+'☆'.repeat(3-stars); title='Mission complete!';
+    text=`${m.client}: “${m.thanks}”  •  Cleared in ${fmt(used)}  •  ${bon.join('  •  ')}  •  💰 +₱${pay}${first?'':' (replay pay)'}`;
+    if(m.idx===MISSIONS.length-1&&first) text+='  •  🏆 All missions cleared — the agency is famous!'; }
+  else { emoji=why==='slimed'?'🟢':'⏰'; title='Mission failed'; text=`You contained ${S.contained} of ${S.ghosts.length} ghosts. ${why==='slimed'?'Back off when a ghost glows bright — it’s about to charge. A Spirit Vest helps.':'Follow the ghost meter’s arrow — and check upstairs!'}`; }
+  store.set('mxtt_best',best); (win?SFX.win:SFX.lose)(); setEndArt(win?ARTA.gcu:null);
+  const nx=win&&MISSIONS[m.idx+1];
+  $('endEmoji').textContent=emoji; $('endTitle').textContent=title; $('endText').textContent=text; $('againBtn').textContent=nx?'Next mission ▶':'Retry mission'; $('menuBtn').textContent='Mission board'; showScreen('end'); }
+
 /* ================= ART PROMPTS ================= */
 const ART_STYLE='Style: teen horror game art, eerie and atmospheric, semi-realistic stylized look with painterly textures, Filipino setting at night, cold moonlight cut by a single warm flashlight beam, deep shadows and drifting fog, desaturated blues and greens with sickly yellow and dull red accents, dread built from lighting, silhouettes and things half-seen in the dark rather than violence.';
 const ART_NEG='Avoid: blood, gore, wounds, injuries, body horror, dismemberment, weapons, text, watermarks.';
@@ -2003,6 +2261,11 @@ ART.push(
  {g:'Multo Hunt (FPS)',t:'Ghost — Anino',f:'tt_hunt_ghost-anino_sheet.png',p:'Sprite sheet of Anino, a big shadow ghost: a looming mass of violet-black smoke with two glowing lilac eye-lights and a round face area for a photo, slow and heavy, poses floating, straining against a crackling energy net, shrinking into a containment box, plain dark background. '},
  {g:'Multo Hunt (FPS)',t:'Beam, net and slime FX',f:'tt_hunt_fx-beam-net-slime.png',p:'Game VFX sheet: a jagged cyan-green plasma beam, a crackling energy net wrapped around a ghost-shaped silhouette, a swirl of light being pulled into a small box, and glowing green ghost-slime splats for the screen edges, on a black background for additive blending. '},
  {g:'Multo Hunt (FPS)',t:'Lumang Mansyon',f:'tt_stage_lumang-mansyon_1920x1080.png',p:'Game environment concept: an abandoned Spanish-era Filipino mansion at night — a grand foyer with a curved staircase, a dusty ballroom with a grand piano and grandfather clock, a library with towering shelves, a long dining hall with a cold fireplace, a master bedroom with a cracked mirror, and an overgrown courtyard fountain under the moon, faint ghost-light drifting through doorways, wide shot. '},
+ {g:'Multo Missions',t:'Agency van',f:'tt_mission_agency-van.png',p:'A beat-up Filipino multicab van converted into a ghost-hunting agency vehicle, hand-painted logo of a ghost inside a “no” circle with the words “Bantay-Multo”, roof rack with antennas and a spotlight, green glowing gear in the back, parked on a misty barangay street at night, three-quarter view. '},
+ {g:'Multo Missions',t:'Mission board',f:'tt_mission_board_1080x1920.png',p:'A cork mission board in a cramped agency office at night: pinned job cards with polaroid photos of a house, a school, a wet market, a cemetery and a mansion, red string connecting them, a peso coin jar, a flickering desk lamp, portrait 9:16. '},
+ {g:'Multo Missions',t:'Boss — Don Anino',f:'tt_mission_boss-don-anino_sheet.png',p:'Boss character sheet of Don Anino, a towering shadow spirit wearing a tattered Spanish-era barong and a wide hat made of smoke, glowing pink eyes, a round face area for a photo face, poses: looming, splitting into two smaller shadows, straining in a crackling energy net, plain dark background. '},
+ {g:'Ang Higante',t:'The giant',f:'tt_giant_higante_sheet.png',p:'Character sheet of Ang Higante, a towering giant made of shadow and old roots, ten times the height of a person, hunched to fit inside a stone tower, long arms dragging, glowing ember eyes, sniffing the air, poses: stomping, reaching, tripping over a cart, plain dark background. '},
+ {g:'Ang Higante',t:'Spiral tower',f:'tt_giant_spiral-tower_1920x1080.png',p:'Game environment concept: the inside of a huge old Filipino stone tower with a wide spiral ramp winding up around an open central well, lanterns on the walls, crates, barrels and bamboo scaffolding along the ramp, a tiny figure running upward with a flashlight while an enormous shadow giant climbs behind, moonlit doorway at the very top, dramatic low angle. '},
  {g:'Sound studio',t:'Sound studio screen',f:'tt_ui_sound-studio_1080x1920.png',p:'Mobile app screen for a spooky music maker: a glowing step-sequencer grid of 16 columns with rows for notes and drums, a big round red record button, a waveform of a voice recording, a tempo slider and three save slots, dark purple panels with amber highlights, portrait 9:16. '},
  {g:'Sound studio',t:'Soundtrack cover',f:'tt_audio_soundtrack-cover_1024.png',p:'Square soundtrack cover for the game: an old cassette tape lying on a wooden floor lit by a flashlight beam, a faint ghostly face reflected in the tape window, a blank hand-written label, moody purple and amber tones, no text. '}
 );
@@ -2034,7 +2297,7 @@ $('copyAll').onclick=async()=>flashBtn($('copyAll'),await copyText(ART.map(a=>`$
 function toastMenu(msg){ toast(msg); }
 
 /* ================= SCREENS ================= */
-function showScreen(id){ ['menu','faces','howto','pause','end','lan','art','studio'].forEach(s=>$(s).hidden=s!==id);
+function showScreen(id){ ['menu','faces','howto','pause','end','lan','art','studio','missions','brief'].forEach(s=>$(s).hidden=s!==id); if(id==='missions') renderMissions();
   if(id!=='studio'&&(stPlaying||REC.mr)){ if(REC.mr){ try{ REC.mr.stop(); }catch(e){} } stStop(); }
   if(id==='menu') renderMenu(); if(id==='lan') renderLan(); if(id==='art') renderArt(); if(id==='studio') renderStudio();
   if(id!=='lan'&&HAS_LAN&&!NET.on){ try{ Android.stopDiscovery(); }catch(e){} } }
@@ -2045,18 +2308,19 @@ function renderMenu(){ if(!STAGES[settings.stage]||STAGES[settings.stage].hunt) 
   renderChips('diffChips',DIFF,settings.diff,k=>{settings.diff=k;saveSettings();renderMenu();});
   renderChips('scareChips',SCARE,settings.scare,k=>{settings.scare=k;saveSettings();renderMenu(); if(k!=='off'){ audioInit(); k==='max'?SFX.scream(false):SFX.boo(); }});
   renderMenuFaces(); const bits=[]; if(best.surviveWins) bits.push(`🌅 Nights survived: ${best.surviveWins}`); if(best.seekBest!==null) bits.push(`🏆 Fastest find-all: ${fmt(best.seekBest)}`);
+  if(best.giantBest!=null) bits.push(`🗼 Fastest tower escape: ${fmt(best.giantBest)}`);
   if(best.huntBest!=null) bits.push(`👻 Fastest mansion clear: ${fmt(best.huntBest)}`);
   const bg={off:'🔇 Off',builtin:'🎵 Built-in'}; bgmSlots.forEach((s,i)=>{ if(s) bg[String(i)]=`🎛 ${s.name}`; }); if(!bg[settings.bgm]) settings.bgm='builtin';
   renderChips('bgmChips',bg,settings.bgm,k=>{ settings.bgm=k; saveSettings(); renderMenu(); });
   $('bestLine').textContent=bits.join('   '); }
 function goMenu(){ if(S&&S.firing) beamOff(); bgmStop(); S=null; userPaused=false; $('hud').hidden=true; $('touch').hidden=true; showScreen('menu'); }
 document.querySelectorAll('[data-go]').forEach(b=>b.addEventListener('click',()=>{ audioInit(); showScreen(b.dataset.go); }));
-$('playSurvive').onclick=()=>newGame('survive'); $('playSeek').onclick=()=>newGame('seek'); $('playHunt').onclick=()=>newGame('hunt');
+$('playGiant').onclick=()=>newGame('giant'); $('briefStart').onclick=()=>newHunt(MISSIONS[briefIdx]); $('playSurvive').onclick=()=>newGame('survive'); $('playSeek').onclick=()=>newGame('seek'); $('playHunt').onclick=()=>newGame('hunt');
 $('pauseBtn').onclick=()=>setPause(true); $('resumeBtn').onclick=()=>setPause(false);
 $('mapBtn').onclick=()=>{ settings.mini=!settings.mini; saveSettings(); $('mini').hidden=!settings.mini; };
 $('quitBtn').onclick=()=>{ if(S&&S.net){ leaveNet(); } goMenu(); };
-$('againBtn').onclick=()=>{ if(S&&S.net&&NET.on){ S=null; $('hud').hidden=true; $('touch').hidden=true; showScreen('lan'); } else if(S&&S.net){ goMenu(); } else newGame(lastMode); };
-$('menuBtn').onclick=()=>{ if(S&&S.net) leaveNet(); goMenu(); };
+$('againBtn').onclick=()=>{ if(S&&S.mission){ const m=S.mission, nx=S.win&&MISSIONS[m.idx+1]; goMenu(); openBrief(nx?m.idx+1:m.idx); return; } if(S&&S.net&&NET.on){ S=null; $('hud').hidden=true; $('touch').hidden=true; showScreen('lan'); } else if(S&&S.net){ goMenu(); } else newGame(lastMode); };
+$('menuBtn').onclick=()=>{ if(S&&S.mission){ goMenu(); showScreen('missions'); return; } if(S&&S.net) leaveNet(); goMenu(); };
 $('hostBtn').onclick=hostGame;
 $('joinIpBtn').onclick=()=>joinGame($('ipIn').value);
 $('startMpBtn').onclick=hostStart;
