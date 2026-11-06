@@ -222,6 +222,8 @@ input[type=range]{border:0;background:none;padding:0;accent-color:var(--lamp)}
 .qrbox canvas{width:200px;height:200px;border-radius:12px;background:#fff;image-rendering:pixelated}
 .qrbox code{font-size:12px;word-break:break-all;color:var(--muted)}
 #getapp p{margin:5px 0;line-height:1.4}
+#batWrap.off .bar{opacity:.45}
+#batWrap[hidden],#bLight[hidden],#navFloorBtn[hidden]{display:none!important}
 @media (prefers-reduced-motion:reduce){ #jumpscare canvas{animation:none!important} #jsFlash{animation:none!important} }
 </style>
 </head>
@@ -236,6 +238,7 @@ input[type=range]{border:0;background:none;padding:0;accent-color:var(--lamp)}
         <div id="hearts"></div>
         <div class="meters">
           <div class="meter" id="noiseWrap"><span>Noise</span><div class="bar"><i id="noiseBar"></i></div></div>
+          <div class="meter" id="batWrap" hidden><span>🔦</span><div class="bar"><i id="batBar" style="background:#5bf0a8"></i></div></div>
           <div class="meter" id="breathWrap" hidden><span>Breath</span><div class="bar"><i id="breathBar" style="background:#6ec6ff"></i></div></div>
           <div class="meter" id="staminaWrap" hidden><span>Stamina</span><div class="bar"><i id="staminaBar" style="background:#6ec6ff"></i></div></div>
           <div class="meter" id="fearWrap" hidden><span>Fear</span><div class="bar"><i id="fearBar" style="background:#ff3d6e"></i></div></div>
@@ -245,7 +248,7 @@ input[type=range]{border:0;background:none;padding:0;accent-color:var(--lamp)}
       </div>
       <div id="objective"></div>
       <div class="hudBtns">
-        <div class="row2"><button class="hb" id="camBtn" aria-label="Switch first or third person view">🎥</button><button class="hb" id="vrBtn" aria-label="Enter VR" hidden>🥽</button><button class="hb" id="mapBtn" aria-label="Toggle map">🗺</button><button class="hb" id="pauseBtn" aria-label="Pause">⏸</button></div>
+        <div class="row2"><button class="hb" id="navFloorBtn" aria-label="Switch map floor" hidden>👣</button><button class="hb" id="camBtn" aria-label="Switch first or third person view">🎥</button><button class="hb" id="vrBtn" aria-label="Enter VR" hidden>🥽</button><button class="hb" id="mapBtn" aria-label="Toggle map">🗺</button><button class="hb" id="pauseBtn" aria-label="Pause">⏸</button></div>
         <canvas id="mini" width="264" height="190"></canvas>
         <div id="gcu" hidden></div>
       </div>
@@ -261,6 +264,7 @@ input[type=range]{border:0;background:none;padding:0;accent-color:var(--lamp)}
     <div id="lookZone"><div class="zhint" id="lookHint" style="left:20px;top:40%">Swipe to look around</div></div>
     <div id="btns">
       <button class="tbtn sm" id="bTurn"><span class="em">↩️</span>Turn</button>
+      <button class="tbtn sm" id="bLight" hidden><span class="em">🔦</span>Light</button>
       <button class="tbtn" id="bSearch" hidden><span class="em">🔎</span>Search</button>
       <button class="tbtn" id="bBreath" hidden><span class="em">🤐</span>Hold breath</button>
       <button class="tbtn" id="bCatch" hidden><span class="em">🧪</span>Catch</button>
@@ -287,6 +291,7 @@ input[type=range]{border:0;background:none;padding:0;accent-color:var(--lamp)}
       <button class="btn" data-go="faces">📸 Monster faces<small>Record your own faces for the monsters to wear</small></button>
       <button class="btn" data-go="studio">🎛 Sound studio<small>Make your own background music — beats, melodies and your own voice</small></button>
       <button class="btn" data-go="art">🎨 Art prompts<small>Copy-ready image prompts for the game’s art and designs</small></button>
+      <button class="btn" id="playGens">⚡ Ilaw — Hotel Esperanza<small>Open doors, find batteries and power 10 generators. Co-op with a Navigator over Wi-Fi!</small></button>
       <button class="btn" data-go="getapp">📲 Get the game<small>QR codes and steps to install on Android or play on Meta Quest</small></button>
       <button class="btn" data-go="howto">❓ How to play</button>
       <div class="setting"><b>Stage</b><div class="chips" id="stageChips"></div></div>
@@ -320,7 +325,7 @@ input[type=range]{border:0;background:none;padding:0;accent-color:var(--lamp)}
         <div id="hostCtl">
           <div class="setting"><b>Stage</b><div class="chips" id="lStage"></div></div>
           <div class="setting"><b>Mode</b><div class="chips" id="lMode"></div></div>
-          <div class="setting" id="lTayaWrap"><b>Who is Taya?</b><div class="chips" id="lTaya"></div></div>
+          <div class="setting" id="lTayaWrap"><b id="lTayaLbl">Who is Taya?</b><div class="chips" id="lTaya"></div></div>
           <div class="setting" id="lAiWrap"><b>Helper monsters</b><div class="chips" id="lAi"></div></div>
           <div class="setting"><b>Difficulty</b><div class="chips" id="lDiff"></div></div>
           <button class="btn primary c" id="startMpBtn">▶ Start game</button>
@@ -444,6 +449,7 @@ input[type=range]{border:0;background:none;padding:0;accent-color:var(--lamp)}
       <p>🥽 <b>Meta Quest VR:</b> open the game in the Quest Browser, start a game, then tap 🥽. Left stick walks where you look, right stick snap-turns (pull down to turn around), left trigger runs. Your right hand holds the flashlight. Ⓐ hides, Ⓑ holds your breath, the right trigger searches. In Multo Hunt the right hand becomes the plasma gun (trigger fires, Ⓐ catches) and your left hand holds the ghost meter.</p>
       <p>📋 <b>Multo Missions</b>: take ghost-clearing jobs from clients — Lola Ising’s house, a haunted school, the palengke, the cemetery on Undas, and finally the mansion of Don Anino, a boss who splits apart when trapped. Earn ⭐ for bonus goals and ₱ to buy agency gear: Cooling Coils, Snare Booster, Spirit Vest and a Long-Range Meter.</p>
       <p>🗼 <b>Ang Higante</b>: a giant ten times your size chases you up a spiral tower. Running drains stamina. Tap (or click / press F) crates, barrels, shelves, carts and scaffolding to knock them over behind you — he trips on them. Hide in closets, drums and jars to catch your breath, but your <b>fear meter</b> rises — faster when he’s close. When it fills, he smells you. Reach the moonlit door at the top to escape.</p>
+      <p>⚡ In <b>Ilaw — Hotel Esperanza</b>, open and close doors, grab batteries from chests to keep your flashlight going, and power all 10 generators before escaping through the lobby EXIT. The skeleton opens doors, peeks under beds and opens closets — hold your breath when it looks! In Wi-Fi co-op, one player is the <b>🗺 Navigator</b> with the full map. They see every generator, see the skeleton when it’s near their partner, hear its footsteps, and can tap the map to ping a spot.</p>
       <p>🎥 Tap <b>🎥</b> (or press <kbd>V</kbd>) any time to switch between first-person and third-person view. In third person you see your character run, and in Multo Hunt the beam fires from their plasma gun.</p>
       <p>🎛 In the <b>Sound studio</b>, tap a beat, record your voice on top, save it, then choose it under <b>Game music</b>.</p>
       <p>📶 <b>Wi-Fi games</b> (Android app): hide together from the monsters, hunt the kids as a team, or play <b>Taya</b> — one player is the monster wearing their own face. The Taya counts to 10 first, then hunts. Taya sees 🔊 when a hider is loud and can search hiding spots. Caught hiders become ghosts 👻 and can keep watching.</p>
@@ -2823,7 +2829,7 @@ const DIFF={
   hard:{label:'Hard',count:3,mul:1.12,sight:340,light:225}
 };
 const SCARE={off:'Off',fun:'Fun',max:'Max 😱'};
-const MODES={survive:'🫣 Tago (team)',seek:'🔎 Hanap (team)',taya:'💀 Taya'};
+const MODES={survive:'🫣 Tago (team)',seek:'🔎 Hanap (team)',taya:'💀 Taya',gens:'⚡ Ilaw (co-op)'};
 
 /* ================= AUDIO ================= */
 let AC=null,master=null,noiseBuf=null;
@@ -2848,6 +2854,11 @@ const SFX={
   giggle(pan,v){ for(let i=0;i<4;i++) tone(950+(i%2?220:0)+Math.random()*80,.07,'triangle',(v||.09),null,i*.09,pan) },
   chime(){ [523,659,784,1047].forEach((f,i)=>tone(f,.28,'triangle',.16,null,i*.08)) },
   rustle(){ nz(.25,.13,2600,.7,'highpass') },
+  door(open,v,pan){ v=v==null?.2:v; tone(open?180:240,.5,'sawtooth',v*.25,open?120:300,0,pan); nz(.35,v*.4,900,2,'bandpass',0,null,pan); if(!open) tone(70,.12,'sine',v,40,.35,pan); },
+  bone(v,pan){ tone(620+Math.random()*180,.04,'square',v*.35,300,0,pan); nz(.03,v*.5,3200,3,'bandpass',.03,null,pan); },
+  wrench(){ tone(1400+Math.random()*300,.05,'square',.06,900); nz(.06,.08,2400,2,'bandpass') },
+  power(){ tone(110,.9,'sawtooth',.12,440); tone(220,.9,'triangle',.1,880,.1); nz(.5,.08,600,1) },
+  ping(){ tone(1320,.18,'sine',.16,null); tone(1760,.22,'sine',.12,null,.12) },
   gasp(){ nz(.45,.28,1300,1,'bandpass',0,500) },
   meow(){ tone(720,.38,'sawtooth',.12,440); tone(1440,.38,'sine',.05,880) },
   rooster(){ [0,.15,.3].forEach((d,i)=>tone(600+i*150,.18,'square',.07,900+i*100,d)) },
@@ -3060,6 +3071,51 @@ STAGES.push({ name:'Lumang Mansyon', emoji:'🏚️', hunt:true, W:36, H:26, sta
     O('Fountain','⛲',16,5,3,3,'#90a4ae'), O('Acacia Tree','🌳',14,1,2,2,'#245e27'), O('Bushes','🌿',20,10,2,1,'#2f7a34'), O('Statue','🗿',21,2,1,1,'#9e9e9e'),
     O('Bed','🛏️',30,2,3,2,'#6a3d5c'), O('Wardrobe','🚪',24,1,2,1,'#5d4037'), O('Mirror','🪞',34,7,1,1,'#b0bec5'), O('Dresser','🗄️',27,10,2,1,'#6d4c41')] });
 const HUNT_STAGE=STAGES.findIndex(s=>s.hunt);
+STAGES.push({ name:'Hotel Esperanza', emoji:'🏨', gens:true, W:36, H:26, start:[5,21], startA:-Math.PI/2,
+   spawns:[[32,4],[24,22]], doors:[[4,11],[13,11],[22,11],[30,11],[5,14],[15,14],[23,14],[31,14]],
+   walls(){ hwall(11,1,34,[4,13,22,30]); hwall(14,1,34,[5,15,23,31]); vwall(9,1,10,[]); vwall(18,1,10,[]); vwall(26,1,10,[]); vwall(11,15,24,[]); vwall(19,15,24,[]); vwall(28,15,24,[]); },
+   rooms:[
+    {name:'Kusina',x0:1,y0:1,x1:8,y1:10,tex:'tiles',floor:[130,122,108],ceil:'#22201d'},
+    {name:'Dining Hall',x0:10,y0:1,x1:17,y1:10,tex:'stripes',floor:[120,74,60],ceil:'#2a1a18'},
+    {name:'Manager’s Office',x0:19,y0:1,x1:25,y1:10,tex:'wood',floor:[100,80,60],ceil:'#201a14'},
+    {name:'Storage',x0:27,y0:1,x1:34,y1:10,tex:'blocks',floor:[90,90,96],ceil:'#1c1c20'},
+    {name:'Hallway',x0:1,y0:12,x1:34,y1:13,tex:'plaster',floor:[104,92,80],ceil:'#1e1a18'},
+    {name:'Lobby',x0:1,y0:15,x1:10,y1:24,tex:'plaster',floor:[124,104,84],ceil:'#231d18'},
+    {name:'Laundry',x0:12,y0:15,x1:18,y1:24,tex:'tiles',floor:[110,120,124],ceil:'#1c2024'},
+    {name:'Lounge',x0:20,y0:15,x1:27,y1:24,tex:'stripes',floor:[110,70,96],ceil:'#26182a'},
+    {name:'Generator Room',x0:29,y0:15,x1:34,y1:24,tex:'blocks',floor:[80,84,70],ceil:'#1a1c16'}],
+   objs:[
+    O('Generator','⚡',2,2,1,1,'#55705a'), O('Supply Chest','📦',1,9,1,1,'#8d6e4c'), O('Cabinet','🗄️',7,1,1,1,'#7b5e43','inside'), O('Kitchen Table','🍽️',3,5,2,2,'#a1724e'), O('Ref','🧊',8,5,1,2,'#cfd8dc'),
+    O('Supply Chest','📦',15,1,1,1,'#8d6e4c'), O('Long Dining Table','🍽️',11,4,3,2,'#a1724e'), O('Cabinet','🗄️',10,9,1,1,'#7b5e43','inside'), O('Wardrobe','🚪',12,1,2,1,'#5d4037','inside'),
+    O('Generator','⚡',24,2,1,1,'#55705a'), O('Office Desk','🗃️',20,3,2,1,'#7b5e43','under'), O('Cabinet','🗄️',25,9,1,1,'#7b5e43','inside'), O('Supply Chest','📦',19,9,1,1,'#8d6e4c'),
+    O('Lockers','🗄️',27,1,2,1,'#607d8b','inside'), O('Crates','📦',29,6,2,2,'#c8a26b'), O('Supply Chest','📦',33,9,1,1,'#8d6e4c'),
+    O('Sofa','🛋️',2,17,3,1,'#8e44ad','behind'), O('Front Desk','🛎️',7,22,3,1,'#6d4c41'), O('Supply Chest','📦',9,16,1,1,'#8d6e4c'), O('Grandfather Clock','🕰️',1,24,1,1,'#6d4c41'),
+    O('Generator','⚡',13,23,1,1,'#55705a'), O('Washers','🧺',17,16,1,2,'#cfd8dc'), O('Closet','🚪',12,16,1,1,'#8a5a3b','inside'), O('Supply Chest','📦',18,23,1,1,'#8d6e4c'),
+    O('Generator','⚡',26,23,1,1,'#55705a'), O('Sofa','🛋️',21,20,3,1,'#8e44ad','behind'), O('Piano','🎹',24,17,2,1,'#2b2b2b'), O('Supply Chest','📦',20,23,1,1,'#8d6e4c'),
+    O('Generator','⚡',33,22,1,1,'#55705a'), O('Lockers','🗄️',33,16,2,1,'#607d8b','inside'), O('Supply Chest','📦',29,23,1,1,'#8d6e4c')],
+   up:{ walls(){ hwall(11,1,34,[4,13,22,30]); hwall(14,1,34,[5,15,23,31]); vwall(9,1,10,[]); vwall(18,1,10,[]); vwall(26,1,10,[]); vwall(11,15,24,[]); vwall(19,15,24,[]); vwall(28,15,24,[]); },
+    doors:[[4,11],[13,11],[22,11],[30,11],[5,14],[15,14],[23,14],[31,14]], stairs:[{x:17,y:8,dir:'n',len:3}], spawns:[[23,19],[6,5]],
+    rooms:[
+     {name:'Room 201',x0:1,y0:1,x1:8,y1:10,tex:'stripes',floor:[110,70,60],ceil:'#22161a'},
+     {name:'Room 202',x0:10,y0:1,x1:17,y1:10,tex:'wood',floor:[104,84,62],ceil:'#211c18'},
+     {name:'Room 203',x0:19,y0:1,x1:25,y1:10,tex:'stars',floor:[70,82,120],ceil:'#1b1d36'},
+     {name:'Room 204',x0:27,y0:1,x1:34,y1:10,tex:'stripes',floor:[120,74,112],ceil:'#2a1a28'},
+     {name:'2F Hallway',x0:1,y0:12,x1:34,y1:13,tex:'plaster',floor:[100,88,78],ceil:'#1e1a18'},
+     {name:'Room 205',x0:1,y0:15,x1:10,y1:24,tex:'wood',floor:[104,84,62],ceil:'#211c18'},
+     {name:'Room 206',x0:12,y0:15,x1:18,y1:24,tex:'stripes',floor:[110,70,60],ceil:'#22161a'},
+     {name:'Room 207',x0:20,y0:15,x1:27,y1:24,tex:'stars',floor:[70,82,120],ceil:'#1b1d36'},
+     {name:'Room 208',x0:29,y0:15,x1:34,y1:24,tex:'stripes',floor:[120,74,112],ceil:'#2a1a28'}],
+    objs:[
+     O('Bed','🛏️',1,2,2,2,'#5d7fd0','under'), O('Closet','🚪',7,1,1,1,'#8a5a3b','inside'), O('Generator','⚡',7,8,1,1,'#55705a'), O('Supply Chest','📦',1,9,1,1,'#8d6e4c'),
+     O('Bed','🛏️',10,2,2,2,'#d06d9e','under'), O('Closet','🚪',14,1,1,1,'#8a5a3b','inside'), O('Supply Chest','📦',10,9,1,1,'#8d6e4c'),
+     O('Bed','🛏️',19,2,2,2,'#6a3d5c','under'), O('Closet','🚪',25,1,1,1,'#8a5a3b','inside'), O('Generator','⚡',24,8,1,1,'#55705a'),
+     O('Bed','🛏️',33,2,2,2,'#5d7fd0','under'), O('Closet','🚪',27,1,1,1,'#8a5a3b','inside'), O('Supply Chest','📦',28,9,1,1,'#8d6e4c'),
+     O('Supply Chest','📦',1,12,1,1,'#8d6e4c'),
+     O('Bed','🛏️',1,22,2,2,'#d06d9e','under'), O('Closet','🚪',10,24,1,1,'#8a5a3b','inside'), O('Generator','⚡',2,16,1,1,'#55705a'),
+     O('Bed','🛏️',17,22,2,2,'#6a3d5c','under'), O('Closet','🚪',12,24,1,1,'#8a5a3b','inside'), O('Supply Chest','📦',13,16,1,1,'#8d6e4c'),
+     O('Bed','🛏️',20,22,2,2,'#5d7fd0','under'), O('Closet','🚪',27,24,1,1,'#8a5a3b','inside'), O('Generator','⚡',26,16,1,1,'#55705a'),
+     O('Bed','🛏️',33,22,2,2,'#d06d9e','under'), O('Closet','🚪',29,24,1,1,'#8a5a3b','inside'), O('Generator','⚡',33,16,1,1,'#55705a'), O('Supply Chest','📦',30,16,1,1,'#8d6e4c')] } });
+const GENS_STAGE=STAGES.length-1;
 /* ================= SECOND FLOORS ================= */
 STAGES[3].objs.forEach(o=>{ if(o.n==='Pew'&&o.x===19) o.w=2; });
 STAGES[HUNT_STAGE].objs=STAGES[HUNT_STAGE].objs.filter(o=>o.n!=='Grand Staircase');
@@ -3152,6 +3208,8 @@ function loadStage(i){ SI=clamp(i|0,0,STAGES.length-1); ST=STAGES[SI]; SW=ST.W; 
     for(let dy=-1;dy<=1;dy++) for(let dx=-1;dx<=1;dx++){ const r=inUp(x+dx,y+dy); if(r){ any=true; if(!r.balcony) allBal=false; } }
     if(any) grid[y][x+OFFT]=allBal?3:1; }
   WOFF=OFFT; if(up.walls) up.walls(); WOFF=0;
+  DOORS=[]; DOORMAP=new Map(); for(const [dx0,dy0,f] of (ST.doors||[]).map(a=>[a[0],a[1],0]).concat((up.doors||[]).map(a=>[a[0],a[1],1]))){ const x=dx0+f*OFFT, y=dy0;
+    grid[y][x]=5; const d={x,y,f,open:false,ang:0,h:grid[y][x-1]===1&&grid[y][x+1]===1}; DOORS.push(d); DOORMAP.set(y*W+x,d); }
   STAIRS=[]; PORTAL=new Map(); TSTAIR=new Map();
   (up.stairs||[]).forEach((s,si)=>{ const [dx,dy]=DV[s.dir], len=s.len||3, run=[...Array(len)].map((_,k)=>({x:s.x+dx*k,y:s.y+dy*k}));
     run.forEach((t,k)=>{ grid[t.y][t.x]=4; grid[t.y][t.x+OFFT]=4; TSTAIR.set(t.y*W+t.x,{s:si,k}); TSTAIR.set(t.y*W+t.x+OFFT,{s:si,k}); });
@@ -3164,7 +3222,7 @@ function loadStage(i){ SI=clamp(i|0,0,STAGES.length-1); ST=STAGES[SI]; SW=ST.W; 
     STAIRS.push({run,dx,dy,len,bot,top}); });
   ROOMS=ST.rooms.map(r=>Object.assign({f:0},r)).concat(up.rooms.map(r=>Object.assign({},r,{f:1,x0:r.x0+OFFT,x1:r.x1+OFFT})));
   roomIdx=[...Array(H)].map((_,y)=>[...Array(W)].map((_,x)=>ROOMS.findIndex(r=>x>=r.x0&&x<=r.x1&&y>=r.y0&&y<=r.y1)));
-  solid=grid.map(r=>r.map(v=>(v===0||v===4)?0:1));
+  solid=grid.map(r=>r.map(v=>(v===0||v===4||v===5)?0:1));
   const mkObj=(d,f)=>{ const o=Object.assign({},d,{f}); o.x+=f*OFFT; o.px=o.x*T; o.py=o.y*T; o.pw=o.w*T; o.ph=o.h*T; o.cx=o.px+o.pw/2; o.cy=o.py+o.ph/2;
     const sz=SIZE[o.n]||[clamp((o.w+o.h)/2*.9,.6,2.4),.8]; o.sw=sz[0]; o.sh=sz[1];
     for(let y=o.y;y<o.y+o.h;y++) for(let x=o.x;x<o.x+o.w;x++) solid[y][x]=1; return o; };
@@ -3173,12 +3231,13 @@ function loadStage(i){ SI=clamp(i|0,0,STAGES.length-1); ST=STAGES[SI]; SW=ST.W; 
     while(h<q.length){ const cur=q[h++], cx=cur%W, cy=(cur/W)|0; for(const [dx,dy] of DIRS){ const nx=cx+dx, ny=cy+dy; if(!passable(nx,ny)) continue; if(dx&&dy&&(!passable(cx+dx,cy)||!passable(cx,cy+dy))) continue; const ni=ny*W+nx; if(!seen[ni]){ seen[ni]=1; q.push(ni); } }
       const pt=PORTAL.get(cur); if(pt!==undefined&&!seen[pt]){ seen[pt]=1; q.push(pt); } }
     for(let y=0;y<H;y++) for(let x=0;x<W;x++) if(!solid[y][x]&&!seen[y*W+x]){ solid[y][x]=1; if(grid[y][x]===0) grid[y][x]=1; } }
+  DOORS.forEach(d=>{ solid[d.y][d.x]=d.open?0:1; });
   TALL=grid.map(r=>r.map(()=>0)); OBJS.forEach(o=>{ if(o.sh>=1) for(let y=o.y;y<o.y+o.h;y++) for(let x=o.x;x<o.x+o.w;x++) TALL[y][x]=1; });
   HIDES=OBJS.filter(o=>o.hide); START=tc(ST.start[0],ST.start[1]);
   SPAWNS=ST.spawns.map(a=>tc(a[0],a[1])).concat((up.spawns||[]).map(a=>tc(a[0]+OFFT,a[1])));
   drawMiniBase(); if(typeof R3!=='undefined') R3.want++; }
 const passable=(tx,ty)=>tx>=0&&ty>=0&&tx<W&&ty<H&&!solid[ty][tx];
-const isWallPx=(px,py)=>{const tx=Math.floor(px/T),ty=Math.floor(py/T); if(!(tx>=0&&ty>=0&&tx<W&&ty<H)) return true; const v=grid[ty][tx]; return v===1||v===2;};
+const isWallPx=(px,py)=>{const tx=Math.floor(px/T),ty=Math.floor(py/T); if(!(tx>=0&&ty>=0&&tx<W&&ty<H)) return true; const v=grid[ty][tx]; return v===1||v===2||(v===5&&!doorOpenAt(ty*W+tx));};
 const isSolidPx=(px,py)=>{const tx=Math.floor(px/T),ty=Math.floor(py/T);return !passable(tx,ty)};
 const tileOf=p=>({x:Math.floor(p.x/T),y:Math.floor(p.y/T)});
 function roomAt(p){const t=tileOf(p);const i=(roomIdx[t.y]||[])[t.x];return i>=0?ROOMS[i]:null}
@@ -3302,6 +3361,8 @@ function onNet(from,m){
     case 'tres': if(S&&S.net&&m.to===NET.id) toast(m.hit?'💀 Gotcha!':'Walang tao dito… 🤷'); break;
     case 'fx': if(S&&S.net&&typeof m.msg==='string'){ toast(m.msg.slice(0,80)); if(m.k==='tcatch'&&S.role==='taya') S.caughtCount++; } break;
     case 'end': if(S&&S.net&&from===NET.hostId) showMPEnd(m.r); break;
+    case 'gact': if(S&&S.net&&S.isAuth&&S.G) gensAct(from,m); break;
+    case 'ping': if(S&&S.net&&S.G&&typeof m.x==='number') addPing(m.x,m.y,(NET.players[from]||{}).name); break;
   }
 }
 function hostGame(){ audioInit(); const nm=saveName(); if(!nm) return toast('Type your name first.');
@@ -3328,22 +3389,24 @@ function renderLan(){ if($('lan').hidden) return;
     tg.textContent=(p.id===NET.hostId?'🏠 host ':'')+(p.faces&&p.faces.length?`📸×${p.faces.length}`:''); d.append(dot,nm,tg); box.appendChild(d); }
   $('hostCtl').hidden=!NET.isHost;
   if(NET.isHost){ const set=(k,v)=>{ NET.lobby[k]=v; lobbyBroadcast(); renderLan(); };
-    const st={}; STAGES.forEach((s,i)=>{ if(!s.hunt) st[i]=`${s.emoji} ${s.name}`; }); renderChips('lStage',st,L.stage,k=>set('stage',+k));
+    const st={}; STAGES.forEach((s,i)=>{ if(!s.hunt&&!s.gens) st[i]=`${s.emoji} ${s.name}`; }); renderChips('lStage',st,L.stage,k=>set('stage',+k));
     renderChips('lMode',MODES,L.mode,k=>set('mode',k));
-    const ty={random:'🎲 Random'}; ps.forEach(p=>ty[p.id]=p.name); renderChips('lTaya',ty,L.taya,k=>set('taya',k)); $('lTayaWrap').hidden=L.mode!=='taya';
+    const ty={random:'🎲 Random'}; ps.forEach(p=>ty[p.id]=p.name); renderChips('lTaya',ty,L.taya,k=>set('taya',k)); $('lTayaWrap').hidden=!(L.mode==='taya'||L.mode==='gens'); $('lTayaLbl').textContent=L.mode==='gens'?'Who is the Navigator? 🗺':'Who is Taya?'; $('lStage').parentElement.hidden=L.mode==='gens';
     renderChips('lAi',{0:'None',1:'1',2:'2'},L.ai,k=>set('ai',+k)); $('lAiWrap').hidden=L.mode!=='taya';
     const df={}; for(const k in DIFF) df[k]=DIFF[k].label; renderChips('lDiff',df,L.diff,k=>set('diff',k));
     $('startMpBtn').disabled=ps.length<2; $('lobbyWait').textContent=ps.length<2?'Waiting for at least one more player…':''; }
-  else { const s=STAGES[L.stage]||STAGES[0]; $('lobbyWait').textContent=NET.ingame?'A round is in progress — you’ll join the next one.':`${s.emoji} ${s.name} • ${MODES[L.mode]} — waiting for the host to start…`; }
+  else { const s=L.mode==='gens'?STAGES[GENS_STAGE]:STAGES[L.stage]||STAGES[0]; $('lobbyWait').textContent=NET.ingame?'A round is in progress — you’ll join the next one.':`${s.emoji} ${s.name} • ${MODES[L.mode]} — waiting for the host to start…`; }
 }
-function hostStart(){ const ps=Object.values(NET.players); if(ps.length<2) return toast('Need at least 2 players.'); const L=NET.lobby; loadStage(L.stage);
+function hostStart(){ const ps=Object.values(NET.players); if(ps.length<2) return toast('Need at least 2 players.'); const L=NET.lobby; loadStage(L.mode==='gens'?GENS_STAGE:L.stage);
   let taya=0; if(L.mode==='taya'){ taya=L.taya==='random'?pick(ps).id:+L.taya; if(!NET.players[taya]) taya=pick(ps).id; }
   const bots=L.mode==='seek'?HIDES.slice().sort(()=>Math.random()-.5).slice(0,5).map(o=>OBJS.indexOf(o)):[];
-  const m={t:'start',stage:L.stage,mode:L.mode,ai:L.ai,diff:L.diff,taya,bots}; netSend(m); newGame(L.mode,m); lobbyBroadcast(); }
+  let nav=0, ch='', dbits=''; if(L.mode==='gens'){ nav=L.taya==='random'?pick(ps).id:+L.taya; if(!NET.players[nav]) nav=pick(ps).id;
+    const cs=OBJS.filter(o=>o.n==='Supply Chest'), idx=cs.map((_,i)=>i).sort(()=>Math.random()-.5).slice(0,10); ch=cs.map((_,i)=>idx.includes(i)?'1':'0').join(''); dbits=DOORS.map(()=>Math.random()<.45?'1':'0').join(''); }
+  const m={t:'start',stage:L.mode==='gens'?GENS_STAGE:L.stage,mode:L.mode,ai:L.ai,diff:L.diff,taya,bots,nav,ch,do:dbits}; netSend(m); newGame(L.mode,m); lobbyBroadcast(); }
 
 /* ================= GAME STATE ================= */
 let S=null, userPaused=false;
-const keys=new Set(), joy={x:0,y:0}; let runHeld=false, breathHeld=false, lookDX=0, fireHeld=false, mouseFire=false;
+const keys=new Set(), joy={x:0,y:0}; let useHeld=false, runHeld=false, breathHeld=false, lookDX=0, fireHeld=false, mouseFire=false;
 function makeCreature(i){ const s=SPAWNS[i%SPAWNS.length]; return {x:s.x,y:s.y,state:'patrol',path:[],repath:0,lost:0,t:Math.random()*10,mark:null,markT:0,
   wob:Math.random()*6,lastSeen:null,checkObj:null,checkPos:null,checkFor:0,tid:0,searchT:0,stepT:0,growlT:rnd(4,9),fk:''}; }
 function facePool(net){ const out=[]; if(!net){ myFaceList().forEach((_,i)=>out.push('me:'+i)); return out; }
@@ -3353,28 +3416,30 @@ function faceFromKey(k){ if(!k) return null; const parts=String(k).split(':'), p
   if(pid==='me'||(NET.id&&+pid===NET.id)) return okImg(myFaceList()[i]); const p=NET.players[pid]; return p?okImg((p.faces||[])[i]):null; }
 const creatureFace=c=>faceFromKey(c.fk);
 function playerFace(p){ return p.me?okImg(myFaceList()[0]):okImg((p.faces||[])[0]); }
-function newGame(mode,mp){ if(mode==='hunt') return newHunt(); if(mode==='giant') return newGiant(); if(VR.supported) $('vrBtn').hidden=false; audioInit(); loadStage(mp?mp.stage:settings.stage);
+function newGame(mode,mp){ if(mode==='hunt') return newHunt(); if(mode==='giant') return newGiant(); if(VR.supported) $('vrBtn').hidden=mode==='gens'; audioInit(); loadStage(mode==='gens'?GENS_STAGE:mp?mp.stage:settings.stage);
   const diff=mp?(DIFF[mp.diff]?mp.diff:'normal'):settings.diff, D=DIFF[diff];
-  const role=mp&&mode==='taya'&&mp.taya===NET.id?'taya':'hider';
-  S={mode,net:!!mp,isAuth:!mp||NET.isHost,role,diff,t:0,timeLeft:mode==='survive'?120:mode==='seek'?180:150,hearts:mode==='taya'?2:3,out:false,
+  const role=mp&&mode==='taya'&&mp.taya===NET.id?'taya':mp&&mode==='gens'&&mp.nav===NET.id?'nav':'hider';
+  S={mode,net:!!mp,isAuth:!mp||NET.isHost,role,diff,t:0,timeLeft:mode==='survive'?120:mode==='seek'?180:mode==='gens'?900:150,hearts:mode==='taya'?2:3,out:false,
     noise:0,breath:100,holding:false,gasp:0,invuln:2.5,stun:0,hearT:0,stingT:-9,heardT:-9,
     player:{x:START.x,y:START.y,a:ST.startA,r:15,hidden:null,hidePos:null,searching:null,step:0,bob:0,turn:0},
     creatures:[],bots:[],found:0,particles:[],over:false,paused:false,hbT:0,shake:0,room:null,extra:false,relocT:rnd(22,30),scareCool:0,nearest:999,
     countdown:mode==='taya'?10:0,sendT:0,snapT:0,caughtCount:0,tayaId:mp?mp.taya:0,lastChase:false,lastCheck:false};
   if(role==='taya'){ const s=farSpawn(START); S.player.x=s.x; S.player.y=s.y; }
-  if(mp){ for(const p of Object.values(NET.players)){ p.role=(mode==='taya'&&p.id===mp.taya)?'taya':'hider'; p.st=null; p.inv=0; p.rx=null; p.ry=null; p.acc=0; } NET.ingame=true; }
-  const count=mode==='taya'?clamp(mp?mp.ai|0:0,0,2):D.count, pool=S.isAuth?facePool(!!mp):[];
+  if(mp){ for(const p of Object.values(NET.players)){ p.role=(mode==='taya'&&p.id===mp.taya)?'taya':(mode==='gens'&&p.id===mp.nav)?'nav':'hider'; p.st=null; p.inv=0; p.rx=null; p.ry=null; p.acc=0; } NET.ingame=true; }
+  const count=mode==='taya'?clamp(mp?mp.ai|0:0,0,2):mode==='gens'?(diff==='hard'?2:1):D.count, pool=S.isAuth?facePool(!!mp):[];
   const order=SPAWNS.slice().sort((a,b)=>dist(b,START)-dist(a,START));
   for(let i=0;i<count;i++){ const c=makeCreature(i); c.x=order[i%order.length].x; c.y=order[i%order.length].y; c.fk=pool.length?pool[i%pool.length]:''; S.creatures.push(c); }
   if(mode==='seek'){ const names=[['Matthew','🧒'],['Xian','👦'],['Bunso','👶'],['Kuya Jun','🧑'],['Ate Liza','👧']];
     const spots=mp&&Array.isArray(mp.bots)&&mp.bots.length===5?mp.bots.map(i=>OBJS[i]||HIDES[0]):HIDES.slice().sort(()=>Math.random()-.5).slice(0,5);
     names.forEach((nm,i)=>S.bots.push({name:nm[0],emoji:nm[1],obj:spots[i],found:false,giggleT:rnd(3,9)})); }
   userPaused=false; showScreen(null); $('hud').hidden=false; $('touch').hidden=!isTouch; $('mini').hidden=!settings.mini;
-  setHuntUI(false); $('bSearch').hidden=!(mode==='seek'||role==='taya'); $('noiseWrap').hidden=role==='taya';
+  setHuntUI(false); $('bSearch').hidden=!(mode==='seek'||role==='taya'); $('noiseWrap').hidden=role==='taya'; $('batWrap').hidden=true; $('bLight').hidden=true; $('navFloorBtn').hidden=true; $('mapBtn').hidden=false; $('camBtn').hidden=false; S.G=null;
+  if(mode==='gens') newGensGame(mp);
   lastMode=mode; spriteCache.clear();
-  if(mode==='taya') toast(role==='taya'?'💀 You’re Taya! Count to 10…':`🫣 ${tayaName()} is Taya! Hide now!`);
+  if(mode==='gens'){}
+  else if(mode==='taya') toast(role==='taya'?'💀 You’re Taya! Count to 10…':`🫣 ${tayaName()} is Taya! Hide now!`);
   else toast(mode==='survive'?'Survive! Hide and stay quiet 🤫':'Find all 5 kids! Follow the giggles 👂');
-  banner(`${ST.emoji} ${ST.name}`); bgmForMode(mode);
+  if(mode!=='gens') banner(`${ST.emoji} ${ST.name}`); bgmForMode(mode);
   const TIPS={survive:'Survive until morning. Hide when they see you — and stay quiet.',seek:'Find all 5 hidden kids. Follow the giggles.',taya:role==='taya'?'You’re Taya! Count to 10, then hunt them down.':'Hide before the Taya finishes counting!'};
   showIntro((ARTA.stages||[])[SI],`${ST.emoji} ${ST.name}`,TIPS[mode]||''); }
 let lastMode='survive';
@@ -3409,13 +3474,14 @@ function hiders(){ const out=[]; const p=S.player;
 function tayaEntity(){ if(S.mode!=='taya') return null; if(S.role==='taya') return {x:S.player.x,y:S.player.y}; const q=NET.players[S.tayaId]; return q&&q.st?{x:q.st.x,y:q.st.y}:null; }
 
 function onHiderHid(h,obj,hidePos){ for(const c of S.creatures){ if(c.state==='chase'&&c.tid===h.id&&dist(c,hidePos)<300&&los(c,hidePos)){
+    if(S.mode==='gens'){ c.sawHide=true; c.queue=[]; c.state='inspect'; c.peekObj=obj; const ap=approachTile(obj,c); goTo(c,ap.x,ap.y); c.mark='!'; c.markT=1.2; if(h.isLocal) toast('😨 It saw you hide! Hold your breath when it looks!'); continue; }
     c.state='check'; c.checkObj=obj; c.checkFor=h.id; c.checkPos={x:hidePos.x,y:hidePos.y}; goTo(c,hidePos.x,hidePos.y); c.mark='!'; c.markT=1.2;
     if(h.isLocal) toast('😨 It saw you hide! Hold your breath!'); } } }
 function toggleHide(){ if(!S||S.over||S.paused||S.role==='taya'||S.out||S.stun>0) return; const p=S.player; if(p.searching) return;
   if(p.hidden){ p.hidden=null; S.holding=false; SFX.rustle(); return; }
   const o=nearHide(); if(!o){ toast('Walk right up to a hiding spot first.'); return; }
   if(S.net&&Object.values(NET.players).some(q=>!q.me&&q.st&&q.st.h===OBJS.indexOf(o)&&!q.st.out)){ toast('Someone’s already hiding there!'); return; }
-  p.hidePos={x:p.x,y:p.y}; p.hidden=o; S.noise=Math.max(S.noise,30); SFX.rustle(); p.a=Math.atan2(p.y-o.cy,p.x-o.cx);
+  p.hidePos={x:p.x,y:p.y}; p.hidden=o; S.noise=Math.max(S.noise,30); SFX.rustle(); p.a=S.mode==='gens'&&(o.hs==='inside'||o.hs==='under')?frontOf(o).a:Math.atan2(p.y-o.cy,p.x-o.cx);
   if(S.isAuth) onHiderHid({id:myId(),isLocal:true},o,p.hidePos);
   if(S.mode==='seek'){ const bi=S.bots.findIndex(b=>!b.found&&b.obj===o); if(bi>=0){ foundByMe(bi); return; } }
   if(settings.scare!=='off'&&S.scareCool<=0&&Math.random()<.07){ S.scareCool=20; miniScare(); } }
@@ -3438,12 +3504,14 @@ function miniScare(){ const opts=[['🐈','MEOW!','meow'],['🦎','TUKO!','beep'
   $('msEmoji').textContent=s[0]; $('msSay').textContent=s[1]; if(R3.inXR) toast(s[0]+' '+s[1]); const m=$('miniScare'); m.classList.add('on'); SFX[s[2]](1200); vibrate(80);
   setTimeout(()=>m.classList.remove('on'),800); }
 
-function goTo(c,x,y){ c.path=bfs(nearestPassable(tileOf(c)),nearestPassable(tileOf({x,y}))); }
-function follow(c,sp,dt){ if(!c.path.length) return true; const n=c.path[0], dx=n.x-c.x, dy=n.y-c.y, d=Math.hypot(dx,dy), st=sp*dt;
+function goTo(c,x,y){ const gm=S&&S.mode==='gens'; c.path=bfs(nearestPassable(tileOf(c)),gm?tileOf({x,y}):nearestPassable(tileOf({x,y})),gm?passMon:undefined); if(gm&&!c.path.length) c.path=bfs(nearestPassable(tileOf(c)),nearestPassable(tileOf({x,y})),passMon); }
+function follow(c,sp,dt){ if(!c.path.length) return true; const n=c.path[0];
+  if(S.mode==='gens'){ if(c.doorWait>0){ c.doorWait-=dt; return false; } const dr=DOORMAP.get(Math.floor(n.y/T)*W+Math.floor(n.x/T)); if(dr&&!dr.open){ setDoor(dr,true); c.doorWait=.6; return false; } }
+  const dx=n.x-c.x, dy=n.y-c.y, d=Math.hypot(dx,dy), st=sp*dt;
   if(d>3*T){ c.x=n.x; c.y=n.y; c.path.shift(); return !c.path.length; }
   if(d<=st){ c.x=n.x; c.y=n.y; c.path.shift(); return !c.path.length; } c.x+=dx/d*st; c.y+=dy/d*st; return false; }
 function creatureAudio(c,dt,moved){ const p=S.player, d=dist(c,p), hear=7*T;
-  c.stepT-=dt; if(moved&&d<hear&&c.stepT<=0){ c.stepT=c.state==='chase'?.3:.55; SFX.mstep(.06+.3*(1-d/hear),relPan(c)); }
+  c.stepT-=dt; if(moved&&d<hear&&c.stepT<=0){ c.stepT=c.state==='chase'?.3:.55; SFX.mstep(.06+.3*(1-d/hear),relPan(c)); if(S.mode==='gens') SFX.bone(.04+.22*(1-d/hear),relPan(c)); }
   c.growlT-=dt; if(c.growlT<=0){ c.growlT=c.state==='chase'?rnd(2,4):rnd(6,12); if(d<hear*1.3) SFX.growl(relPan(c)); } }
 function updCreature(c,dt,hs){ const D=DIFF[S.diff];
   c.t+=dt; if(c.markT>0){ c.markT-=dt; if(c.markT<=0) c.mark=null; } c.repath-=dt;
@@ -3456,13 +3524,17 @@ function updCreature(c,dt,hs){ const D=DIFF[S.diff];
   switch(c.state){
     case 'chase': { const sp=170*D.mul, tg=hs.find(h=>h.id===c.tid)||c.lastSeen||{x:c.x,y:c.y}; if(c.repath<=0){ goTo(c,tg.x,tg.y); c.repath=.3; }
       if(dist(c,tg)<T*1.5&&los(c,tg)){ const d=dist(c,tg)||1; c.x+=(tg.x-c.x)/d*sp*dt; c.y+=(tg.y-c.y)/d*sp*dt; } else follow(c,sp,dt); break; }
-    case 'investigate': if(follow(c,125*D.mul,dt)){ c.state='search'; c.searchT=rnd(2,3.5); } break;
+    case 'investigate': if(follow(c,125*D.mul,dt)){ if(S.mode==='gens'){ const nh=hidesNear(c,6,2); if(nh.length){ gensInspect(c,nh); break; } } c.state='search'; c.searchT=rnd(2,3.5); } break;
+    case 'inspect': if(!c.peekObj){ c.state='patrol'; break; } if(follow(c,(c.sawHide?120:92)*D.mul,dt)){ c.state='peek'; c.peekT=1.9; c.peekDone=false; c.lastInsp=c.peekObj; if(c.peekObj.hs==='inside') SFX.door(true,.25,relPan({x:c.peekObj.cx,y:c.peekObj.cy})); } break;
+    case 'peek': c.peekT-=dt; if(c.peekT<1.05&&!c.peekDone){ c.peekDone=true; const h=hs.find(h=>!h.out&&h.inv<=0&&h.hidden===c.peekObj);
+        if(h){ if(h.noise>6||Math.random()<(c.sawHide?.5:.25)){ c.sawHide=false; caughtHider(h,c); return; } if(h.isLocal) toast('😮‍💨 It looked right at you… and moved on!'); } }
+      if(c.peekT<=0){ c.sawHide=false; nextInspect(c); } break;
     case 'check': { const done=follow(c,130*D.mul,dt);
       if(done||dist(c,c.checkPos)<30){ const h=hs.find(h=>h.id===c.checkFor);
         if(h&&!h.out&&h.hidden&&h.hidden===c.checkObj){ if(h.noise>10){ caughtHider(h,c); return; } if(h.isLocal) toast('😮‍💨 Phew! It didn’t find you…'); }
         c.state='search'; c.searchT=2; c.mark='?'; c.markT=1.5; } break; }
     case 'search': c.searchT-=dt; if(c.searchT<=0){ c.state='patrol'; c.path=[]; } break;
-    default: if(!c.path.length){ const f=randomFloor(); goTo(c,f.x,f.y); } follow(c,80*D.mul,dt);
+    default: if(!c.path.length){ if(S.mode==='gens'&&Math.random()<.35){ const nh=hidesNear(c,9,1); if(nh.length){ gensInspect(c,nh); break; } } const f=randomFloor(); goTo(c,f.x,f.y); } follow(c,80*D.mul,dt);
   }
   creatureAudio(c,dt,Math.hypot(c.x-ox,c.y-oy)>.1);
   for(const h of hs){ if(h.out||h.inv>0) continue;
@@ -3486,7 +3558,9 @@ function respawn(){ const p=S.player; p.x=START.x; p.y=START.y; p.a=ST.startA; p
   const order=SPAWNS.slice().sort((a,b)=>dist(b,p)-dist(a,p)); S.creatures.forEach((c,i)=>{ const s=order[i%order.length]; c.x=s.x; c.y=s.y; c.state='patrol'; c.path=[]; c.mark=null; }); }
 function endGame(win,why){ if(S.over) return; S.over=true; bgmStop(); $('hud').hidden=true; $('touch').hidden=true; try{ document.exitPointerLock&&document.exitPointerLock(); }catch(e){}
   let emoji,title,text;
-  if(S.mode==='survive'){ if(win){ emoji='🌅'; title='You survived the night!'; text=`Morning came and the monsters ran away. Hearts left: ${'❤️'.repeat(S.hearts)}`; best.surviveWins++; }
+  if(S.mode==='gens'){ const used=Math.round(900-S.timeLeft); if(win){ emoji='💡'; title='The lights are back on!'; text=`You powered all 10 generators and escaped Hotel Esperanza in ${fmt(used)}.`; if(best.gensBest==null||used<best.gensBest){ best.gensBest=used; text+=' New best time!'; } }
+    else { emoji=why==='time'?'⏰':'💀'; title=why==='time'?'Time’s up!':'The skeleton got you!'; text=`${gensOn()}/10 generators were running. Hide in closets and hold your breath when it peeks!`; } }
+  else if(S.mode==='survive'){ if(win){ emoji='🌅'; title='You survived the night!'; text=`Morning came and the monsters ran away. Hearts left: ${'❤️'.repeat(S.hearts)}`; best.surviveWins++; }
     else { emoji='💀'; title='Taya ka!'; text=`The monsters caught you with ${Math.ceil(S.timeLeft)} seconds left. Try hiding sooner!`; } }
   else { const used=Math.round(180-S.timeLeft);
     if(win){ emoji='🏆'; title='Found everyone!'; text=`All 5 kids found in ${fmt(used)}.`; if(best.seekBest===null||used<best.seekBest){ best.seekBest=used; text+=' New best time!'; } }
@@ -3494,15 +3568,18 @@ function endGame(win,why){ if(S.over) return; S.over=true; bgmStop(); $('hud').h
   store.set('mxtt_best',best); (win?SFX.win:SFX.lose)(); setEndArt(win?(ARTA.stages||[])[SI]:null);
   $('endEmoji').textContent=emoji; $('endTitle').textContent=title; $('endText').textContent=text; $('againBtn').textContent='Play again'; $('menuBtn').textContent='Menu'; showScreen('end'); }
 function authEnd(reason){ if(S.over) return;
-  if(!S.net){ if(S.mode==='survive') return endGame(reason==='time'); return endGame(reason==='allfound',reason); }
+  if(!S.net){ if(S.mode==='gens') return endGame(reason==='escape',reason); if(S.mode==='survive') return endGame(reason==='time'); return endGame(reason==='allfound',reason); }
   const alive=hiders().some(h=>!h.out); let r;
-  if(S.mode==='taya') r=reason==='time'?'hiders':'taya';
+  if(S.mode==='gens') r=reason==='escape'?'win':'lose';
+  else if(S.mode==='taya') r=reason==='time'?'hiders':'taya';
   else if(S.mode==='survive') r=reason==='time'&&alive?'win':'lose';
   else r=reason==='allfound'?'win':'lose';
   netSend({t:'end',r}); showMPEnd(r); }
 function showMPEnd(r){ if(!S||S.over) return; S.over=true; bgmStop(); NET.ingame=false; $('hud').hidden=true; $('touch').hidden=true; try{ document.exitPointerLock&&document.exitPointerLock(); }catch(e){}
   let win,emoji,title,text;
-  if(r==='lost'){ emoji='📶'; title='Connection lost'; text='The game ended because the host left or the Wi-Fi dropped.'; win=false; }
+  if(S.mode==='gens'&&r==='win'){ win=true; emoji='💡'; title='The lights are back on!'; text='All 10 generators running — your team escaped Hotel Esperanza!'; }
+  else if(S.mode==='gens'&&r==='lose'){ win=false; emoji='💀'; title='The skeleton got everyone!'; text=`${gensOn()}/10 generators were running. Navigator, ping the closest ones first!`; }
+  else if(r==='lost'){ emoji='📶'; title='Connection lost'; text='The game ended because the host left or the Wi-Fi dropped.'; win=false; }
   else if(r==='win'){ win=true; emoji=S.mode==='seek'?'🏆':'🌅'; title=S.mode==='seek'?'Your team found everyone!':'Your team survived the night!'; text='Great teamwork, magkakampi!'; }
   else if(r==='lose'){ win=false; emoji='💀'; title='The monsters won!'; text=S.mode==='seek'?`Your team found ${S.found} of 5 kids.`:'Everyone got caught. Try hiding in different spots!'; }
   else if(r==='hiders'){ win=S.role!=='taya'; emoji=win?'🎉':'⏰'; title=win?'The hiders won!':'Time’s up — they escaped!'; text=win?`${tayaName()} couldn’t catch everyone.`:`You caught ${S.caughtCount}. So close!`; }
@@ -3529,19 +3606,23 @@ function jumpscare(face,done){ const mode=settings.scare, el=$('jumpscare'), cv=
   setTimeout(()=>{ el.className=''; done(); }, mode==='max'?1500:mode==='fun'?1250:950); }
 
 /* ================= UPDATE ================= */
-const CODE={patrol:'p',chase:'c',investigate:'i',check:'k',search:'s'}, CODE2={p:'patrol',c:'chase',i:'investigate',k:'check',s:'search'};
+const CODE={patrol:'p',chase:'c',investigate:'i',check:'k',search:'s',inspect:'n',peek:'e'}, CODE2={p:'patrol',c:'chase',i:'investigate',k:'check',s:'search',n:'inspect',e:'peek'};
 function applySnap(m){ if(typeof m.tl==='number') S.timeLeft=m.tl; if(typeof m.cd==='number') S.countdown=m.cd;
   const arr=Array.isArray(m.c)?m.c.slice(0,6):[]; while(S.creatures.length<arr.length) S.creatures.push(makeCreature(S.creatures.length)); S.creatures.length=arr.length;
   let chaseMe=false, checkMe=false;
   arr.forEach((a,i)=>{ const c=S.creatures[i]; if(!Array.isArray(a)) return; if(c.tx==null){ c.x=+a[0]||0; c.y=+a[1]||0; } c.tx=+a[0]||0; c.ty=+a[1]||0;
-    c.state=CODE2[a[2]]||'patrol'; c.mark=a[3]==='!'||a[3]==='?'?a[3]:null; if(c.fk!==a[4]){ c.fk=typeof a[4]==='string'?a[4]:''; } c.tid=+a[5]||0;
+    c.state=CODE2[a[2]]||'patrol'; c.peekObj=OBJS[a[6]]||null; c.mark=a[3]==='!'||a[3]==='?'?a[3]:null; if(c.fk!==a[4]){ c.fk=typeof a[4]==='string'?a[4]:''; } c.tid=+a[5]||0;
     if(c.state==='chase'&&c.tid===NET.id) chaseMe=true; if(c.state==='check'&&c.tid===NET.id) checkMe=true; });
   if(chaseMe&&!S.lastChase&&S.t-S.stingT>3){ SFX.sting(); S.stingT=S.t; toast('😱 It sees you! TAKBO!'); vibrate(60); }
   if(checkMe&&!S.lastCheck&&S.player.hidden) toast('😨 It saw you hide! Hold your breath!');
   S.lastChase=chaseMe; S.lastCheck=checkMe;
   if(Array.isArray(m.b)) m.b.forEach((a,i)=>{ const b=S.bots[i]; if(!b||!Array.isArray(a)) return; if(OBJS[a[0]]) b.obj=OBJS[a[0]]; if(a[1]&&!b.found) b.found=true; });
-  S.found=S.bots.filter(b=>b.found).length; }
+  S.found=S.bots.filter(b=>b.found).length;
+  if(S.G){ if(Array.isArray(m.g)) m.g.forEach((v,i)=>{ const g=S.G.gens[i]; if(!g) return; if(v>=100){ if(!g.on){ g.on=false; genOn(i); } } else if(!g.on&&!(S.G.rep===g)) g.p=Math.max(g.p,v/99); });
+    if(typeof m.d==='string') DOORS.forEach((d,i)=>{ const o=m.d[i]==='1'; if(d.open!==o&&S.t-(d.lt||-9)>.6) setDoor(d,o); });
+    if(typeof m.k==='string') S.G.chests.forEach((c,i)=>{ if(m.k[i]==='1') c.open=true; }); } }
 function update(dt){ if(S.mode==='giant') return updateGiant(dt); if(S.mode==='hunt') return updateHunt(dt); const p=S.player, D=DIFF[S.diff];
+  if(S.mode==='gens'){ gensTick(dt); if(S.over) return; }
   S.t+=dt; if(S.invuln>0) S.invuln-=dt; if(S.scareCool>0) S.scareCool-=dt; if(S.stun>0) S.stun-=dt;
   if(S.isAuth&&S.countdown>0){ S.countdown-=dt; if(S.countdown<=0){ S.countdown=0; } }
   if(S.mode==='taya'){ if(S.countdown<=0&&!S.cdDone){ S.cdDone=true; toast(S.role==='taya'?'💀 Ready or not, here I come!':`💀 ${tayaName()} is coming!`); SFX.sting(); } }
@@ -3556,7 +3637,7 @@ function update(dt){ if(S.mode==='giant') return updateGiant(dt); if(S.mode==='h
   if(keys.has('KeyW')||keys.has('ArrowUp')) fw+=1; if(keys.has('KeyS')||keys.has('ArrowDown')) fw-=1;
   if(keys.has('KeyA')) st-=1; if(keys.has('KeyD')) st+=1;
   const m=Math.hypot(fw,st); if(m>1){ fw/=m; st/=m; }
-  const frozen=S.stun>0||(S.role==='taya'&&S.countdown>0);
+  const frozen=S.stun>0||(S.role==='taya'&&S.countdown>0)||S.role==='nav';
   const moving=m>.15&&!p.hidden&&!p.searching&&!frozen, running=moving&&!S.out&&(keys.has('ShiftLeft')||keys.has('ShiftRight')||runHeld);
   if(moving){ const base=S.role==='taya'?(running?235:150):S.out?170:(running?220:130), sp=base*dt, ca=Math.cos(p.a), sa=Math.sin(p.a), ox=p.x, oy=p.y;
     moveCircle(p,(ca*fw-sa*st)*sp,(sa*fw+ca*st)*sp); const sw=stairStep(p); p.step+=Math.abs(sw)?0:Math.hypot(p.x-ox,p.y-oy); p.bob+=dt*(running?14:9);
@@ -3567,12 +3648,12 @@ function update(dt){ if(S.mode==='giant') return updateGiant(dt); if(S.mode==='h
   if(S.holding){ S.breath-=24*dt; if(S.breath<=0){ S.breath=0; S.holding=false; S.gasp=2.2; S.noise=92; SFX.gasp(); toast('*GASP!* 😮‍💨 Out of breath!'); } }
   else S.breath=Math.min(100,S.breath+(p.hidden?14:30)*dt);
   if(S.gasp>0) S.gasp-=dt;
-  let target=0; if(S.out||S.role==='taya') target=0; else if(p.hidden) target=S.holding?0:13; else if(p.searching) target=48; else if(moving) target=running?90:30;
+  let target=0; if(S.out||S.role==='taya'||S.role==='nav') target=0; else if(p.hidden) target=S.holding?0:13; else if(p.searching) target=48; else if(S.G&&S.G.rep) target=58; else if(moving) target=running?90:30;
   const rate=target>S.noise?2.6:(S.holding?2.4:1.3); S.noise+=(target-S.noise)*Math.min(1,dt*rate);
   if(S.isAuth){ const hs=hiders();
     if(S.net) for(const q of Object.values(NET.players)) if(q.inv>0) q.inv-=dt;
     S.hearT-=dt; if(S.hearT<=0){ S.hearT=.35; for(const h of hs){ if(h.out||h.noise<=52) continue; const pos=h.hidden?h.hidePos:h;
-      for(const c of S.creatures){ if(c.state==='chase'||c.state==='check') continue; if(physDist(c,pos)<h.noise*5.2&&(c.state!=='investigate'||Math.random()<.4)){
+      for(const c of S.creatures){ if(c.state==='chase'||c.state==='check'||(c.state==='inspect'&&c.sawHide)) continue; if(physDist(c,pos)<h.noise*5.2*(S.mode==='gens'&&!los(c,pos)?.6:1)&&(c.state!=='investigate'||Math.random()<.4)){
         c.state='investigate'; c.mark='?'; c.markT=1.5; goTo(c,pos.x+rnd(-50,50),pos.y+rnd(-50,50));
         if(h.isLocal&&S.t-S.heardT>4){ toast('👂 Something heard you…'); S.heardT=S.t; } } } } }
     const active=!(S.mode==='taya'&&S.countdown>0);
@@ -3585,7 +3666,8 @@ function update(dt){ if(S.mode==='giant') return updateGiant(dt); if(S.mode==='h
       if(free.length){ float(b.obj.cx,b.obj.cy,'👣','#fff',1,1.8); b.obj=pick(free); } } } }
     if(S.net&&hs.length&&hiders().every(h=>h.out)) return authEnd('allout');
     if(S.net){ S.snapT-=dt; if(S.snapT<=0){ S.snapT=.1; netSend({t:'snap',tl:+S.timeLeft.toFixed(1),cd:+S.countdown.toFixed(1),
-      c:S.creatures.map(c=>[Math.round(c.x),Math.round(c.y),CODE[c.state]||'p',c.mark||'',c.fk||'',(c.state==='chase'||c.state==='check')?(c.state==='check'?c.checkFor:c.tid):0]),
+      c:S.creatures.map(c=>[Math.round(c.x),Math.round(c.y),CODE[c.state]||'p',c.mark||'',c.fk||'',(c.state==='chase'||c.state==='check')?(c.state==='check'?c.checkFor:c.tid):0,c.peekObj&&(c.state==='peek'||c.state==='inspect')?OBJS.indexOf(c.peekObj):-1]),
+      g:S.G?S.G.gens.map(g=>g.on?100:Math.round(g.p*99)):undefined, d:S.G?DOORS.map(d=>d.open?1:0).join(''):undefined, k:S.G?S.G.chests.map(c=>c.open?1:0).join(''):undefined,
       b:S.bots.map(b=>[OBJS.indexOf(b.obj),b.found?1:0])}); } }
   } else {
     for(const c of S.creatures){ if(c.tx==null) continue; const ox=c.x, oy=c.y; c.x+=(c.tx-c.x)*Math.min(1,dt*10); c.y+=(c.ty-c.y)*Math.min(1,dt*10); c.t+=dt; creatureAudio(c,dt,Math.hypot(c.x-ox,c.y-oy)>.3); }
@@ -3593,13 +3675,13 @@ function update(dt){ if(S.mode==='giant') return updateGiant(dt); if(S.mode==='h
   if(S.mode==='seek'){ for(const b of S.bots){ if(b.found) continue; b.giggleT-=dt; if(b.giggleT<=0){ b.giggleT=rnd(5,10);
         const o={x:b.obj.cx,y:b.obj.cy}, d=physDist(o,p); if(d<420&&!S.out){ SFX.giggle(relPan(o),.03+.1*(1-d/420)); if(d<260) float(o.x+rnd(-10,10),o.y,'hihi','#ffd166',1,1.4); } } } }
   if(S.net){ for(const q of Object.values(NET.players)){ if(q.me||!q.st) continue; const st=q.st; if(q.rx==null){ q.rx=st.x; q.ry=st.y; }
-      const ox=q.rx, oy=q.ry; q.rx+=(st.x-q.rx)*Math.min(1,dt*12); q.ry+=(st.y-q.ry)*Math.min(1,dt*12); q.acc=(q.acc||0)+Math.hypot(q.rx-ox,q.ry-oy);
+      const ox=q.rx, oy=q.ry; q.rx+=(st.x-q.rx)*Math.min(1,dt*12); q.ry+=(st.y-q.ry)*Math.min(1,dt*12); q.acc=(q.acc||0)+Math.hypot(q.rx-ox,q.ry-oy); if(q.role==='nav'||S.role==='nav') continue;
       if(q.acc>46){ q.acc=0; const d=Math.hypot(q.rx-p.x,q.ry-p.y); if(d<6*T&&!st.out&&st.h<0&&!(q.role==='taya'&&S.countdown>0)){ const v=(1-d/(6*T)); if(q.role==='taya') SFX.mstep(.05+.25*v,relPan({x:q.rx,y:q.ry})); else SFX.pstep(.02+.08*v,relPan({x:q.rx,y:q.ry})); } } }
-    S.sendT-=dt; if(S.sendT<=0){ S.sendT=1/15; netSend({t:'st',x:Math.round(p.x),y:Math.round(p.y),a:+p.a.toFixed(2),h:p.hidden?OBJS.indexOf(p.hidden):-1,n:Math.round(S.noise),hp:S.hearts,out:S.out?1:0}); } }
+    S.sendT-=dt; if(S.sendT<=0){ S.sendT=1/15; netSend({t:'st',x:Math.round(p.x),y:Math.round(p.y),a:+p.a.toFixed(2),h:p.hidden?OBJS.indexOf(p.hidden):-1,n:Math.round(S.noise),hp:S.hearts,out:S.out?1:0,b:S.G?Math.round(S.G.bat):undefined,L:S.flashOn?1:0}); } }
   let near=1e9; if(S.role==='hider'&&!S.out){ for(const c of S.creatures) near=Math.min(near,physDist(c,p)); const ty=S.mode==='taya'&&S.countdown<=0&&S.role!=='taya'?tayaEntity():null; if(ty) near=Math.min(near,physDist(ty,p)); }
   S.hbT-=dt; if(near<380&&S.hbT<=0){ SFX.thump(); S.hbT=.32+(near/380)*.9; if(near<160) S.shake=Math.max(S.shake,1.5); }
   S.nearest=near; if(S.shake>0) S.shake=Math.max(0,S.shake-dt*6);
-  const r=roomAt(p); if(r&&r!==S.room){ S.room=r; banner(r.name); }
+  const r=roomAt(p); if(r&&r!==S.room){ S.room=r; if(S.role!=='nav') banner(r.name); }
   for(const q of S.particles) q.life-=dt; S.particles=S.particles.filter(q=>q.life>0);
 }
 
@@ -3638,7 +3720,9 @@ const shade=(hex,k)=>'#'+new THREE.Color(hex).multiplyScalar(k).getHexString();
 const PRODUCE={'🐟':'#9fb4c0','🦐':'#ff8a65','🦑':'#e1bee7','🥬':'#7cb342','🍅':'#e53935','🍌':'#fdd835','🥕':'#fb8c00','🧅':'#8e5aa8','🍖':'#c0392b','🥩':'#b71c1c','🍲':'#8d6e63','🍱':'#ff7043'};
 function buildProp(o){ let Wd=o.w*.92, Dp=o.h*.92; const rot=o.h>o.w; if(rot){ const t=Wd; Wd=Dp; Dp=t; } const c=o.c||'#888', n=o.n, P=new PB(), dk=shade(c,.55), lt=shade(c,1.25);
   const legs=(h,col)=>{ for(const sx of [-1,1]) for(const sz of [-1,1]) P.box(.06,h,.06,sx*(Wd/2-.07),0,sz*(Dp/2-.07),col); };
-  if(/Bed|Crib/.test(n)){ P.box(Wd,.16,Dp,0,.04,0,dk); P.box(Wd*.96,.13,Dp*.9,0,.2,0,'#e8e4dc'); P.box(Wd*.66,.05,Dp*.94,Wd*.15,.32,0,c); P.box(Wd*.2,.09,Dp*.6,-Wd*.36,.33,0,'#f5f0e6'); P.box(.08,.55,Dp,-Wd/2,0,0,dk); if(/Crib/.test(n)) for(let i=-3;i<=3;i++) P.box(.03,.5,.03,i*Wd/7,.2,Dp/2,lt); }
+  if(n==='Generator'){ P.box(.82,.5,.56,0,.06,0,'#55705a'); P.box(.86,.06,.6,0,.56,0,'#3a4a3e'); for(const sx of [-1,1]) P.box(.06,.06,.6,sx*.36,0,0,'#222'); P.cyl(.13,.13,.42,-.18,.12,0,'#9e9e9e'); P.cyl(.13,.13,.42,.18,.12,0,'#9e9e9e'); P.box(.3,.18,.02,0,.3,.29,'#1b1b1b'); P.box(.06,.06,.02,-.06,.34,.3,'#ffd166'); P.box(.06,.06,.02,.06,.34,.3,'#ff3d6e'); P.cyl(.04,.04,.22,.3,.6,-.16,'#424242'); }
+  else if(n==='Supply Chest'){ P.box(.8,.34,.5,0,.04,0,'#8d6e4c'); for(const sx of [-.3,.3]) P.box(.06,.36,.52,sx,.03,0,'#3e2a1a'); P.box(.08,.1,.02,0,.24,.26,'#d4af37'); }
+  else if(/Bed|Crib/.test(n)){ P.box(Wd,.16,Dp,0,.04,0,dk); P.box(Wd*.96,.13,Dp*.9,0,.2,0,'#e8e4dc'); P.box(Wd*.66,.05,Dp*.94,Wd*.15,.32,0,c); P.box(Wd*.2,.09,Dp*.6,-Wd*.36,.33,0,'#f5f0e6'); P.box(.08,.55,Dp,-Wd/2,0,0,dk); if(/Crib/.test(n)) for(let i=-3;i<=3;i++) P.box(.03,.5,.03,i*Wd/7,.2,Dp/2,lt); }
   else if(/Closet|Wardrobe|Aparador|Cabinet|Lockers|Kumpisalan|Filing|Old Freezer|Chest Freezer|Ice Chest|Ref$/.test(n)){ const H=/Chest|Ice/.test(n)?.42:/Lockers|Ref|Kumpisalan|Aparador|Closet|Wardrobe/.test(n)?1.15:/Filing/.test(n)?.72:.95;
     P.box(Wd,H,Dp*.86,0,0,0,c); P.box(Wd*1.02,.05,Dp*.9,0,H,0,dk); for(const sz of [-1,1]){ P.box(.02,H*.9,.01,0,H*.05,sz*Dp*.43,dk); if(H>.5){ P.box(.03,.12,.03,-.05,H*.48,sz*Dp*.44,'#d4af37'); P.box(.03,.12,.03,.05,H*.48,sz*Dp*.44,'#d4af37'); } if(/Lockers/.test(n)) for(let i=1;i<4;i++) P.box(.02,H*.9,.01,(i/4-.5)*Wd,H*.05,sz*Dp*.43,dk); } }
   else if(/Counter|Altar|Carinderia/.test(n)){ P.box(Wd,.55,Dp*.8,0,0,0,c); P.box(Wd*1.03,.05,Dp*.86,0,.55,0,lt); if(/Altar/.test(n)){ P.box(.05,.5,.05,0,.6,0,'#d4af37'); P.box(.26,.05,.05,0,.92,0,'#d4af37'); P.cyl(.03,.03,.14,-Wd*.35,.6,0,'#fff8e1'); P.cyl(.03,.03,.14,Wd*.35,.6,0,'#fff8e1'); P.sph(.03,-Wd*.35,.78,0,'#ffcc40'); P.sph(.03,Wd*.35,.78,0,'#ffcc40'); } else { P.cyl(.12,.1,.12,-Wd*.25,.6,0,'#9e9e9e'); P.cyl(.12,.1,.12,Wd*.15,.6,0,'#9e9e9e'); } }
@@ -3707,9 +3791,9 @@ function build3D(){ R3.built=R3.want; const sc=R3.scene;
   const rails=new PB(), stairs=new PB();
   for(let y=0;y<H;y++) for(let x=0;x<W;x++){ const v=grid[y][x]; const r=x>=OFFT?1:0, lx=x-r*OFFT, base=r*FH;
     if(v===3){ const pb=rails; for(const [ox,oz] of [[.1,.1],[.9,.1],[.1,.9],[.9,.9],[.5,.1],[.1,.5],[.9,.5],[.5,.9]]) pb.box(.06,.6,.06,lx+ox,base,y+oz,'#5d4037'); pb.box(1,.06,.14,lx+.5,base+.6,y+.1,'#8d6440'); pb.box(1,.06,.14,lx+.5,base+.6,y+.9,'#8d6440'); pb.box(.14,.06,1,lx+.1,base+.6,y+.5,'#8d6440'); pb.box(.14,.06,1,lx+.9,base+.6,y+.5,'#8d6440'); if(r){ quad('rf'+r,floorMat(roomOfTile(x,y)),[lx,base,y],[lx,base,y+1],[lx+1,base,y+1],[lx+1,base,y],[0,1,0]); } continue; }
-    if(v!==0&&v!==4) continue; const room=roomOfTile(x,y), wm=wallMat(room.tex);
+    if(v!==0&&v!==4&&v!==5) continue; const room=roomOfTile(x,y), wm=wallMat(room.tex);
     for(const [dx,dy,nx,nz,ex,ez] of [[1,0,-1,0,lx+1,y+.5],[-1,0,1,0,lx,y+.5],[0,1,0,-1,lx+.5,y+1],[0,-1,0,1,lx+.5,y]]){ if(G(x+dx,y+dy)===1&&!(r===0&&x+dx>=SW)) wallFace('w:'+room.tex,wm,ex,ez,nx,nz,base,FH); }
-    if(v===0){ const fm=floorMat(room); quad('f:'+room.name+room.tex,fm,[lx,base+.001,y],[lx,base+.001,y+1],[lx+1,base+.001,y+1],[lx+1,base+.001,y],[0,1,0]);
+    if(v===0||v===5){ const fm=floorMat(room); quad('f:'+room.name+room.tex,fm,[lx,base+.001,y],[lx,base+.001,y+1],[lx+1,base+.001,y+1],[lx+1,base+.001,y],[0,1,0]);
       if(r===1){ const below=roomOfTile(x-OFFT,y), cm=colMat(below&&below.ceil?shade(below.ceil,1.8):'#2a2018'); quad('uc:'+cm.uuid,cm,[lx,base-.002,y],[lx+1,base-.002,y],[lx+1,base-.002,y+1],[lx,base-.002,y+1],[0,-1,0]); } }
     if(room.ceil){ const above=r===0?G(x+OFFT,y):2; if(r===1||(above!==0&&above!==4&&above!==3)){ if(!(r===0&&v===4)){ const cm=colMat(shade(room.ceil,1.8)); const cy=base+FH; quad('c:'+cm.uuid,cm,[lx,cy,y],[lx+1,cy,y],[lx+1,cy,y+1],[lx,cy,y+1],[0,-1,0]); }
         if(r===0&&above===2){ const rm=colMat('#2b2430'); quad('roof',rm,[lx,FH+.002,y],[lx,FH+.002,y+1],[lx+1,FH+.002,y+1],[lx+1,FH+.002,y],[0,1,0]); } } }
@@ -3719,7 +3803,8 @@ function build3D(){ R3.built=R3.want; const sc=R3.scene;
   for(const k in Q){ const q=Q[k], g=new THREE.BufferGeometry(); g.setAttribute('position',new THREE.Float32BufferAttribute(q.p,3)); g.setAttribute('normal',new THREE.Float32BufferAttribute(q.n,3)); g.setAttribute('uv',new THREE.Float32BufferAttribute(q.u,2));
     const m=new THREE.Mesh(g,q.m); sc.add(m); R3.static.push(m); }
   for(const pb of [rails,stairs]) if(pb.p.length){ const m=pb.mesh(); sc.add(m); R3.static.push(m); }
-  for(const o of OBJS){ const m=buildProp(o); m.position.set(lxOf(o.cx)/T,o.f*FH,o.cy/T); sc.add(m); R3.static.push(m); R3.objMesh.set(o,m); } }
+  for(const o of OBJS){ const m=buildProp(o); m.position.set(lxOf(o.cx)/T,o.f*FH,o.cy/T); sc.add(m); R3.static.push(m); R3.objMesh.set(o,m); }
+  gensBuild3D(sc); }
 function sprite3(i,map,x,y,z,w,h,op,ghost){ let s=R3.spr[i]; if(!s){ s=new THREE.Sprite(new THREE.SpriteMaterial({transparent:true,alphaTest:.04})); R3.scene.add(s); R3.spr[i]=s; }
   if(s.material.map!==map){ s.material.map=map; s.material.needsUpdate=true; } s.material.opacity=op; s.material.depthWrite=!ghost; s.position.set(x,y,z); s.scale.set(w,h,1); s.visible=true; return s; }
 function eye3(i,x,y,z,sz,op){ let s=R3.eyes[i]; if(!s){ s=new THREE.Sprite(new THREE.SpriteMaterial({map:R3.eyeTex,fog:false,transparent:true,depthWrite:false,blending:THREE.AdditiveBlending})); R3.scene.add(s); R3.eyes[i]=s; }
@@ -3731,7 +3816,7 @@ function render3D(){ const t=performance.now()/1000, p=S.player, D=DIFF[S.diff],
   const sc=isTouch?.55:.75; if(!R3.inXR&&(R3.w!==cssW||R3.h!==cssH)){ R3.w=cssW; R3.h=cssH; R.setPixelRatio(1); R.setSize(Math.max(160,Math.round(cssW*sc*Math.min(dpr,1.6))),Math.max(120,Math.round(cssH*sc*Math.min(dpr,1.6))),false);
     R3.camera.aspect=cssW/cssH; R3.camera.fov=clamp(2*Math.atan(Math.tan(.78)/R3.camera.aspect)*180/Math.PI,55,84); R3.camera.updateProjectionMatrix(); }
   const ref=p.hidden?{x:p.hidden.cx,y:p.hidden.cy}:p, reg=regionOf(ref.x), lx=lxOf(ref.x)/T, lz=ref.y/T;
-  const base=p.hidden?p.hidden.f*FH:zOf(p), eye=p.hidden?.32:EYE+Math.sin(p.bob)*.022, sh=S.shake*.012;
+  const base=p.hidden?p.hidden.f*FH:zOf(p), eye=p.hidden?(S.mode==='gens'?(p.hidden.hs==='under'?.09:p.hidden.hs==='inside'?.72:.32):.32):EYE+Math.sin(p.bob)*.022, sh=S.shake*.012;
   if(R3.inXR){ R3.rig.position.set(lx,base+(p.hidden?.32:EYE),lz); } else if(thirdP()&&!p.hidden){ place3P(lx,lz,base,ref,p,sh); } else { R3.camera.position.set(lx+(Math.random()-.5)*sh,base+eye+(Math.random()-.5)*sh,lz); R3.camera.lookAt(lx+Math.cos(p.a),base+eye-.03,lz+Math.sin(p.a)); } R3.camera.updateMatrixWorld();
   const lightMul=S.mode==='hunt'?1.35:S.role==='taya'?1.2:S.out?1.5:1, far=(D.light/T)*1.55*lightMul*(p.hidden?.8:1);
   const room=roomAt(ref)||ROOMS[0], outdoors=!room.ceil, bg=outdoors?0x070a1c:0x05040a;
@@ -3742,14 +3827,15 @@ function render3D(){ const t=performance.now()/1000, p=S.player, D=DIFF[S.diff],
   if(!R3.kid){ R3.kid=makeKid(1); R3.scene.add(R3.kid.g); } R3.kid.g.visible=thirdP()&&!p.hidden;
   if(R3.kid.g.visible){ const pz=zOf(p); animKid(R3.kid,lxOf(p.x)/T,pz,p.y/T,p.a,p.bob,S.mode==='hunt',!!S.firing); R3.kid.g.traverse(o=>{ if(o.material&&o.material.opacity!==undefined){ o.material.transparent=S.out; o.material.opacity=S.out?.35:1; } }); }
   let si=0, ei=0; const marks=[], labels=[];
-  for(const c of S.creatures){ const cz=zOf(c), cx=lxOf(c.x)/T, cy=c.y/T, ch=c.state==='chase', h=1.38, w=h*96/140, lift=Math.sin(t*5+c.wob)*.03;
+  if(S.mode==='gens') gensRender3D(t,lx,lz,base); else hideGensMeshes();
+  for(const c of S.creatures){ if(S.mode==='gens'){ if(c.mark) marks.push({x:lxOf(c.x)/T,y:zOf(c)+1.6,z:c.y/T,t:c.mark,col:c.mark==='!'?'#ff3d6e':'#ffd166',o:c}); continue; } const cz=zOf(c), cx=lxOf(c.x)/T, cy=c.y/T, ch=c.state==='chase', h=1.38, w=h*96/140, lift=Math.sin(t*5+c.wob)*.03;
     sprite3(si++,texOf(creatureSprite(creatureFace(c),ch)),cx,cz+h/2+lift,cy,w,h,1,false); if(regionOf(c.x)===reg){ const de=Math.hypot(cx-lx,cy-lz), eo=clamp((de-2.5)/3,0,1)*(ch?1:.7); if(eo>.02) eye3(ei++,cx,cz+h*.8+lift,cy,.3,eo); }
     if(c.mark) marks.push({x:cx,y:cz+h+.15,z:cy,t:c.mark,col:c.mark==='!'?'#ff3d6e':'#ffd166',o:c}); }
   if(S.ghosts) for(const g of S.ghosts){ g.scr=null; if(g.caught) continue; const G=GTYPES[g.type], fk=ghostFrameKey(g), art=GHOST_IMG[artType(g)]&&GHOST_IMG[artType(g)][fk], aimg=ghostArtSprite(faceFromKey(g.fk),artType(g),fk,g.flip);
     const img=aimg||ghostSprite(faceFromKey(g.fk),g.type,g.state==='snared'||g.state==='trapped'||g.state==='charge'), hh=aimg?1.35*G.size*art.rel:1.2*G.size, ww=aimg?hh*art.ar:hh*.78, gz=zOf(g)+.2+Math.sin(t*2+g.wob)*.07, gx=lxOf(g.x)/T, gy=g.y/T;
     sprite3(si++,texOf(img),gx,gz+hh/2,gy,ww,hh,ghostAlpha(g,t),true);
     if(regionOf(g.x)===reg&&los(ref,g)){ const pc=proj3(gx,gz+hh*.55,gy), pt=proj3(gx,gz+hh,gy), pb=proj3(gx,gz,gy); if(pc&&pt&&pb) g.scr={x:pc.x/cv.width*RW,y:pc.y/cv.height*RH,vis:true,hpx:Math.abs(pb.y-pt.y)/cv.height*RH}; } }
-  if(S.net) for(const q of Object.values(NET.players)){ if(q.me||!q.st||q.rx==null||q.st.out) continue; const pos={x:q.rx,y:q.ry}, qz=zOf(pos), qx=lxOf(q.rx)/T, qy=q.ry/T;
+  if(S.net) for(const q of Object.values(NET.players)){ if(q.me||!q.st||q.rx==null||q.st.out||q.role==='nav') continue; const pos={x:q.rx,y:q.ry}, qz=zOf(pos), qx=lxOf(q.rx)/T, qy=q.ry/T;
     if(q.role==='taya'){ if(S.mode==='taya'&&S.countdown>0) continue; const h=1.38; sprite3(si++,texOf(creatureSprite(playerFace(q),true)),qx,qz+h/2,qy,h*96/140,h,1,false); labels.push({x:qx,y:qz+h+.12,z:qy,t:q.name,col:'#ff3d6e',o:pos}); }
     else { if(q.st.h>=0) continue; const h=.95; sprite3(si++,texOf(kidSprite(q.color)),qx,qz+h/2,qy,h*64/112,h,1,false); labels.push({x:qx,y:qz+h+.1,z:qy,t:q.name,col:q.color,o:pos}); } }
   if(R3.inXR) si=vrTextSprites(si,marks,labels,t,ref); for(let i=si;i<R3.spr.length;i++) R3.spr[i].visible=false; for(let i=ei;i<R3.eyes.length;i++) R3.eyes[i].visible=false;
@@ -3763,7 +3849,201 @@ function render3D(){ const t=performance.now()/1000, p=S.player, D=DIFF[S.diff],
   ctx.globalAlpha=1;
   if(S.net&&S.role==='taya'&&S.countdown<=0) for(const q of Object.values(NET.players)){ if(q.me||!q.st||q.st.out||q.role!=='hider'||q.st.n<55) continue; const s=proj3(lxOf(q.st.x)/T,zOf(q.st)+.6,q.st.y/T); if(!s) continue;
     ctx.globalAlpha=.6+Math.sin(t*10)*.3; ctx.font=`${Math.round(clamp(90/s.d,18,60)*dpr)}px ${EMOJI_FONT}`; ctx.fillText('🔊',s.x,s.y); ctx.globalAlpha=1; }
-  drawOverlays(t); }
+  drawOverlays(t); if(S.mode==='gens') drawGensOverlay(t); }
+
+/* ================= ⚡ ILAW: HOTEL ESPERANZA (doors, batteries, 10 generators, co-op navigator) ================= */
+let DOORS=[], DOORMAP=new Map();
+const passMon=(tx,ty)=>passable(tx,ty)||(tx>=0&&ty>=0&&tx<W&&ty<H&&grid[ty][tx]===5);
+const doorOpenAt=i=>{ const d=DOORMAP.get(i); return !d||d.open; };
+function setDoor(d,open,fromLocal){ if(!d||d.open===open) return; d.open=open; solid[d.y][d.x]=open?0:1; d.lt=S?S.t:0;
+  if(S&&S.player){ const dd=physDist(S.player,tc(d.x,d.y)); if(dd<9*T) SFX.door(open,.05+.25*(1-dd/(9*T)),relPan(tc(d.x,d.y))); } }
+function frontOf(o){ if(o._front) return o._front; let best=null, bs=-1;
+  const sides=[[o.x+o.w,Math.floor(o.y+(o.h-1)/2),1,0],[o.x-1,Math.floor(o.y+(o.h-1)/2),-1,0],[Math.floor(o.x+(o.w-1)/2),o.y+o.h,0,1],[Math.floor(o.x+(o.w-1)/2),o.y-1,0,-1]];
+  for(const [x,y,dx,dy] of sides){ if(!passMon(x,y)) continue; let sc=0; for(let k=0;k<4;k++){ if(passMon(x+dx*k,y+dy*k)) sc++; else break; } if(sc>bs){ bs=sc; best={t:tc(x,y),a:Math.atan2(dy,dx)}; } }
+  o._front=best||{t:{x:o.cx,y:o.cy},a:0}; return o._front; }
+function approachTile(o,c){ if(o.hs==='inside'||o.hs==='under'){ const fr=frontOf(o); if(fr&&passMon(Math.floor(fr.t.x/T),Math.floor(fr.t.y/T))) return fr.t; } let best=null,bd=1e9; for(let y=o.y-1;y<=o.y+o.h;y++) for(let x=o.x-1;x<=o.x+o.w;x++){ if(x>=o.x&&x<o.x+o.w&&y>=o.y&&y<o.y+o.h) continue;
+    if((x<o.x||x>=o.x+o.w)&&(y<o.y||y>=o.y+o.h)) continue; if(!passMon(x,y)) continue; const pt=tc(x,y), d=Math.hypot(pt.x-c.x,pt.y-c.y); if(d<bd){ bd=d; best=pt; } }
+  return best||{x:o.cx,y:o.cy}; }
+function gensInspect(c,objs){ c.queue=objs.slice(); c.state='inspect'; nextInspect(c); }
+function nextInspect(c){ const o=c.queue&&c.queue.shift(); if(!o){ c.state='patrol'; c.path=[]; c.peekObj=null; c.sawHide=false; return; }
+  c.peekObj=o; const ap=approachTile(o,c); goTo(c,ap.x,ap.y); }
+function hidesNear(c,r,n){ const reg=regionOf(c.x); return HIDES.filter(o=>o.f===reg&&physDist(c,{x:o.cx,y:o.cy})<r*T&&o!==c.lastInsp).sort((a,b)=>dist(c,{x:a.cx,y:a.cy})-dist(c,{x:b.cx,y:b.cy})).slice(0,n); }
+const gensOn=()=>S&&S.G?S.G.gens.filter(g=>g.on).length:0;
+function genOn(i,quiet){ const g=S.G.gens[i]; if(!g||g.on) return; g.on=true; g.p=1; const n=gensOn(); SFX.power();
+  toast(n>=S.G.gens.length?'💡 ALL 10 ON! Run to the EXIT in the lobby!':`⚡ Generator ${n}/${S.G.gens.length} is running!`); float(g.o.cx,g.o.cy,'⚡','#ffd166',1.4,1.8);
+  if(S.isAuth) for(const c of S.creatures){ if(c.state==='chase') continue; if(physDist(c,{x:g.o.cx,y:g.o.cy})<14*T){ c.state='investigate'; c.mark='?'; c.markT=1.5; goTo(c,g.o.cx+rnd(-40,40),g.o.cy+rnd(-40,40)); } }
+  if(n>=S.G.gens.length&&!S.G.allOn){ S.G.allOn=true; SFX.win(); } }
+function openChest(i){ const ch=S.G.chests[i]; if(!ch||ch.open) return; ch.open=true; SFX.rustle(); S.noise=Math.max(S.noise,38);
+  if(ch.has){ S.G.bat=Math.min(100,S.G.bat+50); S.G.lowWarn=S.G.bat<20; SFX.chime(); toast('🔋 Battery! Flashlight +50%'); float(ch.o.cx,ch.o.cy,'🔋','#5bf0a8',1.3,1.5); if(!S.flashOn&&!S.player.hidden) S.flashOn=true; }
+  else toast(pick(['Empty… just old hotel towels.','Nothing but cobwebs 🕸️','Only a rusty key… useless.']));
+  if(S.net&&!S.isAuth) netSend({t:'gact',k:'chest',i}); }
+function nearUse(){ const p=S.player; if(!S.G) return null; let best=null, bs=1e9;
+  const sc=(x,y,d)=>{ const ang=Math.abs(((Math.atan2(y-p.y,x-p.x)-p.a)%(Math.PI*2)+Math.PI*3)%(Math.PI*2)-Math.PI); return d+ang*30; };
+  DOORS.forEach((d,i)=>{ const c=tc(d.x,d.y); if(regionOf(c.x)!==regionOf(p.x)) return; const dd=dist(p,c); if(dd>T*1.65) return; const s=sc(c.x,c.y,dd); if(s<bs){ bs=s; best={k:'door',i,d}; } });
+  S.G.gens.forEach((g,i)=>{ if(g.on) return; const dd=rectDist(p,g.o); if(dd>40) return; const s=sc(g.o.cx,g.o.cy,dd)-10; if(s<bs){ bs=s; best={k:'gen',i,g}; } });
+  S.G.chests.forEach((c,i)=>{ if(c.open) return; const dd=rectDist(p,c.o); if(dd>40) return; const s=sc(c.o.cx,c.o.cy,dd)-5; if(s<bs){ bs=s; best={k:'chest',i,c}; } });
+  return best; }
+function useTap(){ if(!S||S.mode!=='gens'||S.over||S.paused||S.out||S.role==='nav'||S.stun>0) return; const p=S.player; if(p.hidden) return;
+  const u=nearUse(); if(!u) return toast('Walk up to a door, generator or chest.');
+  if(u.k==='door'){ const c=tc(u.d.x,u.d.y); if(u.d.open&&(dist(p,c)<T*.62||S.creatures.some(m=>Math.floor(m.x/T)===u.d.x&&Math.floor(m.y/T)===u.d.y))) return toast('Step out of the doorway first.');
+    setDoor(u.d,!u.d.open,true); S.noise=Math.max(S.noise,34); if(S.net&&!S.isAuth) netSend({t:'gact',k:'door',i:u.i,o:u.d.open?1:0}); } }
+function toggleFlash(){ if(!S||S.mode!=='gens'||S.role==='nav'||S.out) return; if(S.player.hidden) return toast('Keep your light off while hiding!');
+  if(!S.flashOn&&S.G.bat<=0) return toast('🔋 No battery! Open chests to find some.'); S.flashOn=!S.flashOn; SFX.beep(S.flashOn?880:440); }
+function gensAct(from,m){ const G=S.G; if(m.k==='door'){ const d=DOORS[m.i|0]; if(d) setDoor(d,!!m.o); }
+  else if(m.k==='gen'){ const g=G.gens[m.i|0]; if(g&&!g.on){ g.p=Math.min(1,g.p+clamp(+m.d||0,0,.4)); if(g.p>=1) genOn(m.i|0); } }
+  else if(m.k==='chest'){ const c=G.chests[m.i|0]; if(c) c.open=true; } }
+function addPing(x,y,who){ if(!S.G) return; S.G.pings.push({x,y,t:S.t}); if(S.G.pings.length>4) S.G.pings.shift(); SFX.ping();
+  if(S.role!=='nav') toast(`📍 ${who||'Navigator'} pinged a spot — check it!`); }
+function navExplorer(){ const qs=Object.values(NET.players).filter(q=>!q.me&&q.role==='hider'&&q.st); if(!qs.length) return null;
+  let best=qs[0], bd=1e9; for(const q of qs){ for(const c of S.creatures){ const d=physDist(c,q.st); if(d<bd){ bd=d; best=q; } } } return best; }
+function gensTick(dt){ const p=S.player, G=S.G;
+  for(const d of DOORS) d.ang+=((d.open?1:0)-d.ang)*Math.min(1,dt*7);
+  G.pings=G.pings.filter(q=>S.t-q.t<12);
+  if(S.isAuth&&G.allOn&&!S.over){ for(const h of hiders()){ if(h.out||h.hidden) continue; if(physDist(h,START)<1.4*T) return authEnd('escape'); } }
+  if(S.role==='nav'){ const q=navExplorer(); if(q){ p.x=q.rx!=null?q.rx:q.st.x; p.y=q.ry!=null?q.ry:q.st.y; p.a=q.st.a||0; } return; }
+  if(p.hidden&&S.flashOn){ S.flashOn=false; G.flashWas=true; } if(!p.hidden&&G.flashWas){ G.flashWas=false; if(G.bat>0) S.flashOn=true; }
+  if(S.flashOn&&!S.out){ G.bat=Math.max(0,G.bat-dt*G.drain); if(G.bat<20&&!G.lowWarn){ G.lowWarn=true; toast('🔋 Battery low! Look in chests.'); }
+    if(G.bat<=0){ S.flashOn=false; SFX.beep(180); toast('🔦 Your flashlight died! Find batteries in chests.'); } }
+  const u=(!p.hidden&&!S.out&&S.stun<=0)?nearUse():null; G.tgt=u; const hold=useHeld||keys.has('KeyF'); G.rep=null;
+  if(hold&&u&&u.k==='gen'){ const g=u.g; G.rep=g; const d=dt/G.genTime; g.p=Math.min(1,g.p+d); G.pend=(G.pend||0)+d; G.wT=(G.wT||0)-dt; if(G.wT<=0){ G.wT=.35; SFX.wrench(); }
+    if(S.net&&!S.isAuth){ G.sendT=(G.sendT||0)-dt; if(G.sendT<=0||g.p>=1){ G.sendT=.25; netSend({t:'gact',k:'gen',i:u.i,d:+G.pend.toFixed(3)}); G.pend=0; } }
+    if(g.p>=1&&!g.on) genOn(u.i); }
+  else G.pend=0;
+  if(hold&&u&&u.k==='chest'){ u.c.t+=dt; if(u.c.t>=.9) openChest(u.i); } else G.chests.forEach(c=>c.t=0);
+  if(p.hidden&&!G.peekWarn&&S.creatures.some(c=>(c.state==='inspect'||c.state==='peek')&&c.peekObj===p.hidden&&physDist(c,{x:p.hidden.cx,y:p.hidden.cy})<3*T)){ G.peekWarn=true; toast('😨 It’s checking your hiding spot — HOLD YOUR BREATH!'); vibrate(80); }
+  if(!p.hidden) G.peekWarn=false; }
+function newGensState(mp){ const G={bat:100,drain:100/80,genTime:5.5,allOn:false,pings:[],rep:null,tgt:null};
+  G.gens=OBJS.filter(o=>o.n==='Generator').map(o=>({o,p:0,on:false}));
+  const cs=OBJS.filter(o=>o.n==='Supply Chest'); let has=mp&&typeof mp.ch==='string'&&mp.ch.length===cs.length?mp.ch.split('').map(v=>v==='1'):null;
+  if(!has){ const idx=cs.map((_,i)=>i).sort(()=>Math.random()-.5).slice(0,10); has=cs.map((_,i)=>idx.includes(i)); }
+  G.chests=cs.map((o,i)=>({o,has:has[i],open:false,t:0}));
+  const dbits=mp&&typeof mp.do==='string'&&mp.do.length===DOORS.length?mp.do:DOORS.map(()=>Math.random()<.45?'1':'0').join('');
+  DOORS.forEach((d,i)=>{ d.open=dbits[i]==='1'; solid[d.y][d.x]=d.open?0:1; d.ang=d.open?1:0; }); return G; }
+function newGensGame(mp){ if(!R3.ok&&!mp) toast('Tip: Ilaw looks best with 3D graphics on.');
+  S.G=newGensState(mp); S.flashOn=S.role!=='nav'; S.navF=-1; $('bSearch').hidden=S.role==='nav'; $('bSearch').innerHTML='<span class="em">🔧</span>Use';
+  $('batWrap').hidden=S.role==='nav'; $('bLight').hidden=!isTouch||S.role==='nav'; $('navFloorBtn').hidden=S.role!=='nav'; $('camBtn').hidden=S.role==='nav'; $('mini').hidden=!(settings.mini&&!S.net&&S.role!=='nav'); $('mapBtn').hidden=!!S.net;
+  if(S.role==='nav'){ $('touch').hidden=true; $('noiseWrap').hidden=true; setTimeout(()=>$('roomBanner').classList.remove('show'),50); toast('🗺 You’re the Navigator! Guide your partner to the generators.'); }
+  else toast(S.net?'⚡ Turn on 10 generators. Your Navigator has the map!':'⚡ Turn on 10 generators, then escape. Keep your flashlight charged!');
+  banner('⚡ Hotel Esperanza'); }
+
+/* ---- navigator map ---- */
+function navLayout(){ const Wd=cv.width, Hd=cv.height, top=96*dpr, bot=16*dpr, s=Math.min((Wd-24*dpr)/SW,(Hd-top-bot)/H), ox=(Wd-s*SW)/2, oy=top+((Hd-top-bot)-s*H)/2; return {s,ox,oy}; }
+function navFloor(){ if(S.navF>=0) return S.navF; const q=navExplorer(); return q?regionOf(q.st.x):0; }
+function renderNav(){ const c=ctx, Wd=cv.width, Hd=cv.height, t=performance.now()/1000, f=navFloor(), L=navLayout(), s=L.s, X=tx=>L.ox+tx*s, Y=ty=>L.oy+ty*s;
+  c.setTransform(1,0,0,1,0,0); c.fillStyle='#0b0814'; c.fillRect(0,0,Wd,Hd); const off=f*OFFT;
+  for(let ty=0;ty<H;ty++) for(let tx=0;tx<SW;tx++){ const v=grid[ty][tx+off]; if(v===2) continue; const ri=roomIdx[ty][tx+off];
+    let col='#3a3228'; if(v===1) col='#4a3d70'; else if(v===3) col='#6b5a4a'; else if(v===4) col='#ffc857'; else if(ri>=0){ const fl=ROOMS[ri].floor; col=`rgb(${fl[0]*.55|0},${fl[1]*.55|0},${fl[2]*.55|0})`; }
+    c.fillStyle=col; c.fillRect(X(tx),Y(ty),Math.ceil(s),Math.ceil(s)); }
+  c.textAlign='center'; c.textBaseline='middle'; c.font=`700 ${Math.round(s*.62)}px "Baloo 2",sans-serif`; c.fillStyle='rgba(255,255,255,.35)';
+  ROOMS.forEach(r=>{ if(r.f!==f) return; c.fillText(r.name,X((r.x0+r.x1+1)/2-off),Y(r.y0+.8)); });
+  for(const d of DOORS){ if(regionOf(d.x*T)!==f) continue; const x=X(d.x-off), y=Y(d.y); c.fillStyle=d.open?'rgba(91,240,168,.5)':'#c08a4e';
+    if(d.open) c.fillRect(x+s*.1,y+s*.42,s*.18,s*.16); else c.fillRect(x,y+s*.3,s,s*.4); }
+  const icon=(o,e,sz,a)=>{ c.globalAlpha=a==null?1:a; c.font=`${Math.round(s*sz)}px ${EMOJI_FONT}`; c.fillText(e,X(o.cx/T-off),Y(o.cy/T)); c.globalAlpha=1; };
+  HIDES.forEach(o=>{ if(o.f!==f) return; c.strokeStyle='rgba(255,200,87,.35)'; c.lineWidth=dpr; c.strokeRect(X(o.x-off)+1,Y(o.y)+1,o.w*s-2,o.h*s-2); });
+  S.G.chests.forEach(ch=>{ if(ch.o.f!==f) return; icon(ch.o,'📦',.8,ch.open?.25:1); });
+  S.G.gens.forEach(g=>{ if(g.o.f!==f) return; const x=X(g.o.cx/T-off), y=Y(g.o.cy/T);
+    c.fillStyle=g.on?'rgba(91,240,168,.25)':`rgba(255,200,87,${.18+.12*Math.sin(t*4)})`; c.beginPath(); c.arc(x,y,s*.9,0,Math.PI*2); c.fill();
+    icon(g.o,g.on?'✅':'⚡',.95); if(!g.on&&g.p>0){ c.strokeStyle='#ffd166'; c.lineWidth=3*dpr; c.beginPath(); c.arc(x,y,s*.75,-Math.PI/2,-Math.PI/2+g.p*Math.PI*2); c.stroke(); } });
+  if(regionOf(START.x)===f){ c.font=`800 ${Math.round(s*.7)}px "Baloo 2",sans-serif`; c.fillStyle=S.G.allOn?'#5bf0a8':'#ff6b8a'; c.fillText(S.G.allOn?'🚪 EXIT':'🔒 EXIT',X(START.x/T-off),Y(START.y/T)); }
+  for(const pg of S.G.pings){ if(regionOf(pg.x)!==f) continue; const k=((S.t-pg.t)%1.4)/1.4; c.strokeStyle=`rgba(91,240,168,${1-k})`; c.lineWidth=3*dpr; c.beginPath(); c.arc(X(lxOf(pg.x)/T),Y(pg.y/T),s*(.4+k*1.6),0,Math.PI*2); c.stroke();
+    c.font=`${Math.round(s*.9)}px ${EMOJI_FONT}`; c.fillText('📍',X(lxOf(pg.x)/T),Y(pg.y/T)-s*.4); }
+  const exps=Object.values(NET.players).filter(q=>!q.me&&q.role==='hider'&&q.st);
+  let warn=null;
+  for(const m of S.creatures){ const near=exps.some(q=>!q.st.out&&physDist(m,q.st)<9*T); if(!near) continue;
+    const q=exps.reduce((a,b)=>physDist(m,b.st)<physDist(m,a.st)?b:a); warn={q,d:physDist(m,q.st)};
+    if(regionOf(m.x)!==f) continue; const x=X(lxOf(m.x)/T), y=Y(m.y/T); c.fillStyle=`rgba(255,40,70,${.25+.2*Math.sin(t*8)})`; c.beginPath(); c.arc(x,y,s*1.1,0,Math.PI*2); c.fill();
+    c.font=`${Math.round(s*1.1)}px ${EMOJI_FONT}`; c.fillText('💀',x,y); if(m.state==='chase'){ c.font=`800 ${Math.round(s*.8)}px "Baloo 2",sans-serif`; c.fillStyle='#ff3d6e'; c.fillText('!',x+s*.8,y-s*.8); } }
+  for(const q of exps){ const st=q.st; if(regionOf(st.x)!==f) continue; const qx=q.rx!=null?q.rx:st.x, qy=q.ry!=null?q.ry:st.y, x=X(lxOf(qx)/T), y=Y(qy/T);
+    if(st.h>=0&&OBJS[st.h]){ icon(OBJS[st.h],'🫣',.9); } else { c.save(); c.translate(x,y); c.rotate(st.a||0); c.fillStyle=st.out?'rgba(160,180,255,.5)':q.color; c.beginPath(); c.moveTo(s*.6,0); c.lineTo(-s*.4,s*.38); c.lineTo(-s*.2,0); c.lineTo(-s*.4,-s*.38); c.closePath(); c.fill(); c.restore(); }
+    c.font=`800 ${Math.round(s*.55)}px "Baloo 2",sans-serif`; c.fillStyle=q.color; c.fillText(q.name+(typeof st.b==='number'?` 🔋${st.b}%`:''),x,y-s*.95); }
+  c.textAlign='left'; c.font=`800 ${Math.round(22*dpr)}px "Baloo 2",sans-serif`; c.fillStyle='#fff'; c.fillText(f?'2F — Guest rooms':'1F — Ground floor',L.ox,L.oy-14*dpr);
+  if(warn){ c.textAlign='center'; c.font=`800 ${Math.round(20*dpr)}px "Baloo 2",sans-serif`; c.fillStyle=`rgba(255,80,110,${.7+.3*Math.sin(t*6)})`; c.fillText(`👣 Footsteps near ${warn.q.name}!${warn.q.st.h>=0?' Tell them to hold their breath!':''}`,Wd/2,Hd-26*dpr); } }
+function navTap(e){ const r=cv.getBoundingClientRect(), px=(e.clientX-r.left)*cv.width/r.width, py=(e.clientY-r.top)*cv.height/r.height, L=navLayout(), tx=(px-L.ox)/L.s, ty=(py-L.oy)/L.s;
+  if(tx<0||ty<0||tx>=SW||ty>=H) return; const f=navFloor(), x=(tx+f*OFFT)*T, y=ty*T; addPing(x,y); netSend({t:'ping',x:Math.round(x),y:Math.round(y)}); toast('📍 Ping sent!'); }
+
+/* ---- 3D: doors, chest lids, generator lamps, exit, hide rigs, skeletons ---- */
+function gensBuild3D(sc){ (R3.gxObjs||[]).forEach(o=>sc.remove(o)); R3.gxObjs=[]; R3.gx={doors:[],lids:[],glows:[],exit:null}; if(!ST.gens) return;
+  const wood=new THREE.MeshPhongMaterial({color:0x6d4c41,shininess:10}), dark=new THREE.MeshPhongMaterial({color:0x3e2a1a}), gold=new THREE.MeshPhongMaterial({color:0xd4af37,shininess:60});
+  DOORS.forEach(d=>{ const r=d.x>=OFFT?1:0, lx=d.x-r*OFFT, base=r*FH, pv=new THREE.Group(), pan=new THREE.Mesh(new THREE.BoxGeometry(.94,FH*.88,.07),wood), knob=new THREE.Mesh(new THREE.SphereGeometry(.04,8,6),gold);
+    for(const yy of [.25,.62]){ const pl=new THREE.Mesh(new THREE.BoxGeometry(.7,.28,.09),dark); pl.position.set(.47,FH*yy,0); pv.add(pl); }
+    pan.position.set(.47,FH*.44,0); knob.position.set(.82,FH*.4,.06); pv.add(pan,knob);
+    if(d.h){ pv.position.set(lx+.03,base,d.y+.5); } else { pv.position.set(lx+.5,base,d.y+.03); pv.rotation.y=-Math.PI/2; }
+    pv.userData.r0=pv.rotation.y; sc.add(pv); R3.gxObjs.push(pv); R3.gx.doors.push(pv); });
+  OBJS.forEach(o=>{ if(o.n==='Supply Chest'){ const pv=new THREE.Group(), lid=new THREE.Mesh(new THREE.BoxGeometry(.78,.1,.5),new THREE.MeshPhongMaterial({color:0x9c7b5b}));
+      lid.position.set(0,.05,.25); pv.add(lid); const band=new THREE.Mesh(new THREE.BoxGeometry(.8,.11,.06),dark); band.position.set(0,.05,.46); pv.add(band);
+      pv.position.set(lxOf(o.cx)/T,o.f*FH+.38,o.cy/T-.25); sc.add(pv); R3.gxObjs.push(pv); R3.gx.lids.push(pv); }
+    if(o.n==='Generator'){ const g=new THREE.Sprite(new THREE.SpriteMaterial({map:texOf(glowCanvas('#ffd166')),fog:false,transparent:true,depthWrite:false,blending:THREE.AdditiveBlending}));
+      g.position.set(lxOf(o.cx)/T,o.f*FH+.95,o.cy/T); g.scale.set(1.3,1.3,1); g.visible=false; sc.add(g); R3.gxObjs.push(g); R3.gx.glows.push(g); } });
+  const sign=(txt,col)=>{ const cc=mk(256,96), x=cc.getContext('2d'); x.fillStyle='rgba(0,0,0,.6)'; x.fillRect(0,0,256,96); x.strokeStyle=col; x.lineWidth=6; x.strokeRect(4,4,248,88); x.fillStyle=col; x.font='800 54px "Baloo 2",sans-serif'; x.textAlign='center'; x.textBaseline='middle'; x.fillText(txt,128,52); return cc; };
+  R3.gx.exitL=texOf(sign('🔒 EXIT','#ff3d6e')); R3.gx.exitO=texOf(sign('EXIT ➜','#5bf0a8'));
+  const ex=new THREE.Sprite(new THREE.SpriteMaterial({map:R3.gx.exitL,fog:false,transparent:true,depthWrite:false})); ex.position.set(lxOf(START.x)/T,1.25,START.y/T); ex.scale.set(.9,.34,1); sc.add(ex); R3.gxObjs.push(ex); R3.gx.exit=ex; }
+function buildHideRigs(){ const cam=R3.camera, wood=new THREE.MeshBasicMaterial({color:0x140d08}), slat=new THREE.MeshBasicMaterial({color:0x2a1a10}), blank=new THREE.MeshBasicMaterial({color:0x5a1e2a}), under=new THREE.MeshBasicMaterial({color:0x0c0908});
+  const B=(w,h,d,m,x,y,z,par)=>{ const b=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),m); b.position.set(x,y,z); par.add(b); return b; };
+  const cl=new THREE.Group(); B(.02,1.4,.6,wood,-.4,-.15,-.05,cl); B(.02,1.4,.6,wood,.4,-.15,-.05,cl); B(.82,.02,.6,wood,0,.55,-.05,cl); B(.82,.02,.6,wood,0,-.85,-.05,cl);
+  const leaves=[]; for(const sd of [-1,1]){ const pv=new THREE.Group(); pv.position.set(sd*.4,0,-.32); cl.add(pv);
+    B(.4,.5,.02,wood,-sd*.2,.3,0,pv); B(.4,.5,.02,wood,-sd*.2,-.6,0,pv); B(.03,.42,.03,wood,-sd*.02,-.15,0,pv); B(.03,.42,.03,wood,-sd*.38,-.15,0,pv);
+    for(let i=0;i<7;i++){ const s=B(.36,.032,.012,slat,-sd*.2,-.33+i*.06,0,pv); s.rotation.x=.55; } leaves.push({pv,sd}); }
+  for(const sd of [-1,1]) B(.05,1.4,.05,wood,sd*.36,-.15,-.34,cl); B(.8,.08,.05,wood,0,.52,-.34,cl);
+  cl.visible=false; cam.add(cl);
+  const bd=new THREE.Group(); B(1.8,.02,1.8,under,0,.11,0,bd); for(const zz of [-.3,.3]) B(1.8,.04,.06,under,0,.085,zz,bd);
+  const fr=[]; for(let i=0;i<16;i++){ const x=-.85+i*.113, h=.05+((i*37)%5)*.006; fr.push(B(.1,h,.01,blank,x,.11-h/2,-.86,bd)); }
+  for(const sd of [-1,1]) for(let i=0;i<14;i++){ const z=-.8+i*.12, h=.06; B(.01,h,.1,blank,sd*.88,.11-h/2,z,bd); }
+  bd.visible=false; cam.add(bd); R3.hr={cl,leaves,bd,fr}; }
+function animPeek(SK,kind,t){ if(kind==='under'){ SK.hips.position.y=3.0; SK.legs.forEach(L=>{ L.th.rotation.z=1.55; L.kn.rotation.z=-2.5; }); SK.chest.rotation.z=-1.72; SK.head.rotation.set(0,Math.sin(t*1.5)*.2,1.0);
+    SK.arms.forEach((A,i)=>{ A.a.rotation.z=1.9+Math.sin(t*3+i)*.1; A.el.rotation.z=.4; }); }
+  else { SK.hips.position.y=6.5; SK.legs.forEach(L=>{ L.th.rotation.z=.3; L.kn.rotation.z=-.6; }); SK.chest.rotation.z=-1.0; SK.head.rotation.set(0,Math.sin(t*2)*.2,.45); SK.arms[1].a.rotation.z=1.5; SK.arms[1].el.rotation.z=.2; SK.arms[0].a.rotation.z=.9+Math.sin(t*2)*.2; }
+  SK.eyes.forEach(e=>{ const k=1+Math.sin(t*9)*.2; e.scale.set(k,k,1); }); }
+function gensRender3D(t,lx,lz,base){ const p=S.player, G=S.G, dt=Math.min(.05,t-(R3.gT||t)); R3.gT=t; if(!R3.gx) return;
+  DOORS.forEach((d,i)=>{ const pv=R3.gx.doors[i]; if(pv) pv.rotation.y=pv.userData.r0-d.ang*Math.PI*.5; });
+  G.chests.forEach((c,i)=>{ const lid=R3.gx.lids[i]; if(lid){ const tg=c.open?-1.35:-(c.t>0?Math.min(.5,c.t*.6):0); lid.rotation.x+=(tg-lid.rotation.x)*Math.min(1,dt*8); } });
+  G.gens.forEach((g,i)=>{ const gl=R3.gx.glows[i]; if(gl){ gl.visible=g.on||g.p>0; const k=g.on?1:.35*g.p; gl.material.opacity=k*(g.on?.75+Math.sin(t*12+i)*.05:.5+Math.sin(t*20)*.3); } });
+  if(R3.gx.exit){ R3.gx.exit.material.map=G.allOn?R3.gx.exitO:R3.gx.exitL; R3.gx.exit.material.opacity=.75+Math.sin(t*3)*.2; }
+  R3.flash.intensity=S.flashOn?(thirdP()?2:2.5):0; R3.flash.distance=9; R3.fog.near=.4; R3.fog.far=p.hidden?(G.allOn?8:5.2):S.flashOn?(G.allOn?9:6.8):(G.allOn?7:3); R3.hemi.intensity=G.allOn?.5:p.hidden?.42:.18+gensOn()*.012;
+  if(!R3.hr) buildHideRigs(); const hs=p.hidden&&p.hidden.hs; R3.hr.cl.visible=hs==='inside'; R3.hr.bd.visible=hs==='under';
+  if(hs==='inside'){ const peeking=S.creatures.some(c=>c.state==='peek'&&c.peekObj===p.hidden); R3.hr.leaves.forEach(L=>{ const tg=peeking?L.sd*1.7:0; L.pv.rotation.y+=(tg-L.pv.rotation.y)*Math.min(1,dt*(peeking?6:3)); }); }
+  else R3.hr.leaves.forEach(L=>L.pv.rotation.y=0);
+  { const lift=hs==='under'&&S.creatures.some(c=>c.state==='peek'&&c.peekObj===p.hidden); R3.hr.fr.forEach((m,i)=>{ const mid=Math.abs(i-7.5)<6; const tg=lift&&mid?.05:1; m.scale.y+=(tg-m.scale.y)*Math.min(1,dt*5); m.position.y=.11-m.geometry.parameters.height*m.scale.y/2; }); }
+  if(!R3.skels) R3.skels=[]; S.creatures.forEach((c,i)=>{ let SK=R3.skels[i]; if(!SK){ SK=buildSkeleton(); SK.G.scale.setScalar(1.42/14.2); R3.scene.add(SK.G); R3.skels[i]=SK; }
+    SK.G.visible=true; const cx=lxOf(c.x)/T, cy=c.y/T, mv=Math.hypot(cx-(SK.px||cx),cy-(SK.py||cy)); if(mv>.002) SK.fa=Math.atan2(cy-(SK.py||cy),cx-(SK.px||cx)); SK.px=cx; SK.py=cy;
+    let fa=SK.fa||0; if((c.state==='peek'||c.state==='inspect')&&c.peekObj&&c.state==='peek') fa=Math.atan2(c.peekObj.cy-c.y,c.peekObj.cx-c.x);
+    if(c.state==='chase'&&regionOf(c.x)===regionOf(p.x)) { const d=physDist(c,p); if(d<2.5*T) fa=Math.atan2(p.y-c.y,p.x-c.x); }
+    SK.ry=(SK.ry==null?fa:SK.ry); let df=((fa-SK.ry+Math.PI*3)%(Math.PI*2))-Math.PI; SK.ry+=df*Math.min(1,dt*8);
+    SK.G.position.set(cx,zOf(c),cy); SK.G.rotation.y=-SK.ry; const near=c.state==='chase'&&physDist(c,p)<3*T;
+    animSkeleton(SK,dt*1.6,t,near?5:20,false,false,mv>.002); if(c.state==='peek'&&c.peekObj) animPeek(SK,c.peekObj.hs,t); });
+  for(let i=S.creatures.length;i<R3.skels.length;i++) R3.skels[i].G.visible=false; }
+function hideGensMeshes(){ if(R3.skels) R3.skels.forEach(s=>s.G.visible=false); if(R3.hr){ R3.hr.cl.visible=false; R3.hr.bd.visible=false; } }
+function drawGensOverlay(t){ const G=S.G, p=S.player, Wd=cv.width, Hd=cv.height, mn=Math.min(Wd,Hd);
+  if(!S.flashOn&&!p.hidden&&!S.out){ ctx.fillStyle='rgba(0,0,8,.35)'; ctx.fillRect(0,0,Wd,Hd); }
+  const k=G.rep?G.rep.p:(G.tgt&&G.tgt.k==='chest'&&G.tgt.c.t>0?G.tgt.c.t/.9:0);
+  if(k>0){ ctx.strokeStyle=G.rep?'#ffd166':'#5bf0a8'; ctx.lineWidth=8*dpr; ctx.beginPath(); ctx.arc(Wd/2,Hd/2,30*dpr,-Math.PI/2,-Math.PI/2+k*Math.PI*2); ctx.stroke(); ctx.font=`${Math.round(26*dpr)}px ${EMOJI_FONT}`; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillStyle='#fff'; ctx.fillText(G.rep?'🔧':'📦',Wd/2,Hd/2); }
+  for(const pg of G.pings){ if(regionOf(pg.x)!==regionOf(p.x)) continue; const dx=lxOf(pg.x)-lxOf(p.x), dy=pg.y-p.y, m=Math.round(Math.hypot(dx,dy)/T*2); const s=R3.ok?proj3(lxOf(pg.x)/T,zOf(pg)+.6,pg.y/T):null;
+    ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.font=`800 ${Math.round(20*dpr)}px "Baloo 2",${EMOJI_FONT}`; ctx.fillStyle='#5bf0a8'; ctx.strokeStyle='#000'; ctx.lineWidth=4*dpr;
+    if(s&&s.x>0&&s.x<Wd&&s.y>0&&s.y<Hd){ ctx.strokeText(`📍 ${m} m`,s.x,s.y); ctx.fillText(`📍 ${m} m`,s.x,s.y); }
+    else { const a=((Math.atan2(dy,dx)-p.a+Math.PI*3)%(Math.PI*2))-Math.PI, x=a<0?40*dpr:Wd-40*dpr, txt=a<0?`◀ 📍 ${m} m`:`📍 ${m} m ▶`; ctx.strokeText(txt,x,Hd*.5); ctx.fillText(txt,x,Hd*.5); } }
+  if(G.allOn){ ctx.textAlign='center'; ctx.font=`800 ${Math.round(mn*.035)}px "Baloo 2",sans-serif`; ctx.fillStyle=`rgba(91,240,168,${.7+.3*Math.sin(t*5)})`; ctx.fillText('💡 Lights on — run to the EXIT in the lobby!',Wd/2,Hd*.2); } }
+function gensHUD(){ const p=S.player, G=S.G, on=gensOn(), tot=G.gens.length;
+  $('hearts').textContent=S.role==='nav'?'🗺':S.out?'👻':'❤️'.repeat(Math.max(0,S.hearts))+'🖤'.repeat(Math.max(0,3-S.hearts));
+  const nav=S.role==='nav', q=nav?navExplorer():null;
+  $('objective').innerHTML=nav?`🗺 Navigator • ⚡ ${on}/${tot} • ⏱ ${fmt(S.timeLeft)}<br><span style="font-size:.8em">Tap the map to ping a spot</span>`
+    :G.allOn?`💡 All ${tot} on! Get to the 🚪 EXIT • ⏱ ${fmt(S.timeLeft)}`:`⚡ Generators ${on}/${tot} • ⏱ ${fmt(S.timeLeft)}`;
+  $('navFloorBtn').textContent=S.navF<0?'👣':S.navF?'2F':'1F';
+  const nb=$('noiseBar'); nb.style.width=S.noise+'%'; nb.style.background=S.noise>60?'#ff3d6e':S.noise>30?'#ffc857':'#58e0a0';
+  const bb=$('batBar'); bb.style.width=G.bat+'%'; bb.style.background=G.bat<20?'#ff3d6e':G.bat<45?'#ffc857':'#5bf0a8'; $('batWrap').classList.toggle('off',!S.flashOn);
+  $('breathWrap').hidden=!p.hidden||nav; $('breathBar').style.width=S.breath+'%'; $('breathBar').style.background=S.gasp>0?'#ff3d6e':'#6ec6ff';
+  const pr=$('prompt'), u=G.tgt, nh=(!p.hidden&&!S.out&&!nav)?nearHide():null; let msg='';
+  if(nav) msg=q?(q.st.h>=0?`${q.name} is hiding — 👣 listen for footsteps`:`Following ${q.name} • tap 👣/1F/2F to switch floors`):'Waiting for your partner…';
+  else if(S.out) msg='👻 You’re out — cheer on your team!';
+  else if(p.hidden) msg=isTouch?`Hiding in the ${p.hidden.n} — hold 🤐 when it comes close`:`Hiding in the ${p.hidden.n} — Space hold breath, E get out`;
+  else if(u&&u.k==='gen') msg=isTouch?`Hold 🔧 Use to fix the generator (${Math.round(u.g.p*100)}%) — it’s loud!`:`Hold F to fix the generator (${Math.round(u.g.p*100)}%) — it’s loud!`;
+  else if(u&&u.k==='chest') msg=isTouch?'Hold 🔧 Use to open the chest':'Hold F to open the chest';
+  else if(u&&u.k==='door') msg=isTouch?`🔧 Use to ${u.d.open?'close':'open'} the door${nh?' • 🫣 Hide':''}`:`F ${u.d.open?'close':'open'} the door${nh?` • E hide in the ${nh.n}`:''}`;
+  else if(nh) msg=isTouch?`🫣 ${nh.n}`:`E — hide in the ${nh.n}`;
+  else if(!S.flashOn&&G.bat>0) msg=isTouch?'🔦 Tap Light to turn your flashlight on':'L — turn your flashlight on';
+  pr.textContent=msg; pr.classList.toggle('show',!!msg);
+  if(isTouch&&!nav){ const bh=$('bHide'); bh.hidden=S.out; bh.innerHTML=p.hidden?'<span class="em">🚪</span>Get out':'<span class="em">🫣</span>Hide'; bh.classList.toggle('dim',!p.hidden&&!nh);
+    $('bSearch').hidden=S.out||!!p.hidden; $('bSearch').classList.toggle('dim',!u); $('bLight').hidden=S.out||!!p.hidden; $('bLight').classList.toggle('on',!!S.flashOn);
+    $('bBreath').hidden=!p.hidden; $('bRun').hidden=!!p.hidden; $('bBreath').classList.toggle('on',S.holding); $('bRun').classList.toggle('on',runHeld); }
+  if(!$('mini').hidden&&settings.mini) drawMini(); }
 
 /* ================= THIRD-PERSON VIEW + KID MODEL ================= */
 const thirdP=()=>settings.cam==='3p'&&!(typeof R3!=='undefined'&&R3.inXR);
@@ -4068,7 +4348,7 @@ function xrFrame(){ const now=performance.now(), dt=Math.min(.05,(now-VR.last)/1
   try{ if(userPaused) setPause(false);
     if(S){ vrInput(dt); if(!S.over&&!S.paused){ update(dt); if(S&&!S.over) updateHUD(dt); } if(VR.scareT>0) VR.scareT-=dt; if(S) render3D(); }
     else R3.renderer.render(R3.scene,R3.camera); }catch(e){ if(!xrFrame.w){ xrFrame.w=1; console.error(e); } } }
-async function startVR(){ if(!VR.supported||!S||R3.inXR) return; if(S.mode==='giant'){ toast('Ang Higante isn’t in VR yet — play it on phone or PC.'); return; } audioInit(); let ses;
+async function startVR(){ if(!VR.supported||!S||R3.inXR) return; if(S.mode==='giant'||S.mode==='gens'){ toast(S.mode==='gens'?'Ilaw isn’t in VR yet — play it on phone or PC.':'Ang Higante isn’t in VR yet — play it on phone or PC.'); return; } audioInit(); let ses;
   try{ ses=await navigator.xr.requestSession('immersive-vr',{optionalFeatures:['local-floor']}); }catch(e){ toast('Couldn’t start VR here — open the game in the Quest Browser.'); return; }
   const R=R3.renderer; R.xr.enabled=true; R.xr.setReferenceSpaceType('local'); try{ R.xr.setFramebufferScaleFactor(.8); }catch(e){}
   vrSetup(); try{ await R.xr.setSession(ses); }catch(e){ toast('Couldn’t start VR.'); return; }
@@ -4148,11 +4428,11 @@ function renderRay(){ const t=performance.now()/1000; ctx.setTransform(1,0,0,1,0
   v.globalAlpha=1;
   ctx.imageSmoothingEnabled=false; ctx.drawImage(view,0,0,cv.width,cv.height);
   drawOverlays(t); }
-function render(){ if(S&&S.mode==='giant'){ if(R3.ok) renderGiant(); return; } if(S&&R3.ok){ render3D(); return; } $('gl').style.display='none'; renderRay(); }
+function render(){ if(S&&S.mode==='gens'&&S.role==='nav'){ $('gl').style.display='none'; renderNav(); return; } if(S&&S.mode==='giant'){ if(R3.ok) renderGiant(); return; } if(S&&R3.ok){ render3D(); return; } $('gl').style.display='none'; renderRay(); }
 function drawOverlays(t){ const p=S.player, Wd=cv.width, Hd=cv.height, mn=Math.min(Wd,Hd);
   const fl=ctx.createRadialGradient(Wd/2,Hd*.52,mn*.22,Wd/2,Hd*.52,Math.max(Wd,Hd)*.72); fl.addColorStop(0,'rgba(255,220,150,.05)'); fl.addColorStop(.45,'rgba(0,0,0,0)'); fl.addColorStop(1,'rgba(0,0,0,.6)');
   ctx.fillStyle=fl; ctx.fillRect(0,0,Wd,Hd);
-  if(p.hidden) drawHideOverlay(p.hidden,Wd,Hd,t);
+  if(p.hidden&&!(S.mode==='gens'&&R3.ok&&p.hidden.hs!=='behind')) drawHideOverlay(p.hidden,Wd,Hd,t);
   if(S.role==='taya'){ ctx.fillStyle='rgba(160,0,30,.12)'; ctx.fillRect(0,0,Wd,Hd); }
   if(S.out){ ctx.fillStyle='rgba(120,160,255,.16)'; ctx.fillRect(0,0,Wd,Hd); }
   const chasing=S.role==='hider'&&S.creatures.some(c=>c.state==='chase'&&c.tid===myId()), danger=S.out?0:chasing?1:clamp(1-S.nearest/300,0,1)*.6;
@@ -4176,7 +4456,7 @@ function drawHideOverlay(o,Wd,Hd,t){ const c=ctx; c.save();
   c.restore(); }
 
 let hudT=0;
-function updateHUD(dt){ hudT-=dt; if(hudT>0) return; hudT=.08; const p=S.player; if(S.mode==='giant') return giantHUD(); if(S.mode==='hunt') return huntHUD();
+function updateHUD(dt){ hudT-=dt; if(hudT>0) return; hudT=.08; const p=S.player; if(S.mode==='giant') return giantHUD(); if(S.mode==='hunt') return huntHUD(); if(S.mode==='gens') return gensHUD();
   $('hearts').textContent=S.role==='taya'?'💀':S.out?'👻':'❤️'.repeat(Math.max(0,S.hearts))+'🖤'.repeat(Math.max(0,(S.mode==='taya'?2:3)-S.hearts));
   let obj;
   if(S.mode==='taya'){ const hs=S.isAuth?hiders():null; let alive=0,total=0;
@@ -4201,6 +4481,8 @@ function updateHUD(dt){ hudT-=dt; if(hudT>0) return; hudT=.08; const p=S.player;
 function escapeHtml(s){ return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 function drawMini(){ const x=$('mini').getContext('2d'), p=S.player, ref=p.hidden?{x:p.hidden.cx,y:p.hidden.cy}:p, r=regionOf(ref.x), s=264/(SW*T), on=o=>regionOf(o.x)===r, mx=o=>lxOf(o.x)*s;
   x.drawImage(miniBases[r],0,0);
+  if(S.G){ for(const d of DOORS){ if(regionOf(d.x*T)!==r) continue; x.fillStyle=d.open?'rgba(91,240,168,.6)':'#c08a4e'; x.fillRect((d.x-r*OFFT)*T*s,d.y*T*s+T*s*.3,T*s,T*s*.4); }
+    for(const g of S.G.gens){ if(!on({x:g.o.cx})) continue; x.fillStyle=g.on?'#5bf0a8':'#ffd166'; x.beginPath(); x.arc(mx({x:g.o.cx}),g.o.cy*s,4.5,0,Math.PI*2); x.fill(); } }
   for(const c of S.creatures){ if(on(c)&&(c.state==='chase'||dist(c,p)<230)){ x.fillStyle='#ff3d6e'; x.beginPath(); x.arc(mx(c),c.y*s,5,0,Math.PI*2); x.fill(); } }
   if(S.net) for(const q of Object.values(NET.players)){ if(q.me||!q.st||q.rx==null||q.st.out) continue; const qq={x:q.rx,y:q.ry}; if(!on(qq)) continue;
     if(q.role==='hider'&&S.role==='hider'){ x.fillStyle=q.color; x.beginPath(); x.arc(mx(qq),q.ry*s,4.5,0,Math.PI*2); x.fill(); }
@@ -4217,13 +4499,13 @@ function loop(now){ if(R3.inXR){ last=now; requestAnimationFrame(loop); return; 
 const typing=()=>{ const a=document.activeElement; return a&&(a.tagName==='INPUT'||a.tagName==='TEXTAREA'); };
 window.addEventListener('keydown',e=>{ if(typing()) return; if(!$('intro').hidden){ $('intro').click(); return; } if(['Space','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.code)&&S&&!S.over) e.preventDefault();
   keys.add(e.code); if(e.repeat||!S||S.over) return; if(e.code==='KeyV'){ toggleCam(); return; }
-  if(S.mode==='giant'){ if(e.code==='KeyE') gToggleHide(); if(e.code==='KeyF') gTopple(); } else if(S.mode==='hunt'){ if(e.code==='KeyE') tryCatch(); } else { if(e.code==='KeyE') toggleHide(); if(e.code==='KeyF') startSearch(); } if(e.code==='KeyQ'&&!userPaused) S.player.turn=Math.PI;
+  if(S.mode==='giant'){ if(e.code==='KeyE') gToggleHide(); if(e.code==='KeyF') gTopple(); } else if(S.mode==='hunt'){ if(e.code==='KeyE') tryCatch(); } else { if(e.code==='KeyE') toggleHide(); if(e.code==='KeyF'){ if(S.mode==='gens') useTap(); else startSearch(); } if(e.code==='KeyL') toggleFlash(); if(e.code==='Tab'&&S.role==='nav'){ e.preventDefault(); navCycleFloor(); } } if(e.code==='KeyQ'&&!userPaused) S.player.turn=Math.PI;
   if(e.code==='KeyP'||e.code==='Escape') setPause(!userPaused); });
 window.addEventListener('keyup',e=>keys.delete(e.code));
-window.addEventListener('blur',()=>{ keys.clear(); runHeld=breathHeld=fireHeld=mouseFire=false; joy.x=joy.y=0; });
+window.addEventListener('blur',()=>{ keys.clear(); runHeld=breathHeld=fireHeld=mouseFire=useHeld=false; joy.x=joy.y=0; });
 document.addEventListener('visibilitychange',()=>{ if(document.hidden&&S&&!S.over) setPause(true); });
 let dragging=false,lastMX=0;
-cv.addEventListener('pointerdown',e=>{ if(!S||S.over||isTouch) return; audioInit(); if(S.mode==='giant'&&e.button===0){ if(document.pointerLockElement===cv){ const r=cv.getBoundingClientRect(); gTapAt(r.left+r.width/2,r.top+r.height/2); } else gTapAt(e.clientX,e.clientY); } dragging=true; lastMX=e.clientX; if(S.mode==='hunt'&&e.button===0) mouseFire=true;
+cv.addEventListener('pointerdown',e=>{ if(!S||S.over||isTouch||(S.mode==='gens'&&S.role==='nav')) return; audioInit(); if(S.mode==='giant'&&e.button===0){ if(document.pointerLockElement===cv){ const r=cv.getBoundingClientRect(); gTapAt(r.left+r.width/2,r.top+r.height/2); } else gTapAt(e.clientX,e.clientY); } dragging=true; lastMX=e.clientX; if(S.mode==='hunt'&&e.button===0) mouseFire=true;
   try{ const r=cv.requestPointerLock&&cv.requestPointerLock(); if(r&&r.catch) r.catch(()=>{}); }catch(err){} });
 window.addEventListener('pointermove',e=>{ if(isTouch||!S) return; if(document.pointerLockElement===cv) lookDX+=e.movementX*.0028; else if(dragging){ lookDX+=(e.clientX-lastMX)*.006; lastMX=e.clientX; } });
 window.addEventListener('pointerup',()=>{ dragging=false; mouseFire=false; });
@@ -4243,7 +4525,12 @@ function holdBtn(el,set){ el.addEventListener('pointerdown',e=>{ e.preventDefaul
 holdBtn($('bRun'),v=>runHeld=v); holdBtn($('bBreath'),v=>breathHeld=v); holdBtn($('bFire'),v=>fireHeld=v);
 $('bCatch').addEventListener('pointerdown',e=>{ e.preventDefault(); tryCatch(); });
 $('bHide').addEventListener('pointerdown',e=>{ e.preventDefault(); if(S&&S.mode==='giant') gToggleHide(); else toggleHide(); });
-$('bSearch').addEventListener('pointerdown',e=>{ e.preventDefault(); if(S&&S.mode==='giant') gTopple(); else startSearch(); });
+$('bSearch').addEventListener('pointerdown',e=>{ e.preventDefault(); if(S&&S.mode==='giant') gTopple(); else if(S&&S.mode==='gens'){ useHeld=true; useTap(); } else startSearch(); });
+['pointerup','pointercancel','pointerleave'].forEach(ev=>$('bSearch').addEventListener(ev,()=>useHeld=false));
+$('bLight').addEventListener('pointerdown',e=>{ e.preventDefault(); toggleFlash(); });
+function navCycleFloor(){ if(!S) return; S.navF=S.navF<0?0:S.navF===0?1:-1; toast(S.navF<0?'👣 Following your partner':S.navF?'Showing 2F':'Showing 1F'); }
+$('navFloorBtn').onclick=navCycleFloor;
+cv.addEventListener('pointerdown',e=>{ if(S&&S.mode==='gens'&&S.role==='nav'&&!S.over) navTap(e); });
 $('bTurn').addEventListener('pointerdown',e=>{ e.preventDefault(); if(S&&!S.over) S.player.turn=Math.PI; });
 document.addEventListener('contextmenu',e=>{ if(S&&!S.over) e.preventDefault(); });
 
@@ -4673,6 +4960,9 @@ ART.push(
  {g:'Multo Missions',t:'Boss — Don Anino',f:'tt_mission_boss-don-anino_sheet.png',p:'Boss character sheet of Don Anino, a towering shadow spirit wearing a tattered Spanish-era barong and a wide hat made of smoke, glowing pink eyes, a round face area for a photo face, poses: looming, splitting into two smaller shadows, straining in a crackling energy net, plain dark background. '},
  {g:'Ang Higante',t:'The giant',f:'tt_giant_higante_sheet.png',p:'Character sheet of Ang Higante, a towering skeletal stick-figure giant ten times the height of a person: impossibly long thin bone limbs, a narrow ribcage, long three-fingered hands, a big round skull with glowing red eye sockets and a toothy grin, poses: striding, reaching down, tripping over a cart, sniffing the air, plain dark background. '},
  {g:'Ang Higante',t:'Spiral tower',f:'tt_giant_spiral-tower_1920x1080.png',p:'Game environment concept: the inside of a huge old Filipino stone tower with a wide spiral ramp winding up around an open central well, lanterns on the walls, crates, barrels and bamboo scaffolding along the ramp, a tiny figure running upward with a flashlight while an enormous shadow giant climbs behind, moonlit doorway at the very top, dramatic low angle. '},
+ {g:'Ilaw',t:'Hotel Esperanza',f:'tt_stage_hotel-esperanza_1920x1080.png',p:'Game environment concept: the dark lobby of an abandoned old Filipino hotel at night, a dusty front desk with a brass bell, a hallway of numbered wooden doors, peeling wallpaper, a flashlight beam cutting through the gloom, a faint glow from a far-off generator, eerie but not gory. '},
+ {g:'Ilaw',t:'Generator and battery chest',f:'tt_ilaw_generator-chest.png',p:'Prop sheet on a plain dark background: a chunky old green diesel generator with coils, a small dial and red and yellow lights, shown off and humming with a warm glow; next to it a wooden supply chest with iron bands and a brass lock, lid open with a few flashlight batteries inside. '},
+ {g:'Ilaw',t:'Navigator map screen',f:'tt_ui_navigator-map_1080x1920.png',p:'Mobile game screen design: a glowing blueprint-style floor map of a two-floor haunted hotel, lightning-bolt generator icons, treasure-chest icons, a green ping ripple, a small arrow for a teammate, and a red skull marker sneaking nearby, friendly spooky style. '},
  {g:'Sound studio',t:'Sound studio screen',f:'tt_ui_sound-studio_1080x1920.png',p:'Mobile app screen for a spooky music maker: a glowing step-sequencer grid of 16 columns with rows for notes and drums, a big round red record button, a waveform of a voice recording, a tempo slider and three save slots, dark purple panels with amber highlights, portrait 9:16. '},
  {g:'Sound studio',t:'Soundtrack cover',f:'tt_audio_soundtrack-cover_1024.png',p:'Square soundtrack cover for the game: an old cassette tape lying on a wooden floor lit by a flashlight beam, a faint ghostly face reflected in the tape window, a blank hand-written label, moody purple and amber tones, no text. '}
 );
@@ -4725,7 +5015,7 @@ function showScreen(id){ ['menu','faces','howto','pause','end','lan','art','stud
   if(id!=='lan'&&HAS_LAN&&!NET.on){ try{ Android.stopDiscovery(); }catch(e){} } }
 function setPause(v){ if(!S||S.over) return; if(v&&S.firing){ S.firing=false; beamOff(); releaseLock(); } userPaused=v; $('pause').hidden=!v; $('pauseNote').textContent=S.net?'The game keeps going for everyone else!':''; keys.clear(); runHeld=breathHeld=fireHeld=mouseFire=false; joy.x=joy.y=0;
   if(v){ try{ document.exitPointerLock&&document.exitPointerLock(); }catch(e){} } }
-function renderMenu(){ if(!STAGES[settings.stage]||STAGES[settings.stage].hunt) settings.stage=0; const st={}; STAGES.forEach((s,i)=>{ if(!s.hunt) st[i]=`${s.emoji} ${s.name}`; }); renderChips('stageChips',st,settings.stage,k=>{settings.stage=+k;saveSettings();renderMenu();});
+function renderMenu(){ if(!STAGES[settings.stage]||STAGES[settings.stage].hunt||STAGES[settings.stage].gens) settings.stage=0; const st={}; STAGES.forEach((s,i)=>{ if(!s.hunt&&!s.gens) st[i]=`${s.emoji} ${s.name}`; }); renderChips('stageChips',st,settings.stage,k=>{settings.stage=+k;saveSettings();renderMenu();});
   { const im=$('stagePreview'), src=(ARTA.stages||[])[settings.stage]; if(src){ im.src=src; im.alt=`${STAGES[settings.stage].name} at night`; im.hidden=false; } else im.hidden=true; }
   renderChips('diffChips',DIFF,settings.diff,k=>{settings.diff=k;saveSettings();renderMenu();});
   renderChips('scareChips',SCARE,settings.scare,k=>{settings.scare=k;saveSettings();renderMenu(); if(k!=='off'){ audioInit(); k==='max'?SFX.scream(false):SFX.boo(); }});
@@ -4737,7 +5027,7 @@ function renderMenu(){ if(!STAGES[settings.stage]||STAGES[settings.stage].hunt) 
   $('bestLine').textContent=bits.join('   '); }
 function goMenu(){ if(S&&S.firing) beamOff(); bgmStop(); S=null; userPaused=false; $('hud').hidden=true; $('touch').hidden=true; showScreen('menu'); }
 document.querySelectorAll('[data-go]').forEach(b=>b.addEventListener('click',()=>{ audioInit(); showScreen(b.dataset.go); }));
-$('playGiant').onclick=()=>newGame('giant'); $('briefStart').onclick=()=>newHunt(MISSIONS[briefIdx]); $('playSurvive').onclick=()=>newGame('survive'); $('playSeek').onclick=()=>newGame('seek'); $('playHunt').onclick=()=>newGame('hunt');
+$('playGiant').onclick=()=>newGame('giant'); $('playGens').onclick=()=>newGame('gens'); $('briefStart').onclick=()=>newHunt(MISSIONS[briefIdx]); $('playSurvive').onclick=()=>newGame('survive'); $('playSeek').onclick=()=>newGame('seek'); $('playHunt').onclick=()=>newGame('hunt');
 $('pauseBtn').onclick=()=>setPause(true); $('resumeBtn').onclick=()=>setPause(false);
 $('mapBtn').onclick=()=>{ settings.mini=!settings.mini; saveSettings(); $('mini').hidden=!settings.mini; };
 $('quitBtn').onclick=()=>{ if(S&&S.net){ leaveNet(); } goMenu(); };
