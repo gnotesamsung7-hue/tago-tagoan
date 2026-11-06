@@ -146,6 +146,12 @@ public class MainActivity extends Activity {
         public String getIp() { return LanBridge.localIp(); }
 
         @JavascriptInterface
+        public String getVersion() {
+            try { return getPackageManager().getPackageInfo(getPackageName(), 0).versionName; }
+            catch (Exception e) { return "?"; }
+        }
+
+        @JavascriptInterface
         public void startDiscovery() { lan.startListen(); }
 
         @JavascriptInterface

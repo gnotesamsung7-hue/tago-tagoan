@@ -223,7 +223,8 @@ input[type=range]{border:0;background:none;padding:0;accent-color:var(--lamp)}
 .qrbox code{font-size:12px;word-break:break-all;color:var(--muted)}
 #getapp p{margin:5px 0;line-height:1.4}
 #batWrap.off .bar{opacity:.45}
-#batWrap[hidden],#bLight[hidden],#navFloorBtn[hidden]{display:none!important}
+#batWrap[hidden],#bLight[hidden],#navFloorBtn[hidden],#monViewBtn[hidden]{display:none!important}
+.verLine{text-align:center;font-size:13px;color:var(--muted);opacity:.8;margin-top:10px;letter-spacing:.02em}
 @media (prefers-reduced-motion:reduce){ #jumpscare canvas{animation:none!important} #jsFlash{animation:none!important} }
 </style>
 </head>
@@ -248,7 +249,7 @@ input[type=range]{border:0;background:none;padding:0;accent-color:var(--lamp)}
       </div>
       <div id="objective"></div>
       <div class="hudBtns">
-        <div class="row2"><button class="hb" id="navFloorBtn" aria-label="Switch map floor" hidden>👣</button><button class="hb" id="camBtn" aria-label="Switch first or third person view">🎥</button><button class="hb" id="vrBtn" aria-label="Enter VR" hidden>🥽</button><button class="hb" id="mapBtn" aria-label="Toggle map">🗺</button><button class="hb" id="pauseBtn" aria-label="Pause">⏸</button></div>
+        <div class="row2"><button class="hb" id="monViewBtn" aria-label="Switch between map and CCTV" hidden>📹</button><button class="hb" id="navFloorBtn" aria-label="Switch map floor" hidden>👣</button><button class="hb" id="camBtn" aria-label="Switch first or third person view">🎥</button><button class="hb" id="vrBtn" aria-label="Enter VR" hidden>🥽</button><button class="hb" id="mapBtn" aria-label="Toggle map">🗺</button><button class="hb" id="pauseBtn" aria-label="Pause">⏸</button></div>
         <canvas id="mini" width="264" height="190"></canvas>
         <div id="gcu" hidden></div>
       </div>
@@ -300,6 +301,7 @@ input[type=range]{border:0;background:none;padding:0;accent-color:var(--lamp)}
       <div class="setting"><b>Jumpscare</b><div class="chips" id="scareChips"></div></div>
       <div class="setting"><b>Game music</b><div class="chips" id="bgmChips"></div></div>
       <div class="best" id="bestLine"></div>
+      <div class="verLine" id="verLine"></div>
     </div>
   </section>
 
@@ -449,7 +451,7 @@ input[type=range]{border:0;background:none;padding:0;accent-color:var(--lamp)}
       <p>🥽 <b>Meta Quest VR:</b> open the game in the Quest Browser, start a game, then tap 🥽. Left stick walks where you look, right stick snap-turns (pull down to turn around), left trigger runs. Your right hand holds the flashlight. Ⓐ hides, Ⓑ holds your breath, the right trigger searches. In Multo Hunt the right hand becomes the plasma gun (trigger fires, Ⓐ catches) and your left hand holds the ghost meter.</p>
       <p>📋 <b>Multo Missions</b>: take ghost-clearing jobs from clients — Lola Ising’s house, a haunted school, the palengke, the cemetery on Undas, and finally the mansion of Don Anino, a boss who splits apart when trapped. Earn ⭐ for bonus goals and ₱ to buy agency gear: Cooling Coils, Snare Booster, Spirit Vest and a Long-Range Meter.</p>
       <p>🗼 <b>Ang Higante</b>: a giant ten times your size chases you up a spiral tower. Running drains stamina. Tap (or click / press F) crates, barrels, shelves, carts and scaffolding to knock them over behind you — he trips on them. Hide in closets, drums and jars to catch your breath, but your <b>fear meter</b> rises — faster when he’s close. When it fills, he smells you. Reach the moonlit door at the top to escape.</p>
-      <p>⚡ In <b>Ilaw — Hotel Esperanza</b>, open and close doors, grab batteries from chests to keep your flashlight going, and power all 10 generators before escaping through the lobby EXIT. The skeleton opens doors, peeks under beds and opens closets — hold your breath when it looks! In Wi-Fi co-op, one player is the <b>🗺 Navigator</b> with the full map. They see every generator, see the skeleton when it’s near their partner, hear its footsteps, and can tap the map to ping a spot.</p>
+      <p>⚡ In <b>Ilaw — Hotel Esperanza</b>, open and close doors, grab batteries from chests to keep your flashlight going, and power all 10 generators before escaping through the lobby EXIT. The skeleton opens doors, peeks under beds and opens closets — hold your breath when it looks! In Wi-Fi co-op, one player is the <b>🗺 Navigator</b> with the full map. Half their screen is the map — every generator, the skeleton when it’s near their partner, and taps to ping a spot. The other half is a wall of low-light CCTV screens, one camera per room (tap one to zoom). Feeds sometimes drop to static… and sometimes the skeleton stops and stares right into the camera. Tap any CCTV screen to sound that camera’s alarm: a skeleton in or near that room stops, even mid-chase, and stares at the camera for 5 seconds, then goes to check that room — your partner’s chance to run. The explorer gets no map — trust your Navigator! Playing solo? Tap 🗺 (or M) to open the security tablet and switch between the MAP and the CCTV wall (📹 / N). You can’t move while it’s open.</p>
       <p>🎥 Tap <b>🎥</b> (or press <kbd>V</kbd>) any time to switch between first-person and third-person view. In third person you see your character run, and in Multo Hunt the beam fires from their plasma gun.</p>
       <p>🎛 In the <b>Sound studio</b>, tap a beat, record your voice on top, save it, then choose it under <b>Game music</b>.</p>
       <p>📶 <b>Wi-Fi games</b> (Android app): hide together from the monsters, hunt the kids as a team, or play <b>Taya</b> — one player is the monster wearing their own face. The Taya counts to 10 first, then hunts. Taya sees 🔊 when a hider is loud and can search hiding spots. Caught hiders become ghosts 👻 and can keep watching.</p>
@@ -2859,6 +2861,8 @@ const SFX={
   wrench(){ tone(1400+Math.random()*300,.05,'square',.06,900); nz(.06,.08,2400,2,'bandpass') },
   power(){ tone(110,.9,'sawtooth',.12,440); tone(220,.9,'triangle',.1,880,.1); nz(.5,.08,600,1) },
   ping(){ tone(1320,.18,'sine',.16,null); tone(1760,.22,'sine',.12,null,.12) },
+  cstatic(){ nz(.7,.16,4000,.4,'highpass'); tone(48,.8,'sawtooth',.07,40) },
+  alarm(v){ v=v==null?1:v; for(let i=0;i<4;i++){ tone(i%2?740:980,.18,'square',.09*v,null,i*.22); } },
   gasp(){ nz(.45,.28,1300,1,'bandpass',0,500) },
   meow(){ tone(720,.38,'sawtooth',.12,440); tone(1440,.38,'sine',.05,880) },
   rooster(){ [0,.15,.3].forEach((d,i)=>tone(600+i*150,.18,'square',.07,900+i*100,d)) },
@@ -3362,6 +3366,7 @@ function onNet(from,m){
     case 'fx': if(S&&S.net&&typeof m.msg==='string'){ toast(m.msg.slice(0,80)); if(m.k==='tcatch'&&S.role==='taya') S.caughtCount++; } break;
     case 'end': if(S&&S.net&&from===NET.hostId) showMPEnd(m.r); break;
     case 'gact': if(S&&S.net&&S.isAuth&&S.G) gensAct(from,m); break;
+    case 'alarm': if(S&&S.net&&S.G&&from===NET.hostId) alarmMsg(m,from); break;
     case 'ping': if(S&&S.net&&S.G&&typeof m.x==='number') addPing(m.x,m.y,(NET.players[from]||{}).name); break;
   }
 }
@@ -3511,21 +3516,22 @@ function follow(c,sp,dt){ if(!c.path.length) return true; const n=c.path[0];
   if(d>3*T){ c.x=n.x; c.y=n.y; c.path.shift(); return !c.path.length; }
   if(d<=st){ c.x=n.x; c.y=n.y; c.path.shift(); return !c.path.length; } c.x+=dx/d*st; c.y+=dy/d*st; return false; }
 function creatureAudio(c,dt,moved){ const p=S.player, d=dist(c,p), hear=7*T;
-  c.stepT-=dt; if(moved&&d<hear&&c.stepT<=0){ c.stepT=c.state==='chase'?.3:.55; SFX.mstep(.06+.3*(1-d/hear),relPan(c)); if(S.mode==='gens') SFX.bone(.04+.22*(1-d/hear),relPan(c)); }
+  c.stepT-=dt; if(moved&&d<hear&&c.stepT<=0){ c.stepT=S.mode==='gens'?(c.state==='chase'?.42:.9):c.state==='chase'?.3:.55; SFX.mstep(.06+.3*(1-d/hear),relPan(c)); if(S.mode==='gens') SFX.bone(.04+.22*(1-d/hear),relPan(c)); }
   c.growlT-=dt; if(c.growlT<=0){ c.growlT=c.state==='chase'?rnd(2,4):rnd(6,12); if(d<hear*1.3) SFX.growl(relPan(c)); } }
-function updCreature(c,dt,hs){ const D=DIFF[S.diff];
+function updCreature(c,dt,hs){ const D=DIFF[S.diff], GS=S.mode==='gens'?gensGait(c):1;
   c.t+=dt; if(c.markT>0){ c.markT-=dt; if(c.markT<=0) c.mark=null; } c.repath-=dt;
   let seen=null,sd=1e9; for(const h of hs){ if(h.out||h.hidden||h.inv>0) continue; const d=dist(c,h); if(d<D.sight&&d<sd&&los(c,h)){ seen=h; sd=d; } }
+  if(c.state==='stare'&&c.alarm) seen=null;
   if(seen){ if(c.state!=='chase'){ c.state='chase'; c.mark='!'; c.markT=1.2; c.repath=0;
       if(seen.isLocal&&S.t-S.stingT>3){ SFX.sting(); S.stingT=S.t; toast('😱 It sees you! TAKBO!'); vibrate(60); } }
     c.tid=seen.id; c.lastSeen={x:seen.x,y:seen.y}; c.lost=0; }
   else if(c.state==='chase'){ c.lost+=dt; const tg=hs.find(h=>h.id===c.tid); if(!tg||tg.hidden||tg.out||c.lost>.8){ c.state='investigate'; c.mark='?'; c.markT=1.5; const ls=c.lastSeen||c; goTo(c,ls.x,ls.y); } }
   const ox=c.x, oy=c.y;
   switch(c.state){
-    case 'chase': { const sp=170*D.mul, tg=hs.find(h=>h.id===c.tid)||c.lastSeen||{x:c.x,y:c.y}; if(c.repath<=0){ goTo(c,tg.x,tg.y); c.repath=.3; }
+    case 'chase': { const sp=170*D.mul*GS, tg=hs.find(h=>h.id===c.tid)||c.lastSeen||{x:c.x,y:c.y}; if(c.repath<=0){ goTo(c,tg.x,tg.y); c.repath=.3; }
       if(dist(c,tg)<T*1.5&&los(c,tg)){ const d=dist(c,tg)||1; c.x+=(tg.x-c.x)/d*sp*dt; c.y+=(tg.y-c.y)/d*sp*dt; } else follow(c,sp,dt); break; }
-    case 'investigate': if(follow(c,125*D.mul,dt)){ if(S.mode==='gens'){ const nh=hidesNear(c,6,2); if(nh.length){ gensInspect(c,nh); break; } } c.state='search'; c.searchT=rnd(2,3.5); } break;
-    case 'inspect': if(!c.peekObj){ c.state='patrol'; break; } if(follow(c,(c.sawHide?120:92)*D.mul,dt)){ c.state='peek'; c.peekT=1.9; c.peekDone=false; c.lastInsp=c.peekObj; if(c.peekObj.hs==='inside') SFX.door(true,.25,relPan({x:c.peekObj.cx,y:c.peekObj.cy})); } break;
+    case 'investigate': if(follow(c,125*D.mul*GS,dt)){ if(S.mode==='gens'){ const nh=hidesNear(c,6,2); if(nh.length){ gensInspect(c,nh); break; } } c.state='search'; c.searchT=rnd(2,3.5); } break;
+    case 'inspect': if(!c.peekObj){ c.state='patrol'; break; } if(follow(c,(c.sawHide?120:92)*D.mul*GS,dt)){ c.state='peek'; c.peekT=1.9; c.peekDone=false; c.lastInsp=c.peekObj; if(c.peekObj.hs==='inside') SFX.door(true,.25,relPan({x:c.peekObj.cx,y:c.peekObj.cy})); } break;
     case 'peek': c.peekT-=dt; if(c.peekT<1.05&&!c.peekDone){ c.peekDone=true; const h=hs.find(h=>!h.out&&h.inv<=0&&h.hidden===c.peekObj);
         if(h){ if(h.noise>6||Math.random()<(c.sawHide?.5:.25)){ c.sawHide=false; caughtHider(h,c); return; } if(h.isLocal) toast('😮‍💨 It looked right at you… and moved on!'); } }
       if(c.peekT<=0){ c.sawHide=false; nextInspect(c); } break;
@@ -3534,7 +3540,12 @@ function updCreature(c,dt,hs){ const D=DIFF[S.diff];
         if(h&&!h.out&&h.hidden&&h.hidden===c.checkObj){ if(h.noise>10){ caughtHider(h,c); return; } if(h.isLocal) toast('😮‍💨 Phew! It didn’t find you…'); }
         c.state='search'; c.searchT=2; c.mark='?'; c.markT=1.5; } break; }
     case 'search': c.searchT-=dt; if(c.searchT<=0){ c.state='patrol'; c.path=[]; } break;
-    default: if(!c.path.length){ if(S.mode==='gens'&&Math.random()<.35){ const nh=hidesNear(c,9,1); if(nh.length){ gensInspect(c,nh); break; } } const f=randomFloor(); goTo(c,f.x,f.y); } follow(c,80*D.mul,dt);
+    case 'stare': c.stareT-=dt; if(c.stareT<=0){ const ar=c.alarm&&ROOMS[c.stareCam]; c.alarm=false; c.path=[];
+        if(ar){ c.state='investigate'; c.mark='?'; c.markT=1.2; goTo(c,((ar.x0+ar.x1+1)/2)*T,((ar.y0+ar.y1+1)/2)*T); } else c.state='patrol'; } break;
+    default: if(S.mode==='gens'){ if(c.pauseT>0){ c.pauseT-=dt; break; } c.stareCd=(c.stareCd==null?rnd(8,16):c.stareCd)-dt;
+        if(c.stareCd<=0){ c.stareCd=rnd(16,30); if(roomAt(c)){ c.stareCam=ROOMS.indexOf(roomAt(c)); c.alarm=false; c.state='stare'; c.stareT=rnd(2.6,3.8); c.path=[]; break; } }
+        if(Math.random()<dt*.1){ c.pauseT=rnd(1.2,3); break; } }
+      if(!c.path.length){ if(S.mode==='gens'&&Math.random()<.35){ const nh=hidesNear(c,9,1); if(nh.length){ gensInspect(c,nh); break; } } const f=randomFloor(); goTo(c,f.x,f.y); } follow(c,80*D.mul*GS,dt);
   }
   creatureAudio(c,dt,Math.hypot(c.x-ox,c.y-oy)>.1);
   for(const h of hs){ if(h.out||h.inv>0) continue;
@@ -3606,12 +3617,12 @@ function jumpscare(face,done){ const mode=settings.scare, el=$('jumpscare'), cv=
   setTimeout(()=>{ el.className=''; done(); }, mode==='max'?1500:mode==='fun'?1250:950); }
 
 /* ================= UPDATE ================= */
-const CODE={patrol:'p',chase:'c',investigate:'i',check:'k',search:'s',inspect:'n',peek:'e'}, CODE2={p:'patrol',c:'chase',i:'investigate',k:'check',s:'search',n:'inspect',e:'peek'};
+const CODE={patrol:'p',chase:'c',investigate:'i',check:'k',search:'s',inspect:'n',peek:'e',stare:'z'}, CODE2={p:'patrol',c:'chase',i:'investigate',k:'check',s:'search',n:'inspect',e:'peek',z:'stare'};
 function applySnap(m){ if(typeof m.tl==='number') S.timeLeft=m.tl; if(typeof m.cd==='number') S.countdown=m.cd;
   const arr=Array.isArray(m.c)?m.c.slice(0,6):[]; while(S.creatures.length<arr.length) S.creatures.push(makeCreature(S.creatures.length)); S.creatures.length=arr.length;
   let chaseMe=false, checkMe=false;
   arr.forEach((a,i)=>{ const c=S.creatures[i]; if(!Array.isArray(a)) return; if(c.tx==null){ c.x=+a[0]||0; c.y=+a[1]||0; } c.tx=+a[0]||0; c.ty=+a[1]||0;
-    c.state=CODE2[a[2]]||'patrol'; c.peekObj=OBJS[a[6]]||null; c.mark=a[3]==='!'||a[3]==='?'?a[3]:null; if(c.fk!==a[4]){ c.fk=typeof a[4]==='string'?a[4]:''; } c.tid=+a[5]||0;
+    c.state=CODE2[a[2]]||'patrol'; c.peekObj=OBJS[a[6]]||null; c.stareCam=a[7]>=0?a[7]:null; c.mark=a[3]==='!'||a[3]==='?'?a[3]:null; if(c.fk!==a[4]){ c.fk=typeof a[4]==='string'?a[4]:''; } c.tid=+a[5]||0;
     if(c.state==='chase'&&c.tid===NET.id) chaseMe=true; if(c.state==='check'&&c.tid===NET.id) checkMe=true; });
   if(chaseMe&&!S.lastChase&&S.t-S.stingT>3){ SFX.sting(); S.stingT=S.t; toast('😱 It sees you! TAKBO!'); vibrate(60); }
   if(checkMe&&!S.lastCheck&&S.player.hidden) toast('😨 It saw you hide! Hold your breath!');
@@ -3637,7 +3648,7 @@ function update(dt){ if(S.mode==='giant') return updateGiant(dt); if(S.mode==='h
   if(keys.has('KeyW')||keys.has('ArrowUp')) fw+=1; if(keys.has('KeyS')||keys.has('ArrowDown')) fw-=1;
   if(keys.has('KeyA')) st-=1; if(keys.has('KeyD')) st+=1;
   const m=Math.hypot(fw,st); if(m>1){ fw/=m; st/=m; }
-  const frozen=S.stun>0||(S.role==='taya'&&S.countdown>0)||S.role==='nav';
+  const frozen=S.stun>0||(S.role==='taya'&&S.countdown>0)||S.role==='nav'||!!S.monOpen;
   const moving=m>.15&&!p.hidden&&!p.searching&&!frozen, running=moving&&!S.out&&(keys.has('ShiftLeft')||keys.has('ShiftRight')||runHeld);
   if(moving){ const base=S.role==='taya'?(running?235:150):S.out?170:(running?220:130), sp=base*dt, ca=Math.cos(p.a), sa=Math.sin(p.a), ox=p.x, oy=p.y;
     moveCircle(p,(ca*fw-sa*st)*sp,(sa*fw+ca*st)*sp); const sw=stairStep(p); p.step+=Math.abs(sw)?0:Math.hypot(p.x-ox,p.y-oy); p.bob+=dt*(running?14:9);
@@ -3653,7 +3664,7 @@ function update(dt){ if(S.mode==='giant') return updateGiant(dt); if(S.mode==='h
   if(S.isAuth){ const hs=hiders();
     if(S.net) for(const q of Object.values(NET.players)) if(q.inv>0) q.inv-=dt;
     S.hearT-=dt; if(S.hearT<=0){ S.hearT=.35; for(const h of hs){ if(h.out||h.noise<=52) continue; const pos=h.hidden?h.hidePos:h;
-      for(const c of S.creatures){ if(c.state==='chase'||c.state==='check'||(c.state==='inspect'&&c.sawHide)) continue; if(physDist(c,pos)<h.noise*5.2*(S.mode==='gens'&&!los(c,pos)?.6:1)&&(c.state!=='investigate'||Math.random()<.4)){
+      for(const c of S.creatures){ if(c.state==='chase'||c.state==='check'||(c.state==='inspect'&&c.sawHide)||(c.state==='stare'&&c.alarm)) continue; if(physDist(c,pos)<h.noise*5.2*(S.mode==='gens'&&!los(c,pos)?.6:1)&&(c.state!=='investigate'||Math.random()<.4)){
         c.state='investigate'; c.mark='?'; c.markT=1.5; goTo(c,pos.x+rnd(-50,50),pos.y+rnd(-50,50));
         if(h.isLocal&&S.t-S.heardT>4){ toast('👂 Something heard you…'); S.heardT=S.t; } } } } }
     const active=!(S.mode==='taya'&&S.countdown>0);
@@ -3666,7 +3677,7 @@ function update(dt){ if(S.mode==='giant') return updateGiant(dt); if(S.mode==='h
       if(free.length){ float(b.obj.cx,b.obj.cy,'👣','#fff',1,1.8); b.obj=pick(free); } } } }
     if(S.net&&hs.length&&hiders().every(h=>h.out)) return authEnd('allout');
     if(S.net){ S.snapT-=dt; if(S.snapT<=0){ S.snapT=.1; netSend({t:'snap',tl:+S.timeLeft.toFixed(1),cd:+S.countdown.toFixed(1),
-      c:S.creatures.map(c=>[Math.round(c.x),Math.round(c.y),CODE[c.state]||'p',c.mark||'',c.fk||'',(c.state==='chase'||c.state==='check')?(c.state==='check'?c.checkFor:c.tid):0,c.peekObj&&(c.state==='peek'||c.state==='inspect')?OBJS.indexOf(c.peekObj):-1]),
+      c:S.creatures.map(c=>[Math.round(c.x),Math.round(c.y),CODE[c.state]||'p',c.mark||'',c.fk||'',(c.state==='chase'||c.state==='check')?(c.state==='check'?c.checkFor:c.tid):0,c.peekObj&&(c.state==='peek'||c.state==='inspect')?OBJS.indexOf(c.peekObj):-1,c.state==='stare'&&c.stareCam!=null?c.stareCam:-1]),
       g:S.G?S.G.gens.map(g=>g.on?100:Math.round(g.p*99)):undefined, d:S.G?DOORS.map(d=>d.open?1:0).join(''):undefined, k:S.G?S.G.chests.map(c=>c.open?1:0).join(''):undefined,
       b:S.bots.map(b=>[OBJS.indexOf(b.obj),b.found?1:0])}); } }
   } else {
@@ -3891,15 +3902,24 @@ function toggleFlash(){ if(!S||S.mode!=='gens'||S.role==='nav'||S.out) return; i
   if(!S.flashOn&&S.G.bat<=0) return toast('🔋 No battery! Open chests to find some.'); S.flashOn=!S.flashOn; SFX.beep(S.flashOn?880:440); }
 function gensAct(from,m){ const G=S.G; if(m.k==='door'){ const d=DOORS[m.i|0]; if(d) setDoor(d,!!m.o); }
   else if(m.k==='gen'){ const g=G.gens[m.i|0]; if(g&&!g.on){ g.p=Math.min(1,g.p+clamp(+m.d||0,0,.4)); if(g.p>=1) genOn(m.i|0); } }
-  else if(m.k==='chest'){ const c=G.chests[m.i|0]; if(c) c.open=true; } }
+  else if(m.k==='chest'){ const c=G.chests[m.i|0]; if(c) c.open=true; }
+  else if(m.k==='alarm'){ cctvAlarm(m.i|0,true); } }
 function addPing(x,y,who){ if(!S.G) return; S.G.pings.push({x,y,t:S.t}); if(S.G.pings.length>4) S.G.pings.shift(); SFX.ping();
-  if(S.role!=='nav') toast(`📍 ${who||'Navigator'} pinged a spot — check it!`); }
-function navExplorer(){ const qs=Object.values(NET.players).filter(q=>!q.me&&q.role==='hider'&&q.st); if(!qs.length) return null;
+  if(S.role!=='nav'&&S.net) toast(`📍 ${who||'Navigator'} pinged a spot — check it!`); }
+function navExplorers(){ if(!S.net){ const p=S.player; return [{id:'me',name:settings.name||'You',color:'#ffd166',st:{x:p.x,y:p.y,a:p.a,h:p.hidden?OBJS.indexOf(p.hidden):-1,out:S.out?1:0,b:Math.round(S.G.bat),L:S.flashOn?1:0},rx:p.x,ry:p.y}]; }
+  return Object.values(NET.players).filter(q=>!q.me&&q.role==='hider'&&q.st); }
+const monSolo=()=>S&&S.mode==='gens'&&!S.net&&S.role!=='nav';
+function toggleMonitor(){ if(!monSolo()||S.over) return; S.monOpen=!S.monOpen; S.monView=S.monView||'map';
+  if(S.monOpen){ $('touch').hidden=true; if(document.pointerLockElement) document.exitPointerLock(); SFX.beep(660); }
+  else { $('touch').hidden=!isTouch; $('gl').style.display=''; SFX.beep(440); } }
+function toggleMonView(){ if(!S.monOpen) return; S.monView=S.monView==='cctv'?'map':'cctv'; SFX.beep(S.monView==='cctv'?760:560); }
+function navExplorer(){ const qs=navExplorers(); if(!qs.length) return null;
   let best=qs[0], bd=1e9; for(const q of qs){ for(const c of S.creatures){ const d=physDist(c,q.st); if(d<bd){ bd=d; best=q; } } } return best; }
 function gensTick(dt){ const p=S.player, G=S.G;
   for(const d of DOORS) d.ang+=((d.open?1:0)-d.ang)*Math.min(1,dt*7);
   G.pings=G.pings.filter(q=>S.t-q.t<12);
   if(S.isAuth&&G.allOn&&!S.over){ for(const h of hiders()){ if(h.out||h.hidden) continue; if(physDist(h,START)<1.4*T) return authEnd('escape'); } }
+  G.alarmCd=Math.max(0,(G.alarmCd||0)-dt); if(S.monOpen&&(S.stun>0||S.over)) toggleMonitor();
   if(S.role==='nav'){ const q=navExplorer(); if(q){ p.x=q.rx!=null?q.rx:q.st.x; p.y=q.ry!=null?q.ry:q.st.y; p.a=q.st.a||0; } return; }
   if(p.hidden&&S.flashOn){ S.flashOn=false; G.flashWas=true; } if(!p.hidden&&G.flashWas){ G.flashWas=false; if(G.bat>0) S.flashOn=true; }
   if(S.flashOn&&!S.out){ G.bat=Math.max(0,G.bat-dt*G.drain); if(G.bat<20&&!G.lowWarn){ G.lowWarn=true; toast('🔋 Battery low! Look in chests.'); }
@@ -3927,10 +3947,11 @@ function newGensGame(mp){ if(!R3.ok&&!mp) toast('Tip: Ilaw looks best with 3D gr
   banner('⚡ Hotel Esperanza'); }
 
 /* ---- navigator map ---- */
-function navLayout(){ const Wd=cv.width, Hd=cv.height, top=96*dpr, bot=16*dpr, s=Math.min((Wd-24*dpr)/SW,(Hd-top-bot)/H), ox=(Wd-s*SW)/2, oy=top+((Hd-top-bot)-s*H)/2; return {s,ox,oy}; }
+function navLayout(){ const M=navSplit().map, s=Math.min(M.w/SW,(M.h-28*dpr)/H), ox=M.x+(M.w-s*SW)/2, oy=M.y+22*dpr+((M.h-28*dpr)-s*H)/2; return {s,ox,oy,M}; }
 function navFloor(){ if(S.navF>=0) return S.navF; const q=navExplorer(); return q?regionOf(q.st.x):0; }
 function renderNav(){ const c=ctx, Wd=cv.width, Hd=cv.height, t=performance.now()/1000, f=navFloor(), L=navLayout(), s=L.s, X=tx=>L.ox+tx*s, Y=ty=>L.oy+ty*s;
   c.setTransform(1,0,0,1,0,0); c.fillStyle='#0b0814'; c.fillRect(0,0,Wd,Hd); const off=f*OFFT;
+  if(S.role!=='nav'&&S.monView==='cctv'){ drawCCTV(navSplit().tv,t); return; }
   for(let ty=0;ty<H;ty++) for(let tx=0;tx<SW;tx++){ const v=grid[ty][tx+off]; if(v===2) continue; const ri=roomIdx[ty][tx+off];
     let col='#3a3228'; if(v===1) col='#4a3d70'; else if(v===3) col='#6b5a4a'; else if(v===4) col='#ffc857'; else if(ri>=0){ const fl=ROOMS[ri].floor; col=`rgb(${fl[0]*.55|0},${fl[1]*.55|0},${fl[2]*.55|0})`; }
     c.fillStyle=col; c.fillRect(X(tx),Y(ty),Math.ceil(s),Math.ceil(s)); }
@@ -3947,7 +3968,7 @@ function renderNav(){ const c=ctx, Wd=cv.width, Hd=cv.height, t=performance.now(
   if(regionOf(START.x)===f){ c.font=`800 ${Math.round(s*.7)}px "Baloo 2",sans-serif`; c.fillStyle=S.G.allOn?'#5bf0a8':'#ff6b8a'; c.fillText(S.G.allOn?'🚪 EXIT':'🔒 EXIT',X(START.x/T-off),Y(START.y/T)); }
   for(const pg of S.G.pings){ if(regionOf(pg.x)!==f) continue; const k=((S.t-pg.t)%1.4)/1.4; c.strokeStyle=`rgba(91,240,168,${1-k})`; c.lineWidth=3*dpr; c.beginPath(); c.arc(X(lxOf(pg.x)/T),Y(pg.y/T),s*(.4+k*1.6),0,Math.PI*2); c.stroke();
     c.font=`${Math.round(s*.9)}px ${EMOJI_FONT}`; c.fillText('📍',X(lxOf(pg.x)/T),Y(pg.y/T)-s*.4); }
-  const exps=Object.values(NET.players).filter(q=>!q.me&&q.role==='hider'&&q.st);
+  const exps=navExplorers();
   let warn=null;
   for(const m of S.creatures){ const near=exps.some(q=>!q.st.out&&physDist(m,q.st)<9*T); if(!near) continue;
     const q=exps.reduce((a,b)=>physDist(m,b.st)<physDist(m,a.st)?b:a); warn={q,d:physDist(m,q.st)};
@@ -3957,9 +3978,10 @@ function renderNav(){ const c=ctx, Wd=cv.width, Hd=cv.height, t=performance.now(
     if(st.h>=0&&OBJS[st.h]){ icon(OBJS[st.h],'🫣',.9); } else { c.save(); c.translate(x,y); c.rotate(st.a||0); c.fillStyle=st.out?'rgba(160,180,255,.5)':q.color; c.beginPath(); c.moveTo(s*.6,0); c.lineTo(-s*.4,s*.38); c.lineTo(-s*.2,0); c.lineTo(-s*.4,-s*.38); c.closePath(); c.fill(); c.restore(); }
     c.font=`800 ${Math.round(s*.55)}px "Baloo 2",sans-serif`; c.fillStyle=q.color; c.fillText(q.name+(typeof st.b==='number'?` 🔋${st.b}%`:''),x,y-s*.95); }
   c.textAlign='left'; c.font=`800 ${Math.round(22*dpr)}px "Baloo 2",sans-serif`; c.fillStyle='#fff'; c.fillText(f?'2F — Guest rooms':'1F — Ground floor',L.ox,L.oy-14*dpr);
-  if(warn){ c.textAlign='center'; c.font=`800 ${Math.round(20*dpr)}px "Baloo 2",sans-serif`; c.fillStyle=`rgba(255,80,110,${.7+.3*Math.sin(t*6)})`; c.fillText(`👣 Footsteps near ${warn.q.name}!${warn.q.st.h>=0?' Tell them to hold their breath!':''}`,Wd/2,Hd-26*dpr); } }
-function navTap(e){ const r=cv.getBoundingClientRect(), px=(e.clientX-r.left)*cv.width/r.width, py=(e.clientY-r.top)*cv.height/r.height, L=navLayout(), tx=(px-L.ox)/L.s, ty=(py-L.oy)/L.s;
-  if(tx<0||ty<0||tx>=SW||ty>=H) return; const f=navFloor(), x=(tx+f*OFFT)*T, y=ty*T; addPing(x,y); netSend({t:'ping',x:Math.round(x),y:Math.round(y)}); toast('📍 Ping sent!'); }
+  if(warn){ c.textAlign='center'; c.font=`800 ${Math.round(20*dpr)}px "Baloo 2",sans-serif`; c.fillStyle=`rgba(255,80,110,${.7+.3*Math.sin(t*6)})`; c.font=`800 ${Math.round(Math.min(18*dpr,L.M.w/26))}px "Baloo 2",sans-serif`; c.fillText(warn.q.id==='me'?`👣 Footsteps nearby!${warn.q.st.h>=0?' Hold your breath!':''}`:`👣 Footsteps near ${warn.q.name}!${warn.q.st.h>=0?' Tell them to hold their breath!':''}`,L.M.x+L.M.w/2,Math.min(Hd-14*dpr,L.oy+H*s+16*dpr)); }
+  if(S.role==='nav') drawCCTV(navSplit().tv,t); }
+function navTap(e){ const r=cv.getBoundingClientRect(), px=(e.clientX-r.left)*cv.width/r.width, py=(e.clientY-r.top)*cv.height/r.height; if((S.role==='nav'||S.monView==='cctv')&&cctvTap(px,py)) return; const L=navLayout(), tx=(px-L.ox)/L.s, ty=(py-L.oy)/L.s;
+  if(tx<0||ty<0||tx>=SW||ty>=H) return; const f=navFloor(), x=(tx+f*OFFT)*T, y=ty*T; addPing(x,y); if(S.net){ netSend({t:'ping',x:Math.round(x),y:Math.round(y)}); toast('📍 Ping sent!'); } else toast('📍 Marker dropped'); }
 
 /* ---- 3D: doors, chest lids, generator lamps, exit, hide rigs, skeletons ---- */
 function gensBuild3D(sc){ (R3.gxObjs||[]).forEach(o=>sc.remove(o)); R3.gxObjs=[]; R3.gx={doors:[],lids:[],glows:[],exit:null}; if(!ST.gens) return;
@@ -3976,7 +3998,7 @@ function gensBuild3D(sc){ (R3.gxObjs||[]).forEach(o=>sc.remove(o)); R3.gxObjs=[]
       g.position.set(lxOf(o.cx)/T,o.f*FH+.95,o.cy/T); g.scale.set(1.3,1.3,1); g.visible=false; sc.add(g); R3.gxObjs.push(g); R3.gx.glows.push(g); } });
   const sign=(txt,col)=>{ const cc=mk(256,96), x=cc.getContext('2d'); x.fillStyle='rgba(0,0,0,.6)'; x.fillRect(0,0,256,96); x.strokeStyle=col; x.lineWidth=6; x.strokeRect(4,4,248,88); x.fillStyle=col; x.font='800 54px "Baloo 2",sans-serif'; x.textAlign='center'; x.textBaseline='middle'; x.fillText(txt,128,52); return cc; };
   R3.gx.exitL=texOf(sign('🔒 EXIT','#ff3d6e')); R3.gx.exitO=texOf(sign('EXIT ➜','#5bf0a8'));
-  const ex=new THREE.Sprite(new THREE.SpriteMaterial({map:R3.gx.exitL,fog:false,transparent:true,depthWrite:false})); ex.position.set(lxOf(START.x)/T,1.25,START.y/T); ex.scale.set(.9,.34,1); sc.add(ex); R3.gxObjs.push(ex); R3.gx.exit=ex; }
+  const ex=new THREE.Sprite(new THREE.SpriteMaterial({map:R3.gx.exitL,fog:false,transparent:true,depthWrite:false})); ex.position.set(lxOf(START.x)/T,1.25,START.y/T); ex.scale.set(.9,.34,1); sc.add(ex); R3.gxObjs.push(ex); R3.gx.exit=ex; buildCCTV(sc); }
 function buildHideRigs(){ const cam=R3.camera, wood=new THREE.MeshBasicMaterial({color:0x140d08}), slat=new THREE.MeshBasicMaterial({color:0x2a1a10}), blank=new THREE.MeshBasicMaterial({color:0x5a1e2a}), under=new THREE.MeshBasicMaterial({color:0x0c0908});
   const B=(w,h,d,m,x,y,z,par)=>{ const b=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),m); b.position.set(x,y,z); par.add(b); return b; };
   const cl=new THREE.Group(); B(.02,1.4,.6,wood,-.4,-.15,-.05,cl); B(.02,1.4,.6,wood,.4,-.15,-.05,cl); B(.82,.02,.6,wood,0,.55,-.05,cl); B(.82,.02,.6,wood,0,-.85,-.05,cl);
@@ -3997,6 +4019,7 @@ function gensRender3D(t,lx,lz,base){ const p=S.player, G=S.G, dt=Math.min(.05,t-
   DOORS.forEach((d,i)=>{ const pv=R3.gx.doors[i]; if(pv) pv.rotation.y=pv.userData.r0-d.ang*Math.PI*.5; });
   G.chests.forEach((c,i)=>{ const lid=R3.gx.lids[i]; if(lid){ const tg=c.open?-1.35:-(c.t>0?Math.min(.5,c.t*.6):0); lid.rotation.x+=(tg-lid.rotation.x)*Math.min(1,dt*8); } });
   G.gens.forEach((g,i)=>{ const gl=R3.gx.glows[i]; if(gl){ gl.visible=g.on||g.p>0; const k=g.on?1:.35*g.p; gl.material.opacity=k*(g.on?.75+Math.sin(t*12+i)*.05:.5+Math.sin(t*20)*.3); } });
+  if(R3.gx.cams) R3.gx.cams.forEach((g,i)=>{ const al=S.cctvAlarm&&S.cctvAlarm.i===i&&S.t-S.cctvAlarm.t<5; g.led.material.opacity=al?(((t*8)|0)%2?1:.1):((t*1.4+i*.17)%1)<.5?.9:.15; g.led.scale.setScalar(al?.22:.09); });
   if(R3.gx.exit){ R3.gx.exit.material.map=G.allOn?R3.gx.exitO:R3.gx.exitL; R3.gx.exit.material.opacity=.75+Math.sin(t*3)*.2; }
   R3.flash.intensity=S.flashOn?(thirdP()?2:2.5):0; R3.flash.distance=9; R3.fog.near=.4; R3.fog.far=p.hidden?(G.allOn?8:5.2):S.flashOn?(G.allOn?9:6.8):(G.allOn?7:3); R3.hemi.intensity=G.allOn?.5:p.hidden?.42:.18+gensOn()*.012;
   if(!R3.hr) buildHideRigs(); const hs=p.hidden&&p.hidden.hs; R3.hr.cl.visible=hs==='inside'; R3.hr.bd.visible=hs==='under';
@@ -4007,9 +4030,10 @@ function gensRender3D(t,lx,lz,base){ const p=S.player, G=S.G, dt=Math.min(.05,t-
     SK.G.visible=true; const cx=lxOf(c.x)/T, cy=c.y/T, mv=Math.hypot(cx-(SK.px||cx),cy-(SK.py||cy)); if(mv>.002) SK.fa=Math.atan2(cy-(SK.py||cy),cx-(SK.px||cx)); SK.px=cx; SK.py=cy;
     let fa=SK.fa||0; if((c.state==='peek'||c.state==='inspect')&&c.peekObj&&c.state==='peek') fa=Math.atan2(c.peekObj.cy-c.y,c.peekObj.cx-c.x);
     if(c.state==='chase'&&regionOf(c.x)===regionOf(p.x)) { const d=physDist(c,p); if(d<2.5*T) fa=Math.atan2(p.y-c.y,p.x-c.x); }
-    SK.ry=(SK.ry==null?fa:SK.ry); let df=((fa-SK.ry+Math.PI*3)%(Math.PI*2))-Math.PI; SK.ry+=df*Math.min(1,dt*8);
+    if(c.state==='stare'&&R3.gx.cams){ const G=R3.gx.cams[c.stareCam!=null?c.stareCam:ROOMS.indexOf(roomAt(c))]; if(G) fa=Math.atan2(G.P.z-c.y/T,G.P.x-lxOf(c.x)/T); }
+    SK.ry=(SK.ry==null?fa:SK.ry); let df=((fa-SK.ry+Math.PI*3)%(Math.PI*2))-Math.PI; SK.ry+=df*Math.min(1,dt*(c.state==='chase'?7:c.state==='stare'?1.8:3));
     SK.G.position.set(cx,zOf(c),cy); SK.G.rotation.y=-SK.ry; const near=c.state==='chase'&&physDist(c,p)<3*T;
-    animSkeleton(SK,dt*1.6,t,near?5:20,false,false,mv>.002); if(c.state==='peek'&&c.peekObj) animPeek(SK,c.peekObj.hs,t); });
+    animCreep(SK,c,mv,t,dt); if(c.state==='peek'&&c.peekObj) animPeek(SK,c.peekObj.hs,t); });
   for(let i=S.creatures.length;i<R3.skels.length;i++) R3.skels[i].G.visible=false; }
 function hideGensMeshes(){ if(R3.skels) R3.skels.forEach(s=>s.G.visible=false); if(R3.hr){ R3.hr.cl.visible=false; R3.hr.bd.visible=false; } }
 function drawGensOverlay(t){ const G=S.G, p=S.player, Wd=cv.width, Hd=cv.height, mn=Math.min(Wd,Hd);
@@ -4026,12 +4050,14 @@ function gensHUD(){ const p=S.player, G=S.G, on=gensOn(), tot=G.gens.length;
   const nav=S.role==='nav', q=nav?navExplorer():null;
   $('objective').innerHTML=nav?`🗺 Navigator • ⚡ ${on}/${tot} • ⏱ ${fmt(S.timeLeft)}<br><span style="font-size:.8em">Tap the map to ping a spot</span>`
     :G.allOn?`💡 All ${tot} on! Get to the 🚪 EXIT • ⏱ ${fmt(S.timeLeft)}`:`⚡ Generators ${on}/${tot} • ⏱ ${fmt(S.timeLeft)}`;
-  $('navFloorBtn').textContent=S.navF<0?'👣':S.navF?'2F':'1F';
+  $('navFloorBtn').textContent=S.navF<0?'👣':S.navF?'2F':'1F'; $('navFloorBtn').hidden=!(nav||S.monOpen); $('monViewBtn').hidden=!S.monOpen; $('monViewBtn').textContent=S.monView==='cctv'?'🗺':'📹';
+  if(monSolo()){ $('mapBtn').textContent=S.monOpen?'✕':'🗺'; $('mapBtn').hidden=false; }
   const nb=$('noiseBar'); nb.style.width=S.noise+'%'; nb.style.background=S.noise>60?'#ff3d6e':S.noise>30?'#ffc857':'#58e0a0';
   const bb=$('batBar'); bb.style.width=G.bat+'%'; bb.style.background=G.bat<20?'#ff3d6e':G.bat<45?'#ffc857':'#5bf0a8'; $('batWrap').classList.toggle('off',!S.flashOn);
   $('breathWrap').hidden=!p.hidden||nav; $('breathBar').style.width=S.breath+'%'; $('breathBar').style.background=S.gasp>0?'#ff3d6e':'#6ec6ff';
   const pr=$('prompt'), u=G.tgt, nh=(!p.hidden&&!S.out&&!nav)?nearHide():null; let msg='';
-  if(nav) msg=q?(q.st.h>=0?`${q.name} is hiding — 👣 listen for footsteps`:`Following ${q.name} • tap 👣/1F/2F to switch floors`):'Waiting for your partner…';
+  if(nav) msg=q?'':'Waiting for your partner…';
+  else if(S.monOpen) msg='';
   else if(S.out) msg='👻 You’re out — cheer on your team!';
   else if(p.hidden) msg=isTouch?`Hiding in the ${p.hidden.n} — hold 🤐 when it comes close`:`Hiding in the ${p.hidden.n} — Space hold breath, E get out`;
   else if(u&&u.k==='gen') msg=isTouch?`Hold 🔧 Use to fix the generator (${Math.round(u.g.p*100)}%) — it’s loud!`:`Hold F to fix the generator (${Math.round(u.g.p*100)}%) — it’s loud!`;
@@ -4043,7 +4069,119 @@ function gensHUD(){ const p=S.player, G=S.G, on=gensOn(), tot=G.gens.length;
   if(isTouch&&!nav){ const bh=$('bHide'); bh.hidden=S.out; bh.innerHTML=p.hidden?'<span class="em">🚪</span>Get out':'<span class="em">🫣</span>Hide'; bh.classList.toggle('dim',!p.hidden&&!nh);
     $('bSearch').hidden=S.out||!!p.hidden; $('bSearch').classList.toggle('dim',!u); $('bLight').hidden=S.out||!!p.hidden; $('bLight').classList.toggle('on',!!S.flashOn);
     $('bBreath').hidden=!p.hidden; $('bRun').hidden=!!p.hidden; $('bBreath').classList.toggle('on',S.holding); $('bRun').classList.toggle('on',runHeld); }
+  if(monSolo()) $('mini').hidden=!(settings.mini&&!S.monOpen);
   if(!$('mini').hidden&&settings.mini) drawMini(); }
+
+/* ================= CCTV WALL (Navigator) + creepy skeleton ================= */
+function navSplit(){ const Wd=cv.width, Hd=cv.height, top=96*dpr, pad=10*dpr, land=Wd>=Hd;
+  if(S.role!=='nav'){ const R={x:pad,y:top,w:Wd-pad*2,h:Hd-top-pad}; return {map:R,tv:R}; }
+  if(land){ const half=Wd/2; return {map:{x:pad,y:top,w:half-pad*1.5,h:Hd-top-pad},tv:{x:half+pad*.5,y:top-26*dpr,w:half-pad*1.5,h:Hd-top+26*dpr-pad}}; }
+  const mh=(Hd-top)*.5; return {map:{x:pad,y:top,w:Wd-pad*2,h:mh-pad},tv:{x:pad,y:top+mh,w:Wd-pad*2,h:Hd-top-mh-pad}}; }
+function roomCamPos(r){ const lx0=r.x0-r.f*OFFT, lx1=r.x1-r.f*OFFT+1, y0=r.y0, y1=r.y1+1, base=r.f*FH;
+  return {x:lx0+.18,y:base+FH-.14,z:y0+.18,tx:(lx0+lx1)/2+(lx1-lx0)*.12,ty:base+.25,tz:(y0+y1)/2+(y1-y0)*.12}; }
+function buildCCTV(sc){ R3.gx.cams=[]; const body=new THREE.MeshPhongMaterial({color:0xd8d8d0}), dark=new THREE.MeshPhongMaterial({color:0x111111});
+  ROOMS.forEach((r,i)=>{ const P=roomCamPos(r), cam=new THREE.PerspectiveCamera(r.y1-r.y0<3?70:80,4/3,.05,30); cam.position.set(P.x,P.y,P.z); cam.lookAt(P.tx,P.ty,P.tz); cam.updateMatrixWorld();
+    const g=new THREE.Group(), b=new THREE.Mesh(new THREE.BoxGeometry(.2,.1,.1),body), l=new THREE.Mesh(new THREE.CylinderGeometry(.035,.035,.04,10),dark); l.rotation.z=Math.PI/2; l.position.x=.12; g.add(b,l);
+    const led=new THREE.Sprite(new THREE.SpriteMaterial({map:texOf(glowCanvas('#ff2030')),fog:false,transparent:true,depthWrite:false,blending:THREE.AdditiveBlending})); led.scale.set(.09,.09,1); led.position.set(.06,.07,0); g.add(led);
+    g.position.set(P.x+.02,P.y+.02,P.z+.02); g.lookAt(P.tx,P.ty,P.tz); g.rotateY(-Math.PI/2); sc.add(g); R3.gxObjs.push(g);
+    R3.gx.cams.push({cam,led,room:r,P,prop:g}); }); }
+const CCTV_NOISE=[]; function cctvNoise(i){ if(!CCTV_NOISE.length) for(let k=0;k<5;k++){ const c=mk(160,120), x=c.getContext('2d'), d=x.createImageData(160,120);
+    for(let j=0;j<d.data.length;j+=4){ const v=Math.random()*255|0; d.data[j]=d.data[j+1]=d.data[j+2]=v; d.data[j+3]=255; } x.putImageData(d,0,0); CCTV_NOISE.push(c); } return CCTV_NOISE[i%CCTV_NOISE.length]; }
+function cctvClock(){ const s=Math.floor(23*3600+40*60+(S?S.t:0))%86400; return [s/3600|0,(s/60|0)%60,s%60].map(v=>String(v).padStart(2,'0')).join(':'); }
+function navKidsUpdate(){ R3.navKids=R3.navKids||{}; const seen=new Set();
+  for(const q of navExplorers()){ seen.add(String(q.id)); let K=R3.navKids[q.id];
+    if(!K){ K=makeKid(1); const gl=new THREE.Sprite(new THREE.SpriteMaterial({map:texOf(glowCanvas('#fff3c4')),fog:false,transparent:true,depthWrite:false,blending:THREE.AdditiveBlending})); gl.scale.set(.5,.5,1); gl.position.set(.16,-.33,0); K.arms[1].add(gl); K.glow=gl; K.nb=0; R3.scene.add(K.g); R3.navKids[q.id]=K; }
+    const st=q.st, x=q.rx!=null?q.rx:st.x, y=q.ry!=null?q.ry:st.y, mv=Math.hypot(x-(K.lx||x),y-(K.ly||y)); K.lx=x; K.ly=y; K.nb+=mv/T*7;
+    K.g.visible=!st.out&&!(st.h>=0); animKid(K,lxOf(x)/T,zOf({x,y}),y/T,st.a||0,K.nb,false,false); K.glow.visible=!!st.L; }
+  for(const id in R3.navKids) if(!seen.has(String(id))) R3.navKids[id].g.visible=false; }
+function cctvFeeds(cells,t){ const R=R3.renderer, el=R.domElement, C=S.cctv; if(R3.built!==R3.want) build3D(); if(!R3.gx||!R3.gx.cams) return;
+  if(el.width<400||el.height<300){ R.setPixelRatio(1); R.setSize(480,360,false); R3.w=0; }
+  gensRender3D(t,0,0,0); navKidsUpdate();
+  R3.spr.forEach(s=>s.visible=false); R3.eyes.forEach(s=>s.visible=false); if(R3.kid) R3.kid.g.visible=false; R3.stars.visible=false; R3.moon.visible=false;
+  R3.flash.intensity=0; R3.hemi.intensity=S.G.allOn?2.6:2.1; R3.fog.color.setHex(0x000000); R3.fog.near=2; R3.fog.far=S.G.allOn?18:14; R.setClearColor(0x000000,1);
+  const big=cells.length===1, fw=big?400:160, fh=big?300:120, todo=big?cells:[];
+  if(!big){ for(let k=0;k<2&&k<cells.length;k++){ todo.push(cells[(C.rr+k)%cells.length]); } C.rr=(C.rr+2)%Math.max(1,cells.length); }
+  R.setScissorTest(true);
+  for(const cell of todo){ const cm=C.cams[cell.i], G=R3.gx.cams[cell.i]; if(!G) continue; if(cm.st>0&&!big) continue;
+    R.setViewport(0,0,fw,fh); R.setScissor(0,0,fw,fh); G.cam.aspect=4/3; G.cam.updateProjectionMatrix(); G.prop.visible=false; R.render(R3.scene,G.cam); G.prop.visible=true;
+    if(!cm.feed||cm.feed.width!==fw){ cm.feed=mk(fw,fh); } cm.feed.getContext('2d').drawImage(el,0,el.height-fh,fw,fh,0,0,fw,fh); cm.ok=true; }
+  R.setScissorTest(false); R.setViewport(0,0,el.width,el.height); }
+function drawCCTV(Rc,t){ const c=ctx, f=navFloor(), dt=Math.min(.1,t-(S.cctvT||t)); S.cctvT=t;
+  const C=S.cctv||(S.cctv={focus:-1,cams:ROOMS.map(()=>({st:0,feed:null,ok:false,gl:0})),rr:0});
+  const idx=ROOMS.map((r,i)=>i).filter(i=>ROOMS[i].f===f), head=24*dpr, gap=5*dpr, A={x:Rc.x,y:Rc.y+head,w:Rc.w,h:Rc.h-head};
+  c.fillStyle='#050407'; c.fillRect(Rc.x,Rc.y,Rc.w,Rc.h);
+  c.textAlign='left'; c.textBaseline='middle'; c.font=`800 ${Math.round(15*dpr)}px "Baloo 2",sans-serif`; c.fillStyle='#d9e7d0'; c.fillText(`📹 CCTV • ${f?'2F':'1F'} • ${cctvClock()}`,Rc.x+4*dpr,Rc.y+head/2);
+  c.textAlign='right'; c.fillStyle='rgba(217,231,208,.6)'; c.font=`700 ${Math.round(12*dpr)}px "Baloo 2",sans-serif`; c.fillText((S.G.alarmCd>0?`🔔 ${Math.ceil(S.G.alarmCd)}s`:'🔔 ready')+' • '+(C.focus>=0?'tap screen = alarm':'tap = alarm, 🔍 = zoom'),Rc.x+Rc.w-4*dpr,Rc.y+head/2);
+  if(C.focus>=0&&!idx.includes(C.focus)) C.focus=-1;
+  const cells=[]; if(C.focus>=0) cells.push({i:C.focus,x:A.x,y:A.y,w:A.w,h:A.h});
+  else { const cols=3, rows=Math.ceil(idx.length/cols), cw=(A.w-gap*(cols-1))/cols, ch=(A.h-gap*(rows-1))/rows; idx.forEach((ri,k)=>cells.push({i:ri,x:A.x+(k%cols)*(cw+gap),y:A.y+Math.floor(k/cols)*(ch+gap),w:cw,h:ch})); }
+  C.cells=cells;
+  C.cams.forEach((cm,i)=>{ const r=ROOMS[i], monster=S.creatures.some(m=>roomAt(m)===r); if(cm.st>0) cm.st-=dt;
+    else if(Math.random()<dt*(monster?.09:.012)) cm.st=monster?rnd(.25,.9):rnd(1.5,4.5); if(cm.gl>0) cm.gl-=dt; });
+  if(R3.ok) cctvFeeds(cells,t);
+  for(const cell of cells){ const cm=C.cams[cell.i], r=ROOMS[cell.i], sw=Math.min(cell.w,cell.h*4/3), sh=sw*.75, x=cell.x+(cell.w-sw)/2, y=cell.y+(cell.h-sh)/2;
+    c.fillStyle='#151515'; c.fillRect(x-2*dpr,y-2*dpr,sw+4*dpr,sh+4*dpr);
+    const staring=S.creatures.find(m=>m.state==='stare'&&roomAt(m)===r);
+    if(staring&&!staring._nvs){ staring._nvs=true; cm.gl=1.2; SFX.cstatic(); }
+    if(!staring&&S.creatures.every(m=>m.state!=='stare')) S.creatures.forEach(m=>m._nvs=false);
+    if(!R3.ok||cm.st>0||!cm.ok||!cm.feed){ c.drawImage(cctvNoise((t*20|0)+cell.i),x,y,sw,sh); c.fillStyle='rgba(0,0,0,.35)'; c.fillRect(x,y,sw,sh);
+      if(((t*2+cell.i)|0)%2===0){ c.textAlign='center'; c.fillStyle='#e8e8e8'; c.font=`800 ${Math.round(Math.max(10,sh*.12))}px "Baloo 2",monospace`; c.fillText('NO SIGNAL',x+sw/2,y+sh/2); } }
+    else { c.save(); c.beginPath(); c.rect(x,y,sw,sh); c.clip(); c.filter='grayscale(1) contrast(1.3) brightness(1.75)'; c.drawImage(cm.feed,x,y,sw,sh); c.filter='none';
+      c.globalCompositeOperation='multiply'; c.fillStyle='#9fe8a8'; c.fillRect(x,y,sw,sh); c.globalCompositeOperation='source-over';
+      c.globalAlpha=.09; c.drawImage(cctvNoise((t*24|0)+cell.i*3),x,y,sw,sh); c.globalAlpha=1;
+      if(cm.gl>0){ for(let k=0;k<5;k++){ const yy=y+Math.random()*sh, hh=Math.random()*sh*.08; c.drawImage(cm.feed,0,(yy-y)/sh*cm.feed.height,cm.feed.width,hh/sh*cm.feed.height,x+(Math.random()-.5)*sw*.12,yy,sw,hh); } }
+      c.fillStyle='rgba(0,0,0,.14)'; for(let yy=y;yy<y+sh;yy+=3*dpr) c.fillRect(x,yy,sw,1.2*dpr);
+      const by=y+((t*.18+cell.i*.13)%1)*sh; c.fillStyle='rgba(255,255,255,.05)'; c.fillRect(x,by,sw,sh*.07);
+      const vg=c.createRadialGradient(x+sw/2,y+sh/2,sh*.3,x+sw/2,y+sh/2,sw*.7); vg.addColorStop(0,'rgba(0,0,0,0)'); vg.addColorStop(1,'rgba(0,0,0,.6)'); c.fillStyle=vg; c.fillRect(x,y,sw,sh); c.restore(); }
+    const fs=Math.round(clamp(sh*.085,9*dpr,15*dpr)); c.font=`700 ${fs}px monospace`; c.textAlign='left'; c.textBaseline='top'; c.fillStyle='rgba(235,245,230,.85)';
+    { let nm=`CAM ${String(cell.i+1).padStart(2,'0')} ${r.name.toUpperCase()}`; const room=sw-(sw>220*dpr?48:20)*dpr; while(nm.length>6&&c.measureText(nm).width>room) nm=nm.slice(0,-1); c.fillText(nm,x+4*dpr,y+3*dpr); }
+    if((t*1.4|0)%2===0){ c.fillStyle='#ff2a3a'; c.beginPath(); c.arc(x+sw-9*dpr,y+fs*.6+3*dpr,fs*.3,0,Math.PI*2); c.fill(); if(sw>220*dpr){ c.fillStyle='rgba(235,245,230,.85)'; c.textAlign='right'; c.fillText('REC',x+sw-16*dpr,y+3*dpr); } }
+    c.textAlign='right'; c.textBaseline='bottom'; c.fillStyle='rgba(235,245,230,.75)'; c.fillText(cctvClock(),x+sw-4*dpr,y+sh-3*dpr);
+    const inRoom=navExplorers().filter(q=>!q.st.out&&roomAt({x:q.rx!=null?q.rx:q.st.x,y:q.ry!=null?q.ry:q.st.y})===r);
+    const zb=Math.round(clamp(sh*.2,18*dpr,30*dpr)); if(C.focus<0){ cell.zoom={x,y:y+sh-zb,w:zb,h:zb}; c.fillStyle='rgba(0,0,0,.55)'; c.fillRect(x,y+sh-zb,zb,zb); c.font=`${Math.round(zb*.62)}px ${EMOJI_FONT}`; c.textAlign='center'; c.textBaseline='middle'; c.fillText('🔍',x+zb/2,y+sh-zb/2); c.font=`700 ${fs}px monospace`; c.textBaseline='bottom'; }
+    else { c.textAlign='right'; c.textBaseline='top'; c.fillStyle='rgba(235,245,230,.9)'; c.font=`800 ${Math.round(fs*1.1)}px "Baloo 2",sans-serif`; c.fillText('◀ back to wall',x+sw-6*dpr,y+fs+10*dpr); c.font=`700 ${fs}px monospace`; c.textBaseline='bottom'; }
+    const al=S.cctvAlarm&&S.cctvAlarm.i===cell.i&&S.t-S.cctvAlarm.t<5;
+    if(al){ const on=((t*4)|0)%2===0; c.fillStyle=on?'rgba(255,30,50,.28)':'rgba(255,30,50,.08)'; c.fillRect(x,y,sw,sh); c.textAlign='center'; c.textBaseline='middle'; c.fillStyle=on?'#fff':'#ff8a95'; c.font=`800 ${Math.round(clamp(sh*.16,12*dpr,34*dpr))}px "Baloo 2",sans-serif`; c.fillText(`🔔 ALARM ${Math.ceil(5-(S.t-S.cctvAlarm.t))}`,x+sw/2,y+sh*.82); c.font=`700 ${fs}px monospace`; c.textBaseline='bottom'; }
+    if(inRoom.length){ c.textAlign='left'; c.fillStyle=inRoom[0].color; c.fillText('● '+inRoom.map(q=>q.name).join(', '),x+(C.focus<0?zb+4*dpr:4*dpr),y+sh-3*dpr); }
+    c.strokeStyle=al?'#ff2a3a':inRoom.length?inRoom[0].color:'#2a2a2a'; c.lineWidth=(inRoom.length?2:1)*dpr; c.strokeRect(x-1*dpr,y-1*dpr,sw+2*dpr,sh+2*dpr); }
+  c.textBaseline='middle'; }
+function cctvAlarm(i,fromNet){ const G=S.G, r=ROOMS[i]; if(!G||!r) return;
+  if(!fromNet){ if(G.alarmCd>0){ toast(`🔔 Alarm recharging… ${Math.ceil(G.alarmCd)}s`); return; } G.alarmCd=12; }
+  S.cctvAlarm={i,t:S.t}; SFX.alarm(S.role==='nav'||S.monOpen?1:.45);
+  if(S.isAuth){ const P=roomCamPos(r), cp={x:(P.x+r.f*OFFT)*T,y:P.z*T}; let n=0;
+    for(const c of S.creatures){ const near=roomAt(c)===r||(regionOf(c.x)===r.f&&physDist(c,cp)<9*T); if(!near) continue;
+      c.state='stare'; c.stareT=5; c.stareCam=i; c.alarm=true; c.path=[]; c.peekObj=null; c.mark='?'; c.markT=1.5; n++; }
+    if(S.role==='nav'||!S.net) toast(n?`🔔 Alarm in ${r.name}! It’s staring at the camera — 5 seconds!`:`🔔 Alarm in ${r.name}… nothing came.`);
+    if(S.role!=='nav'&&S.net&&n) toast('🔔 The skeleton is distracted — RUN!');
+    if(S.net) netSend({t:'alarm',i,n}); }
+  else if(!fromNet) netSend({t:'gact',k:'alarm',i}); }
+function alarmMsg(m,from){ if(!S||!S.G||S.isAuth) return; const r=ROOMS[m.i|0]; if(!r) return; S.cctvAlarm={i:m.i|0,t:S.t};
+  if(S.role==='nav') toast(m.n?`🔔 Alarm in ${r.name}! It’s staring at the camera — 5 seconds!`:`🔔 Alarm in ${r.name}… nothing came.`);
+  else { SFX.alarm(.45); toast(m.n?`🔔 Your Navigator set off the alarm in ${r.name} — the skeleton is distracted, RUN!`:`🔔 Alarm in ${r.name}`); } }
+function cctvTap(px,py){ const C=S.cctv; if(!C||!C.cells) return false; const tv=navSplit().tv; if(px<tv.x||px>tv.x+tv.w||py<tv.y||py>tv.y+tv.h) return false;
+  const cell=C.cells.find(k=>px>=k.x&&px<=k.x+k.w&&py>=k.y&&py<=k.y+k.h);
+  if(C.focus>=0){ if(!cell||py<cell.y+26*dpr&&px>cell.x+cell.w*.55){ C.focus=-1; SFX.beep(520); return true; } cctvAlarm(cell.i); return true; }
+  if(!cell){ return true; } const z=cell.zoom; if(z&&px>=z.x&&px<=z.x+z.w&&py>=z.y&&py<=z.y+z.h){ C.focus=cell.i; C.cams[cell.i].st=0; SFX.beep(700); return true; }
+  cctvAlarm(cell.i); return true; }
+
+/* slow, creepy skeleton movement */
+function gensGait(c){ if(c.state==='chase') return .8*(.5+.8*Math.abs(Math.sin(c.t*2.3))); if(c.state==='investigate') return .68; if(c.state==='inspect') return c.sawHide?.85:.75; return .6; }
+function animCreep(SK,c,mv,t,dt){ const seed=SK.seed||(SK.seed=Math.random()*10); SK.ph=(SK.ph||0)+mv*2.3; const ph=SK.ph, sw=Math.sin(ph);
+  SK.amp=(SK.amp||0)+(((mv>.002)?1:0)-(SK.amp||0))*Math.min(1,dt*4); const A=SK.amp, chase=c.state==='chase', stare=c.state==='stare';
+  SK.legs[0].th.rotation.z=sw*.52*A; SK.legs[1].th.rotation.z=-sw*.52*A;
+  SK.legs[0].kn.rotation.z=-Math.max(0,-Math.cos(ph))*.9*A-.1; SK.legs[1].kn.rotation.z=-Math.max(0,Math.cos(ph))*.9*A-.1;
+  SK.hips.position.y=7.25+Math.abs(Math.cos(ph))*.32*A+Math.sin(t*.8+seed)*.04;
+  SK.chest.rotation.z=stare?-.08:-.4-(chase?.3:0)+Math.sin(t*.55+seed)*.05; SK.chest.rotation.x=Math.sin(t*.4+seed)*.07;
+  const dang=stare?.04:.14;
+  SK.arms[0].a.rotation.z=(-sw*.3*A+dang)+(chase?1.05+Math.sin(t*9)*.1:0); SK.arms[1].a.rotation.z=(sw*.3*A+dang)+(chase?1.15+Math.sin(t*8+1)*.1:0);
+  SK.arms[0].a.rotation.x=.1+Math.sin(t*.7+seed)*.05; SK.arms[1].a.rotation.x=-.1-Math.sin(t*.6+seed)*.05;
+  SK.arms.forEach((a,i)=>{ a.el.rotation.z=.2+Math.sin(t*1.1+i+seed)*.07+(chase?.45:0); });
+  SK.twT=(SK.twT==null?rnd(2,5):SK.twT)-dt; if(SK.twT<=0){ SK.twT=rnd(2.2,5.5); SK.tw={y:rnd(-.8,.8),z:rnd(-.35,.25),x:rnd(-.4,.4)}; }
+  const tw=SK.tw||{y:0,z:0,x:0}; let ty=tw.y+Math.sin(t*.3+seed)*.2, tz=tw.z, tx=tw.x;
+  if(stare){ const G=R3.gx&&R3.gx.cams&&R3.gx.cams[c.stareCam!=null?c.stareCam:ROOMS.indexOf(roomAt(c))]; ty=0; tx=.32; tz=G?clamp(Math.atan2(G.P.y-zOf(c)-1.3,Math.hypot(G.P.x-lxOf(c.x)/T,G.P.z-c.y/T))*1.2,0,1.1):.6; }
+  if(chase){ ty=Math.sin(t*3)*.12; tz=-.1; tx=Math.sin(t*5)*.15; }
+  const k=Math.min(1,dt*(stare?3:11)); SK.hx=(SK.hx||0)+(tx-(SK.hx||0))*k; SK.hy=(SK.hy||0)+(ty-(SK.hy||0))*k; SK.hz=(SK.hz||0)+(tz-(SK.hz||0))*k; SK.head.rotation.set(SK.hx,SK.hy,SK.hz);
+  SK.eyes.forEach(e=>{ const s=stare?1.5+Math.sin(t*3)*.15:chase?1.15+Math.sin(t*14)*.15:.8+Math.sin(t*1.5+seed)*.12; e.scale.set(s,s,1); }); }
 
 /* ================= THIRD-PERSON VIEW + KID MODEL ================= */
 const thirdP=()=>settings.cam==='3p'&&!(typeof R3!=='undefined'&&R3.inXR);
@@ -4428,7 +4566,7 @@ function renderRay(){ const t=performance.now()/1000; ctx.setTransform(1,0,0,1,0
   v.globalAlpha=1;
   ctx.imageSmoothingEnabled=false; ctx.drawImage(view,0,0,cv.width,cv.height);
   drawOverlays(t); }
-function render(){ if(S&&S.mode==='gens'&&S.role==='nav'){ $('gl').style.display='none'; renderNav(); return; } if(S&&S.mode==='giant'){ if(R3.ok) renderGiant(); return; } if(S&&R3.ok){ render3D(); return; } $('gl').style.display='none'; renderRay(); }
+function render(){ if(S&&S.mode==='gens'&&(S.role==='nav'||S.monOpen)){ $('gl').style.display='none'; renderNav(); return; } if(R3.navKids&&S){ for(const id in R3.navKids) R3.navKids[id].g.visible=false; } if(S&&S.mode==='giant'){ if(R3.ok) renderGiant(); return; } if(S&&R3.ok){ render3D(); return; } $('gl').style.display='none'; renderRay(); }
 function drawOverlays(t){ const p=S.player, Wd=cv.width, Hd=cv.height, mn=Math.min(Wd,Hd);
   const fl=ctx.createRadialGradient(Wd/2,Hd*.52,mn*.22,Wd/2,Hd*.52,Math.max(Wd,Hd)*.72); fl.addColorStop(0,'rgba(255,220,150,.05)'); fl.addColorStop(.45,'rgba(0,0,0,0)'); fl.addColorStop(1,'rgba(0,0,0,.6)');
   ctx.fillStyle=fl; ctx.fillRect(0,0,Wd,Hd);
@@ -4499,13 +4637,13 @@ function loop(now){ if(R3.inXR){ last=now; requestAnimationFrame(loop); return; 
 const typing=()=>{ const a=document.activeElement; return a&&(a.tagName==='INPUT'||a.tagName==='TEXTAREA'); };
 window.addEventListener('keydown',e=>{ if(typing()) return; if(!$('intro').hidden){ $('intro').click(); return; } if(['Space','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.code)&&S&&!S.over) e.preventDefault();
   keys.add(e.code); if(e.repeat||!S||S.over) return; if(e.code==='KeyV'){ toggleCam(); return; }
-  if(S.mode==='giant'){ if(e.code==='KeyE') gToggleHide(); if(e.code==='KeyF') gTopple(); } else if(S.mode==='hunt'){ if(e.code==='KeyE') tryCatch(); } else { if(e.code==='KeyE') toggleHide(); if(e.code==='KeyF'){ if(S.mode==='gens') useTap(); else startSearch(); } if(e.code==='KeyL') toggleFlash(); if(e.code==='Tab'&&S.role==='nav'){ e.preventDefault(); navCycleFloor(); } } if(e.code==='KeyQ'&&!userPaused) S.player.turn=Math.PI;
+  if(S.mode==='giant'){ if(e.code==='KeyE') gToggleHide(); if(e.code==='KeyF') gTopple(); } else if(S.mode==='hunt'){ if(e.code==='KeyE') tryCatch(); } else { if(e.code==='KeyE') toggleHide(); if(e.code==='KeyF'){ if(S.mode==='gens') useTap(); else startSearch(); } if(e.code==='KeyL') toggleFlash(); if(e.code==='KeyM'&&monSolo()) toggleMonitor(); if(e.code==='KeyN') toggleMonView(); if(e.code==='Tab'&&(S.role==='nav'||S.monOpen)){ e.preventDefault(); navCycleFloor(); } } if(e.code==='KeyQ'&&!userPaused) S.player.turn=Math.PI;
   if(e.code==='KeyP'||e.code==='Escape') setPause(!userPaused); });
 window.addEventListener('keyup',e=>keys.delete(e.code));
 window.addEventListener('blur',()=>{ keys.clear(); runHeld=breathHeld=fireHeld=mouseFire=useHeld=false; joy.x=joy.y=0; });
 document.addEventListener('visibilitychange',()=>{ if(document.hidden&&S&&!S.over) setPause(true); });
 let dragging=false,lastMX=0;
-cv.addEventListener('pointerdown',e=>{ if(!S||S.over||isTouch||(S.mode==='gens'&&S.role==='nav')) return; audioInit(); if(S.mode==='giant'&&e.button===0){ if(document.pointerLockElement===cv){ const r=cv.getBoundingClientRect(); gTapAt(r.left+r.width/2,r.top+r.height/2); } else gTapAt(e.clientX,e.clientY); } dragging=true; lastMX=e.clientX; if(S.mode==='hunt'&&e.button===0) mouseFire=true;
+cv.addEventListener('pointerdown',e=>{ if(!S||S.over||isTouch||(S.mode==='gens'&&(S.role==='nav'||S.monOpen))) return; audioInit(); if(S.mode==='giant'&&e.button===0){ if(document.pointerLockElement===cv){ const r=cv.getBoundingClientRect(); gTapAt(r.left+r.width/2,r.top+r.height/2); } else gTapAt(e.clientX,e.clientY); } dragging=true; lastMX=e.clientX; if(S.mode==='hunt'&&e.button===0) mouseFire=true;
   try{ const r=cv.requestPointerLock&&cv.requestPointerLock(); if(r&&r.catch) r.catch(()=>{}); }catch(err){} });
 window.addEventListener('pointermove',e=>{ if(isTouch||!S) return; if(document.pointerLockElement===cv) lookDX+=e.movementX*.0028; else if(dragging){ lookDX+=(e.clientX-lastMX)*.006; lastMX=e.clientX; } });
 window.addEventListener('pointerup',()=>{ dragging=false; mouseFire=false; });
@@ -4530,7 +4668,7 @@ $('bSearch').addEventListener('pointerdown',e=>{ e.preventDefault(); if(S&&S.mod
 $('bLight').addEventListener('pointerdown',e=>{ e.preventDefault(); toggleFlash(); });
 function navCycleFloor(){ if(!S) return; S.navF=S.navF<0?0:S.navF===0?1:-1; toast(S.navF<0?'👣 Following your partner':S.navF?'Showing 2F':'Showing 1F'); }
 $('navFloorBtn').onclick=navCycleFloor;
-cv.addEventListener('pointerdown',e=>{ if(S&&S.mode==='gens'&&S.role==='nav'&&!S.over) navTap(e); });
+cv.addEventListener('pointerdown',e=>{ if(S&&S.mode==='gens'&&(S.role==='nav'||S.monOpen)&&!S.over) navTap(e); });
 $('bTurn').addEventListener('pointerdown',e=>{ e.preventDefault(); if(S&&!S.over) S.player.turn=Math.PI; });
 document.addEventListener('contextmenu',e=>{ if(S&&!S.over) e.preventDefault(); });
 
@@ -4994,6 +5132,11 @@ $('copyAll').onclick=async()=>flashBtn($('copyAll'),await copyText(ART.map(a=>`$
 function toastMenu(msg){ toast(msg); }
 
 
+/* ================= APP VERSION ================= */
+const APP_VERSION='9.0';
+function appVersion(){ try{ if(window.Android&&typeof Android.getVersion==='function'){ const v=Android.getVersion(); if(v&&v!=='?') return {v,src:'Android app'}; } }catch(e){}
+  return {v:APP_VERSION,src:VR.supported?'Web • Quest ready':'Web'}; }
+function showVersion(){ const a=appVersion(); $('verLine').textContent=`Version ${a.v} • ${a.src}`; }
 /* ================= GET THE GAME (QR codes) ================= */
 const appUrls=()=>{ const u=(settings.ghUser||'gnotesamsung7-hue').trim(), r=(settings.ghRepo||'tago-tagoan').trim();
   return {apk:`https://github.com/${u}/${r}/releases/latest/download/TagoTagoan.apk`, web:`https://${u.toLowerCase()}.github.io/${r}/`}; };
@@ -5009,7 +5152,8 @@ $('copyApk').onclick=async()=>flashBtn($('copyApk'),await copyText(appUrls().apk
 $('copyWeb').onclick=async()=>flashBtn($('copyWeb'),await copyText(appUrls().web),'📋 Copy link');
 
 /* ================= SCREENS ================= */
-function showScreen(id){ ['menu','faces','howto','pause','end','lan','art','studio','missions','brief','getapp'].forEach(s=>$(s).hidden=s!==id); if(id==='getapp') renderGetApp(); if(id==='missions') renderMissions();
+function showScreen(id){ if(id==='menu') try{ showVersion(); }catch(e){}
+ ['menu','faces','howto','pause','end','lan','art','studio','missions','brief','getapp'].forEach(s=>$(s).hidden=s!==id); if(id==='getapp') renderGetApp(); if(id==='missions') renderMissions();
   if(id!=='studio'&&(stPlaying||REC.mr)){ if(REC.mr){ try{ REC.mr.stop(); }catch(e){} } stStop(); }
   if(id==='menu') renderMenu(); if(id==='lan') renderLan(); if(id==='art') renderArt(); if(id==='studio') renderStudio();
   if(id!=='lan'&&HAS_LAN&&!NET.on){ try{ Android.stopDiscovery(); }catch(e){} } }
@@ -5029,7 +5173,8 @@ function goMenu(){ if(S&&S.firing) beamOff(); bgmStop(); S=null; userPaused=fals
 document.querySelectorAll('[data-go]').forEach(b=>b.addEventListener('click',()=>{ audioInit(); showScreen(b.dataset.go); }));
 $('playGiant').onclick=()=>newGame('giant'); $('playGens').onclick=()=>newGame('gens'); $('briefStart').onclick=()=>newHunt(MISSIONS[briefIdx]); $('playSurvive').onclick=()=>newGame('survive'); $('playSeek').onclick=()=>newGame('seek'); $('playHunt').onclick=()=>newGame('hunt');
 $('pauseBtn').onclick=()=>setPause(true); $('resumeBtn').onclick=()=>setPause(false);
-$('mapBtn').onclick=()=>{ settings.mini=!settings.mini; saveSettings(); $('mini').hidden=!settings.mini; };
+$('mapBtn').onclick=()=>{ if(monSolo()) return toggleMonitor(); settings.mini=!settings.mini; saveSettings(); $('mini').hidden=!settings.mini; };
+$('monViewBtn').onclick=toggleMonView;
 $('quitBtn').onclick=()=>{ if(S&&S.net){ leaveNet(); } goMenu(); };
 $('againBtn').onclick=()=>{ if(S&&S.mission){ const m=S.mission, nx=S.win&&MISSIONS[m.idx+1]; goMenu(); openBrief(nx?m.idx+1:m.idx); return; } if(S&&S.net&&NET.on){ S=null; $('hud').hidden=true; $('touch').hidden=true; showScreen('lan'); } else if(S&&S.net){ goMenu(); } else newGame(lastMode); };
 $('menuBtn').onclick=()=>{ if(S&&S.mission){ goMenu(); showScreen('missions'); return; } if(S&&S.net) leaveNet(); goMenu(); };
